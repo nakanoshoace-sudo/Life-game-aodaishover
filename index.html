@@ -13,7 +13,7 @@
 
 body {
   font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
-  background: linear-gradient(135deg, #1a237e 0%, #0d47a1 30%, #1565c0 60%, #42a5f5 100%);
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 30%, #16213e 60%, #0f3460 100%);
   min-height: 100vh;
   overflow-x: hidden;
   color: #333;
@@ -45,10 +45,10 @@ body {
 }
 
 .title-container {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.97);
   border-radius: 24px;
   padding: 60px 80px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
   position: relative;
   overflow: hidden;
 }
@@ -60,7 +60,7 @@ body {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: conic-gradient(from 0deg, transparent, rgba(25, 118, 210, 0.05), transparent, rgba(25, 118, 210, 0.05));
+  background: conic-gradient(from 0deg, transparent, rgba(15, 52, 96, 0.05), transparent, rgba(15, 52, 96, 0.05));
   animation: rotate 20s linear infinite;
 }
 
@@ -71,21 +71,31 @@ body {
 .game-title {
   font-size: 3.2em;
   font-weight: 900;
-  background: linear-gradient(135deg, #1565c0, #0d47a1, #1a237e);
+  background: linear-gradient(135deg, #0f3460, #1a1a2e, #000);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   position: relative;
   z-index: 1;
 }
 
 .game-subtitle {
-  font-size: 1.4em;
-  color: #1976d2;
+  font-size: 1.2em;
+  color: #0f3460;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+  font-weight: 600;
+}
+
+.game-slogan {
+  font-size: 0.95em;
+  color: #666;
   margin-bottom: 40px;
   position: relative;
   z-index: 1;
+  font-style: italic;
 }
 
 .btn {
@@ -101,14 +111,14 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #1976d2, #1565c0);
+  background: linear-gradient(135deg, #0f3460, #1a1a2e);
   color: white;
-  box-shadow: 0 8px 25px rgba(25, 118, 210, 0.4);
+  box-shadow: 0 8px 25px rgba(15, 52, 96, 0.4);
 }
 
 .btn-primary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 35px rgba(25, 118, 210, 0.5);
+  box-shadow: 0 12px 35px rgba(15, 52, 96, 0.5);
 }
 
 .btn-primary:active {
@@ -152,8 +162,8 @@ body {
 }
 
 .character-card.selected {
-  border-color: #ffab00;
-  box-shadow: 0 0 20px rgba(255, 171, 0, 0.5);
+  border-color: #f9a825;
+  box-shadow: 0 0 20px rgba(249, 168, 37, 0.5);
 }
 
 .character-icon {
@@ -164,7 +174,7 @@ body {
 .character-name {
   font-size: 1.2em;
   font-weight: 700;
-  color: #1565c0;
+  color: #0f3460;
   margin-bottom: 5px;
 }
 
@@ -176,8 +186,8 @@ body {
 
 .character-skill {
   font-size: 0.85em;
-  color: #1976d2;
-  background: #e3f2fd;
+  color: #0f3460;
+  background: #e8eaf6;
   padding: 4px 10px;
   border-radius: 12px;
   display: inline-block;
@@ -219,7 +229,7 @@ body {
 .stat-money .stat-value { color: #f9a825; }
 .stat-motivation .stat-value { color: #e53935; }
 .stat-contribution .stat-value { color: #43a047; }
-.stat-position .stat-value { color: #1565c0; }
+.stat-position .stat-value { color: #0f3460; }
 
 .board-container {
   background: rgba(255, 255, 255, 0.95);
@@ -252,17 +262,18 @@ body {
   padding: 4px;
 }
 
-.board-cell.start { background: #e3f2fd; border-color: #1976d2; }
+.board-cell.start { background: #e8eaf6; border-color: #0f3460; }
 .board-cell.goal { background: #fff3e0; border-color: #ff9800; }
 .board-cell.history { background: #e8f5e9; border-color: #66bb6a; }
 .board-cell.choice { background: #fff8e1; border-color: #ffc107; }
 .board-cell.bonus { background: #e1f5fe; border-color: #29b6f6; }
 .board-cell.crisis { background: #fce4ec; border-color: #ef5350; }
 .board-cell.celebration { background: #f3e5f5; border-color: #ab47bc; }
+.board-cell.credo { background: #e0f2f1; border-color: #26a69a; }
 .board-cell.rest { background: #f5f5f5; border-color: #bdbdbd; }
 
 .board-cell.current {
-  box-shadow: 0 0 15px rgba(25, 118, 210, 0.6);
+  box-shadow: 0 0 15px rgba(15, 52, 96, 0.6);
   transform: scale(1.05);
   z-index: 2;
 }
@@ -309,7 +320,7 @@ body {
 .roulette-display {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #1976d2, #0d47a1);
+  background: linear-gradient(135deg, #0f3460, #1a1a2e);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -317,7 +328,7 @@ body {
   font-size: 2.5em;
   font-weight: 900;
   color: white;
-  box-shadow: 0 5px 20px rgba(25, 118, 210, 0.4);
+  box-shadow: 0 5px 20px rgba(15, 52, 96, 0.4);
 }
 
 .roulette-display.spinning {
@@ -399,7 +410,7 @@ body {
 .modal-title {
   font-size: 1.5em;
   font-weight: 700;
-  color: #1565c0;
+  color: #0f3460;
   margin-bottom: 12px;
 }
 
@@ -440,23 +451,23 @@ body {
   padding: 14px 24px;
   font-size: 1em;
   font-weight: 600;
-  border: 2px solid #1976d2;
+  border: 2px solid #0f3460;
   border-radius: 12px;
   background: white;
-  color: #1976d2;
+  color: #0f3460;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .btn-choice:hover {
-  background: #1976d2;
+  background: #0f3460;
   color: white;
 }
 
 .btn-modal-close {
   padding: 12px 36px;
   font-size: 1em;
-  background: linear-gradient(135deg, #1976d2, #1565c0);
+  background: linear-gradient(135deg, #0f3460, #1a1a2e);
   color: white;
   border: none;
   border-radius: 50px;
@@ -467,7 +478,7 @@ body {
 
 .btn-modal-close:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(25, 118, 210, 0.4);
+  box-shadow: 0 5px 15px rgba(15, 52, 96, 0.4);
 }
 
 /* ===== RESULT SCREEN ===== */
@@ -487,7 +498,7 @@ body {
 .result-title {
   font-size: 2em;
   font-weight: 900;
-  color: #1565c0;
+  color: #0f3460;
   margin-bottom: 30px;
 }
 
@@ -520,7 +531,7 @@ body {
 .total-score {
   font-size: 2.5em;
   font-weight: 900;
-  color: #1565c0;
+  color: #0f3460;
   margin: 20px 0;
 }
 
@@ -532,7 +543,7 @@ body {
 
 .rank-S { color: #ff6f00; text-shadow: 0 0 20px rgba(255, 111, 0, 0.5); }
 .rank-A { color: #e53935; }
-.rank-B { color: #1976d2; }
+.rank-B { color: #0f3460; }
 .rank-C { color: #757575; }
 
 /* ===== ENDING SCREEN ===== */
@@ -545,6 +556,7 @@ body {
   font-size: 2em;
   font-weight: 900;
   margin-bottom: 15px;
+  color: #0f3460;
 }
 
 .ending-message {
@@ -552,6 +564,7 @@ body {
   color: #555;
   line-height: 1.8;
   margin-bottom: 30px;
+  white-space: pre-line;
 }
 
 /* ===== RESPONSIVE ===== */
@@ -588,6 +601,7 @@ body {
   <div class="title-container">
     <div class="game-title">人生ゲーム</div>
     <div class="game-subtitle">AODAISHO.ver</div>
+    <div class="game-slogan">〜 "おもしろい"をサイエンスしよう 〜</div>
     <button class="btn btn-primary" onclick="showScreen('character-screen')">🎮 ゲームスタート</button>
   </div>
 </div>
@@ -691,13 +705,13 @@ const companyEvents = [
   {
     type: "history",
     title: "AODAISHO設立",
-    description: "2010年、創業者が会社を設立。新たな挑戦の始まり！",
-    effects: { money: 0, motivation: 15, contribution: 10 }
+    description: "2021年11月、代表・土屋大樹が東京都渋谷区にて株式会社AODAISHOを設立。「"おもしろい"をサイエンスしよう」を掲げ、新たな挑戦が始まる！",
+    effects: { money: 0, motivation: 20, contribution: 10 }
   },
   {
     type: "choice",
     title: "初の大型案件",
-    description: "大手企業から難しいプロジェクトのオファー。どうする？",
+    description: "大手企業から採用コンサルティングのオファーが届いた。難易度は高いが、実績になる！",
     choices: [
       { text: "チャレンジする", effects: { money: 80, motivation: -15, contribution: 40 }},
       { text: "見送る", effects: { money: 20, motivation: 5, contribution: 5 }}
@@ -705,135 +719,123 @@ const companyEvents = [
   },
   {
     type: "bonus",
-    title: "新オフィス移転",
-    description: "業績好調により、広いオフィスに移転！",
-    effects: { money: -30, motivation: 25, contribution: 15 }
+    title: "SNSコンサル事業開始",
+    description: "TikTok・Instagram・Xのコンサルティング事業を本格スタート。各SNSの特性を活かした戦略的マーケティングを提供開始！",
+    effects: { money: 30, motivation: 25, contribution: 20 }
   },
   {
     type: "crisis",
-    title: "システム障害発生",
-    description: "重大な障害が発生。全社一丸となって対応。",
+    title: "クライアントトラブル",
+    description: "クライアントの期待値とのギャップが発生。クレド「成果にこだわる」を胸に全社で対応。",
     effects: { money: -50, motivation: -20, contribution: 25 }
   },
   {
     type: "celebration",
-    title: "創立5周年記念",
-    description: "みんなでお祝いパーティー開催！",
-    effects: { money: -20, motivation: 30, contribution: 10 }
+    title: "TikTok 1000万再生突破",
+    description: "運用支援中のTikTokアカウントが累計1000万再生を突破！チーム一丸で喜びを分かち合った。",
+    effects: { money: 40, motivation: 30, contribution: 15 }
   },
   {
     type: "history",
-    title: "新規事業開始",
-    description: "新しい分野への挑戦。社内にワクワクが広がる。",
-    effects: { money: -20, motivation: 20, contribution: 15 }
+    title: "Web開発事業拡大",
+    description: "LP・HP・Webアプリの企画から開発まで一気通貫で対応する体制を構築。ビジネスのデジタル化を加速！",
+    effects: { money: -20, motivation: 15, contribution: 20 }
   },
   {
     type: "choice",
     title: "社員研修の提案",
-    description: "社員からスキルアップ研修の要望が。どうする？",
+    description: "チームメンバーからスキルアップ研修の要望が。クレド「仲間の成長に協力する」に基づき…",
     choices: [
       { text: "大規模に実施", effects: { money: -40, motivation: 25, contribution: 30 }},
       { text: "最小限で対応", effects: { money: -10, motivation: 5, contribution: 10 }}
     ]
   },
   {
+    type: "credo",
+    title: "クレド浸透プロジェクト",
+    description: "9つのクレドを全社に浸透させるプロジェクトを開始。「誠実である」「責務を全うする」「人の心を大切にする」——行動指針が文化になる。",
+    effects: { money: -10, motivation: 20, contribution: 25 }
+  },
+  {
     type: "bonus",
-    title: "表彰受賞",
-    description: "業界の優秀企業として表彰された！",
-    effects: { money: 20, motivation: 30, contribution: 25 }
+    title: "渋谷・神宮前オフィス",
+    description: "神宮前6丁目にオフィスを構える。渋谷のクリエイティブな空気の中で「非常識戦略」を生み出す拠点に！",
+    effects: { money: -30, motivation: 25, contribution: 15 }
   },
   {
     type: "crisis",
-    title: "主要クライアント離脱",
-    description: "大口クライアントが契約を更新しなかった…",
-    effects: { money: -60, motivation: -25, contribution: -10 }
+    title: "競合の台頭",
+    description: "SNSコンサル市場に大手が参入。「業界の常識を疑い、競争優位をつくる」——非常識戦略の真価が問われる。",
+    effects: { money: -30, motivation: -15, contribution: 10 }
+  },
+  {
+    type: "choice",
+    title: "AIX事業への投資",
+    description: "AIXコンサルティングを採用領域に導入するか検討中。先行投資は大きいが…",
+    choices: [
+      { text: "全力でAIX推進", effects: { money: -50, motivation: 15, contribution: 35 }},
+      { text: "様子を見る", effects: { money: 10, motivation: -5, contribution: 5 }}
+    ]
   },
   {
     type: "celebration",
-    title: "創立10周年",
-    description: "10年の歩みを全社で振り返り、感謝の気持ちを共有。",
+    title: "TikTok 5000万再生達成",
+    description: "累計5,000万再生のノウハウが蓄積！ホワイトペーパーとして体系化し、業界トップクラスの実績に。",
+    effects: { money: 60, motivation: 30, contribution: 25 }
+  },
+  {
+    type: "history",
+    title: "教育研修事業拡充",
+    description: "人事戦略設計から教育研修まで、企業の人材確保を包括的にサポートする体制が整う。",
+    effects: { money: 20, motivation: 15, contribution: 20 }
+  },
+  {
+    type: "choice",
+    title: "新規クライアントの決断",
+    description: "大企業から「再現性のある採用の仕組みを作ってほしい」との依頼。リソースは限られるが…",
+    choices: [
+      { text: "受注する（再現性を証明）", effects: { money: 60, motivation: -10, contribution: 35 }},
+      { text: "リソース確保を優先", effects: { money: 10, motivation: 10, contribution: 10 }}
+    ]
+  },
+  {
+    type: "crisis",
+    title: "メンバー離脱の危機",
+    description: "主力メンバーが独立を検討…クレド「自分との約束を守る」を全員で語り合い、ビジョンを再共有。",
+    effects: { money: -20, motivation: -25, contribution: -10 }
+  },
+  {
+    type: "bonus",
+    title: "クライアントファースト実証",
+    description: "顧客成果を起点にした支援が実を結び、複数クライアントから追加案件の依頼が殺到！",
+    effects: { money: 80, motivation: 20, contribution: 20 }
+  },
+  {
+    type: "credo",
+    title: "美意識と成長",
+    description: "「常に美意識を持ち続ける」「常に期待以上の価値である」——デザインからサービス品質まで全てに美学を貫く。",
+    effects: { money: 0, motivation: 20, contribution: 20 }
+  },
+  {
+    type: "choice",
+    title: "「場の発明」への挑戦",
+    description: "AODAISHO独自の新コンセプト事業を立ち上げるチャンス。リスクは高いが、ビジョン実現に直結する。",
+    choices: [
+      { text: "場の発明に挑戦する", effects: { money: -40, motivation: 20, contribution: 40 }},
+      { text: "既存事業を磨く", effects: { money: 30, motivation: 5, contribution: 15 }}
+    ]
+  },
+  {
+    type: "celebration",
+    title: "創立記念日",
+    description: "設立からの歩みを全員で振り返る。苦しいときも楽しいときも、「礼儀礼節を重んじ」「人の心を大切に」してきた仲間たちと乾杯！",
     effects: { money: -15, motivation: 35, contribution: 20 }
   },
   {
-    type: "choice",
-    title: "海外展開の機会",
-    description: "海外からのオファーが届いた。挑戦する？",
-    choices: [
-      { text: "海外進出する", effects: { money: -50, motivation: 10, contribution: 35 }},
-      { text: "国内に集中する", effects: { money: 30, motivation: 10, contribution: 10 }}
-    ]
-  },
-  {
     type: "bonus",
-    title: "ヒット商品誕生",
-    description: "自社プロダクトが大ヒット！売上が急上昇！",
-    effects: { money: 100, motivation: 20, contribution: 30 }
-  },
-  {
-    type: "crisis",
-    title: "コロナ禍の試練",
-    description: "パンデミックによる業績悪化。リモートワーク体制へ移行。",
-    effects: { money: -40, motivation: -15, contribution: 10 }
-  },
-  {
-    type: "history",
-    title: "DX推進宣言",
-    description: "デジタルトランスフォーメーションを全社で推進！",
-    effects: { money: -20, motivation: 15, contribution: 20 }
-  },
-  {
-    type: "choice",
-    title: "若手の抜擢",
-    description: "若手社員をリーダーに抜擢するか迷っている。",
-    choices: [
-      { text: "思い切って抜擢", effects: { money: 0, motivation: 20, contribution: 25 }},
-      { text: "経験者に任せる", effects: { money: 10, motivation: -5, contribution: 10 }}
-    ]
-  },
-  {
-    type: "celebration",
-    title: "最優秀チーム賞",
-    description: "チーム全員の努力が認められた！",
-    effects: { money: 10, motivation: 30, contribution: 20 }
-  },
-  {
-    type: "bonus",
-    title: "投資ラウンド成功",
-    description: "新たな投資家からの資金調達に成功！",
-    effects: { money: 80, motivation: 15, contribution: 10 }
-  },
-  {
-    type: "crisis",
-    title: "人材流出危機",
-    description: "複数の優秀な社員が転職を検討中…",
-    effects: { money: -20, motivation: -30, contribution: -15 }
-  },
-  {
-    type: "history",
-    title: "新サービスローンチ",
-    description: "長年準備してきた新サービスがついにリリース！",
-    effects: { money: -30, motivation: 25, contribution: 25 }
-  },
-  {
-    type: "choice",
-    title: "競合からの買収提案",
-    description: "大手企業から買収の打診が…",
-    choices: [
-      { text: "独立を維持する", effects: { money: 0, motivation: 20, contribution: 30 }},
-      { text: "条件を聞く", effects: { money: 50, motivation: -10, contribution: -5 }}
-    ]
-  },
-  {
-    type: "bonus",
-    title: "過去最高売上",
-    description: "創業以来最高の売上を記録！",
-    effects: { money: 70, motivation: 25, contribution: 20 }
-  },
-  {
-    type: "celebration",
-    title: "15周年＆未来への誓い",
-    description: "15年の感謝と、これからの100年に向けた決意を新たに！",
-    effects: { money: -10, motivation: 30, contribution: 25 }
+    title: "過去最高の成果",
+    description: "「"おもしろい"をサイエンスしよう」を体現し、社会に広く普及するビジネスの創造に成功！全パラメータ大幅UP！",
+    effects: { money: 70, motivation: 25, contribution: 30 }
   }
 ];
 
@@ -843,10 +845,9 @@ function generateBoard() {
   boardCells.length = 0;
   boardCells.push({ type: 'start', label: 'スタート', icon: '🚀' });
 
-  // Distribute events across cells 1-23
   const eventIndices = [];
-  const totalEventSlots = 22; // cells 1 to 23 (minus some rest)
-  const eventsToPlace = Math.min(companyEvents.length, 18);
+  const totalEventSlots = 22;
+  const eventsToPlace = Math.min(companyEvents.length, 20);
   const step = totalEventSlots / eventsToPlace;
 
   for (let i = 0; i < eventsToPlace; i++) {
@@ -873,7 +874,7 @@ function generateBoard() {
 }
 
 function getEventIcon(type) {
-  const icons = { history: '📜', choice: '🤔', bonus: '🎁', crisis: '⚠️', celebration: '🎊' };
+  const icons = { history: '📜', choice: '🤔', bonus: '🎁', crisis: '⚠️', celebration: '🎊', credo: '📖' };
   return icons[type] || '📌';
 }
 
@@ -918,7 +919,6 @@ function selectCharacter(id) {
 function startGame() {
   if (!gameState.character) return;
 
-  // Apply character bonus
   gameState.money = 100 + (gameState.character.bonus.money || 0);
   gameState.motivation = 50 + (gameState.character.bonus.motivation || 0);
   gameState.contribution = 0 + (gameState.character.bonus.contribution || 0);
@@ -933,7 +933,6 @@ function startGame() {
 // ===== BOARD RENDERING =====
 function renderBoard() {
   const grid = document.getElementById('board-grid');
-  // Snake layout: rows alternate direction
   const rows = 5;
   const cols = 5;
   const orderedCells = [];
@@ -950,7 +949,7 @@ function renderBoard() {
     orderedCells.push(...rowCells);
   }
 
-  grid.innerHTML = orderedCells.map((cellIdx, displayIdx) => {
+  grid.innerHTML = orderedCells.map((cellIdx) => {
     const cell = boardCells[cellIdx];
     if (!cell) return '<div class="board-cell"></div>';
     const isCurrent = cellIdx === gameState.position;
@@ -1029,7 +1028,6 @@ function checkCell() {
   const cell = boardCells[gameState.position];
 
   if (gameState.position >= 24) {
-    // Goal reached
     gameState.isSpinning = false;
     setTimeout(() => showResults(), 500);
     return;
@@ -1038,7 +1036,6 @@ function checkCell() {
   if (cell && cell.eventIndex !== undefined) {
     showEvent(companyEvents[cell.eventIndex]);
   } else if (cell && cell.type === 'rest') {
-    // Rest cell - small motivation recovery
     gameState.motivation = Math.min(100, gameState.motivation + 5);
     updateStats();
     showRestModal();
@@ -1062,7 +1059,7 @@ function showRestModal() {
 // ===== EVENT DISPLAY =====
 function showEvent(event) {
   const overlay = document.getElementById('modal-overlay');
-  const icons = { history: '📜', choice: '🤔', bonus: '🎁', crisis: '⚠️', celebration: '🎊' };
+  const icons = { history: '📜', choice: '🤔', bonus: '🎁', crisis: '⚠️', celebration: '🎊', credo: '📖' };
 
   document.getElementById('modal-icon').textContent = icons[event.type] || '📌';
   document.getElementById('modal-title').textContent = event.title;
@@ -1127,7 +1124,6 @@ function applyEffects(effects) {
   let motivationChange = effects.motivation || 0;
   let contributionChange = effects.contribution || 0;
 
-  // Apply passive abilities
   if (passive === 'halfMoneyLoss' && moneyChange < 0) {
     moneyChange = Math.ceil(moneyChange / 2);
   }
@@ -1142,7 +1138,6 @@ function applyEffects(effects) {
   gameState.motivation += motivationChange;
   gameState.contribution += contributionChange;
 
-  // Clamp motivation
   gameState.motivation = Math.max(0, Math.min(100, gameState.motivation));
 }
 
@@ -1181,19 +1176,49 @@ function showEnding() {
   if (gameState.contribution >= 100) {
     icon = '🏆';
     title = '伝説の社員エンド';
-    message = 'あなたはAODAISHOの歴史に名を刻む伝説の社員となりました。\n\n会社への貢献は計り知れず、後輩たちから尊敬される存在に。\nあなたの情熱と努力が、会社の成長を支え続けました。\n\n「一人ひとりの力が、大きな流れをつくる」\n——それを体現した、最高の仲間でした。';
+    message = `あなたはAODAISHOの歴史に名を刻む伝説のメンバーとなりました。
+
+「場の発明」を通じて"おもしろい"を科学的にアプローチし、
+社会に広く普及するビジネスを創造する——
+その志を誰よりも体現した存在です。
+
+クレド「成果にこだわる」「責務を全うする」を胸に、
+これからもAODAISHOの未来を切り拓いてください。`;
   } else if (gameState.money >= 300) {
     icon = '💎';
     title = '大富豪エンド';
-    message = '卓越したビジネスセンスで、あなたは大きな富を築きました。\n\n数々の案件を成功に導き、会社の売上を何倍にも成長させた立役者。\n「お金は信頼の証」——クライアントからの信頼を積み重ねた結果です。\n\nこれからも、その手腕でAODAISHOを導いてください。';
+    message = `卓越したビジネスセンスで、大きな成果を生み出しました。
+
+「クライアントファースト」を貫き、
+顧客成果を起点に本質課題へ最短で導く支援を実現。
+
+「再現性」のある仕組みを構築し、
+継続的に成果を生むビジネスモデルを確立しました。
+
+AODAISHOの「非常識戦略」の申し子です！`;
   } else if (gameState.motivation <= 20) {
     icon = '😮‍💨';
     title = '燃え尽きエンド';
-    message = '全力で走り続けた結果、少し疲れてしまったようです。\n\nでも大丈夫。休むことも、立ち止まることも大切な選択です。\n仲間たちがあなたを待っています。\n\n「焦らなくていい。また一緒に歩き出そう。」\n——AODAISHOは、いつでもあなたの味方です。';
+    message = `全力で走り続けた結果、少し疲れてしまったようです。
+
+でも大丈夫。クレドの一つ「人の心を大切にする」——
+それは自分自身の心も含まれます。
+
+「仲間の成長に協力する」仲間たちが、
+あなたの回復を待っています。
+
+また一緒に"おもしろい"をサイエンスしましょう。`;
   } else {
     icon = '🌱';
     title = 'バランス成長エンド';
-    message = '着実に、バランスよく成長を続けてきました。\n\n派手さはなくても、確かな一歩一歩が今のあなたを作っています。\n資金も、モチベーションも、貢献も——すべてが調和した理想的な歩み。\n\n「継続は力なり」\n——AODAISHOと共に、これからも前へ。';
+    message = `着実に、バランスよく成長を続けてきました。
+
+「常に期待以上の価値である」ことを意識しながら、
+「礼儀礼節を重んじ」「誠実である」姿勢を貫いた——
+AODAISHOらしい歩みです。
+
+「"おもしろい"をサイエンスしよう」
+この旗の下に、これからも前へ。`;
   }
 
   document.getElementById('ending-icon').textContent = icon;
