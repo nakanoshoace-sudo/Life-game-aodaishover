@@ -4,40 +4,37 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>人生ゲーム AODAISHO.ver</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@400;600;700&display=swap');
-
 :root {
+  --color-primary: #1a3a6b;
+  --color-accent: #e8a020;
+  --color-success: #2e7d32;
+  --color-danger: #c62828;
+  --color-bg: #faf6f0;
+  --color-card: #ffffff;
   --font-title: 'Noto Serif JP', serif;
   --font-body: 'Noto Sans JP', sans-serif;
-  --font-size-xl: 2.5rem;
-  --font-size-lg: 1.5rem;
-  --font-size-md: 1.1rem;
-  --font-size-sm: 0.9rem;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
   font-family: var(--font-body);
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 30%, #16213e 60%, #0f3460 100%);
+  background: var(--color-bg);
   min-height: 100vh;
   overflow-x: hidden;
   color: #333;
 }
 
+/* ===== SCREENS ===== */
 .screen {
   display: none;
   width: 100%;
   min-height: 100vh;
-  padding: 20px;
+  padding: 24px;
   animation: fadeIn 0.5s ease;
 }
-
 .screen.active {
   display: flex;
   flex-direction: column;
@@ -50,1222 +47,1185 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== TITLE SCREEN ===== */
-#title-screen {
+/* ===== COMMON ===== */
+.card {
+  background: var(--color-card);
+  border-radius: 20px;
+  padding: 48px 56px;
+  box-shadow: 0 8px 40px rgba(26,58,107,0.08), 0 2px 8px rgba(0,0,0,0.04);
+  max-width: 700px;
+  width: 100%;
   text-align: center;
 }
 
-.title-container {
-  background: rgba(255, 255, 255, 0.97);
-  border-radius: 24px;
-  padding: 60px 80px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-  position: relative;
-  overflow: hidden;
-}
-
-.title-container::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: conic-gradient(from 0deg, transparent, rgba(15, 52, 96, 0.05), transparent, rgba(15, 52, 96, 0.05));
-  animation: rotate 20s linear infinite;
-}
-
-@keyframes rotate {
-  to { transform: rotate(360deg); }
-}
-
-.game-title {
+.title-xl {
   font-family: var(--font-title);
-  font-size: var(--font-size-xl);
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: var(--color-primary);
+  margin-bottom: 8px;
+}
+
+.title-lg {
+  font-family: var(--font-title);
+  font-size: 1.6rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #0f3460, #1a1a2e, #000);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 8px;
-  position: relative;
-  z-index: 1;
+  color: var(--color-primary);
+  margin-bottom: 16px;
 }
 
-.game-subtitle {
-  font-family: var(--font-title);
-  font-size: var(--font-size-lg);
-  color: #0f3460;
-  margin-bottom: 8px;
-  position: relative;
-  z-index: 1;
-  font-weight: 600;
-}
-
-.game-slogan {
-  font-family: var(--font-title);
-  font-size: var(--font-size-sm);
+.subtitle {
+  font-size: 1.1rem;
   color: #666;
-  margin-bottom: 40px;
-  position: relative;
-  z-index: 1;
-  font-style: italic;
+  margin-bottom: 32px;
 }
 
 .btn {
-  padding: 16px 48px;
-  font-size: 1.2em;
+  padding: 14px 40px;
+  font-size: 1.1rem;
   font-weight: 700;
+  font-family: var(--font-body);
   border: none;
   border-radius: 50px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  z-index: 1;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #0f3460, #1a1a2e);
-  color: white;
-  box-shadow: 0 8px 25px rgba(15, 52, 96, 0.4);
-}
-
-.btn-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 35px rgba(15, 52, 96, 0.5);
-}
-
-.btn-primary:active {
-  transform: translateY(0);
-}
-
-/* ===== CHARACTER SELECT ===== */
-#character-screen {
-  text-align: center;
-}
-
-.character-screen-title {
-  font-family: var(--font-title);
-  font-size: var(--font-size-xl);
-  color: white;
-  margin-bottom: 30px;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-}
-
-.character-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  max-width: 900px;
-  margin-bottom: 30px;
-}
-
-.character-card {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
-  padding: 24px 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 3px solid transparent;
-  position: relative;
-  overflow: hidden;
-}
-
-.character-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-}
-
-.character-card.selected {
-  border-color: #f9a825;
-  box-shadow: 0 0 20px rgba(249, 168, 37, 0.5);
-}
-
-.character-icon {
-  font-size: 3em;
-  margin-bottom: 10px;
-}
-
-.character-name {
-  font-family: var(--font-title);
-  font-size: var(--font-size-md);
-  font-weight: 700;
-  color: #0f3460;
-  margin-bottom: 5px;
-}
-
-.character-role {
-  font-size: var(--font-size-sm);
-  color: #666;
-  margin-bottom: 8px;
-}
-
-.character-skill {
-  font-size: 0.85em;
-  color: #0f3460;
-  background: #e8eaf6;
-  padding: 4px 10px;
-  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: inline-block;
 }
 
-/* ===== GAME BOARD ===== */
-#game-screen {
-  justify-content: flex-start;
-  padding-top: 10px;
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+  box-shadow: 0 6px 20px rgba(26,58,107,0.3);
+}
+.btn-primary:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 30px rgba(26,58,107,0.4);
+}
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
 }
 
-.stats-bar {
+.btn-accent {
+  background: var(--color-accent);
+  color: white;
+  box-shadow: 0 6px 20px rgba(232,160,32,0.3);
+}
+.btn-accent:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 30px rgba(232,160,32,0.4);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+}
+.btn-outline:hover {
+  background: var(--color-primary);
+  color: white;
+}
+
+/* ===== TITLE SCREEN ===== */
+.title-logo {
+  font-family: var(--font-title);
+  font-size: 1rem;
+  color: var(--color-accent);
+  letter-spacing: 4px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+/* ===== PLAYER COUNT ===== */
+.count-grid {
   display: flex;
-  gap: 24px;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 16px 32px;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.count-btn {
+  width: 80px;
+  height: 80px;
   border-radius: 16px;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  border: 3px solid #e0e0e0;
+  background: white;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--font-body);
+}
+.count-btn:hover { border-color: var(--color-accent); transform: scale(1.05); }
+.count-btn.selected { border-color: var(--color-accent); background: #fff8e8; box-shadow: 0 0 15px rgba(232,160,32,0.3); }
+
+/* ===== PLAYER SETUP ===== */
+.setup-card {
+  background: var(--color-card);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 8px 40px rgba(26,58,107,0.08);
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+
+.player-badge {
+  display: inline-block;
+  padding: 4px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.input-field {
+  width: 100%;
+  max-width: 300px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-family: var(--font-body);
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  outline: none;
+  transition: border-color 0.3s ease;
+  margin-bottom: 24px;
+}
+.input-field:focus { border-color: var(--color-primary); }
+
+.char-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.char-card {
+  padding: 16px 8px;
+  border-radius: 14px;
+  border: 2px solid #e8e8e8;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+.char-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
+.char-card.selected { border-color: var(--color-accent); background: #fffcf5; }
+.char-card.taken { opacity: 0.35; pointer-events: none; }
+.char-card .icon { font-size: 2.2rem; margin-bottom: 6px; }
+.char-card .name { font-family: var(--font-title); font-size: 0.95rem; font-weight: 700; color: var(--color-primary); }
+.char-card .role { font-size: 0.75rem; color: #888; margin: 2px 0; }
+.char-card .skill { font-size: 0.7rem; color: var(--color-primary); background: #eef2fa; padding: 3px 8px; border-radius: 8px; display: inline-block; margin-top: 4px; }
+
+/* ===== GAME SCREEN ===== */
+#game-screen {
+  justify-content: flex-start;
+  padding: 12px;
+}
+
+.game-header {
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
   justify-content: center;
 }
 
-.stat-item {
-  text-align: center;
+.player-stat-card {
+  background: var(--color-card);
+  border-radius: 14px;
+  padding: 12px 18px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+  min-width: 180px;
+  flex: 1;
+  max-width: 240px;
+  border-left: 4px solid transparent;
+  transition: all 0.3s ease;
 }
+.player-stat-card.active-turn { border-left-color: var(--color-accent); box-shadow: 0 4px 20px rgba(232,160,32,0.2); }
+.player-stat-card.finished { opacity: 0.5; }
 
-.stat-label {
-  font-size: 0.8em;
-  color: #666;
-  margin-bottom: 4px;
-}
-
-.stat-value {
-  font-size: 1.4em;
+.psc-name {
+  font-family: var(--font-title);
+  font-size: 0.95rem;
   font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 6px;
 }
+.psc-stats {
+  display: flex;
+  gap: 10px;
+  font-size: 0.75rem;
+}
+.psc-stat { display: flex; flex-direction: column; align-items: center; }
+.psc-stat-label { color: #999; font-size: 0.65rem; }
+.psc-stat-value { font-weight: 700; font-size: 0.9rem; }
+.psc-stat-money .psc-stat-value { color: var(--color-accent); }
+.psc-stat-moti .psc-stat-value { color: var(--color-danger); }
+.psc-stat-cont .psc-stat-value { color: var(--color-success); }
 
-.stat-money .stat-value { color: #f9a825; }
-.stat-motivation .stat-value { color: #e53935; }
-.stat-contribution .stat-value { color: #43a047; }
-.stat-position .stat-value { color: #0f3460; }
-
-.board-container {
-  background: rgba(255, 255, 255, 0.95);
+.board-wrapper {
+  background: var(--color-card);
   border-radius: 20px;
-  padding: 24px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  padding: 20px;
+  box-shadow: 0 8px 40px rgba(26,58,107,0.08);
   width: 100%;
-  max-width: 900px;
-  margin-bottom: 15px;
+  max-width: 1000px;
+  margin-bottom: 12px;
 }
 
 .board-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
-.board-cell {
+.cell {
   aspect-ratio: 1;
-  border-radius: 12px;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 0.7em;
-  font-weight: 600;
   position: relative;
-  border: 2px solid #e0e0e0;
+  border: 2px solid #eee;
   transition: all 0.3s ease;
-  padding: 4px;
+  padding: 3px;
+  font-size: 0.65rem;
 }
+.cell.start { background: #eef2fa; border-color: var(--color-primary); }
+.cell.goal { background: #fff8e8; border-color: var(--color-accent); }
+.cell.history { background: #e8f5e9; border-color: #66bb6a; }
+.cell.choice { background: #fff8e1; border-color: #ffc107; }
+.cell.bonus { background: #e3f2fd; border-color: #42a5f5; }
+.cell.crisis { background: #fce4ec; border-color: #ef5350; }
+.cell.celebration { background: #f3e5f5; border-color: #ab47bc; }
+.cell.credo { background: #e0f2f1; border-color: #26a69a; }
+.cell.rest { background: #fafafa; border-color: #e0e0e0; }
 
-.board-cell.start { background: #e8eaf6; border-color: #0f3460; }
-.board-cell.goal { background: #fff3e0; border-color: #ff9800; }
-.board-cell.history { background: #e8f5e9; border-color: #66bb6a; }
-.board-cell.choice { background: #fff8e1; border-color: #ffc107; }
-.board-cell.bonus { background: #e1f5fe; border-color: #29b6f6; }
-.board-cell.crisis { background: #fce4ec; border-color: #ef5350; }
-.board-cell.celebration { background: #f3e5f5; border-color: #ab47bc; }
-.board-cell.credo { background: #e0f2f1; border-color: #26a69a; }
-.board-cell.rest { background: #f5f5f5; border-color: #bdbdbd; }
+.cell-num { position: absolute; top: 2px; left: 5px; font-size: 0.6rem; color: #bbb; }
+.cell-icon { font-size: 1.4rem; }
+.cell-label { text-align: center; line-height: 1.1; font-weight: 600; margin-top: 2px; }
 
-.board-cell.current {
-  box-shadow: 0 0 15px rgba(15, 52, 96, 0.6);
-  transform: scale(1.05);
-  z-index: 2;
-}
-
-.cell-number {
-  font-size: 0.8em;
-  color: #999;
+.cell-tokens {
   position: absolute;
-  top: 3px;
-  left: 6px;
+  bottom: 2px;
+  right: 2px;
+  display: flex;
+  gap: 1px;
+  font-size: 0.8rem;
 }
 
-.cell-icon {
-  font-size: 1.6em;
-  margin-bottom: 2px;
+.token {
+  animation: tokenBounce 1.2s ease infinite;
 }
-
-.cell-label {
-  text-align: center;
-  line-height: 1.2;
-  font-size: 0.75em;
-}
-
-.player-token {
-  position: absolute;
-  bottom: 4px;
-  right: 4px;
-  font-size: 1.2em;
-  animation: bounce 1s ease infinite;
-}
-
-@keyframes bounce {
+@keyframes tokenBounce {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  50% { transform: translateY(-3px); }
 }
 
-.roulette-section {
+.game-footer {
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
-.roulette-display {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #0f3460, #1a1a2e);
+.turn-indicator {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  color: var(--color-primary);
+}
+
+.roulette-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.roulette-wheel {
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), #0d2240);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.5em;
+  font-size: 2.2rem;
   font-weight: 900;
   color: white;
-  box-shadow: 0 5px 20px rgba(15, 52, 96, 0.4);
+  box-shadow: 0 4px 16px rgba(26,58,107,0.3);
+  transition: transform 0.1s;
 }
-
-.roulette-display.spinning {
-  animation: spin 0.1s linear infinite;
+.roulette-wheel.spinning {
+  animation: rouletteSpin 0.15s linear infinite;
 }
-
-@keyframes spin {
+@keyframes rouletteSpin {
   0% { transform: rotate(0deg) scale(1); }
-  25% { transform: rotate(5deg) scale(1.05); }
+  25% { transform: rotate(8deg) scale(1.06); }
   50% { transform: rotate(0deg) scale(1); }
-  75% { transform: rotate(-5deg) scale(1.05); }
+  75% { transform: rotate(-8deg) scale(1.06); }
 }
 
-.btn-roulette {
-  padding: 14px 36px;
-  font-size: 1.1em;
-  background: linear-gradient(135deg, #ff6f00, #ff8f00);
+.btn-roll {
+  padding: 12px 32px;
+  font-size: 1.05rem;
+  background: linear-gradient(135deg, var(--color-accent), #d4900a);
   color: white;
   border: none;
   border-radius: 50px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 5px 20px rgba(255, 111, 0, 0.4);
-  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(232,160,32,0.35);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  font-family: var(--font-body);
+}
+.btn-roll:hover { transform: translateY(-2px) scale(1.03); }
+.btn-roll:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+/* ===== TURN TRANSITION ===== */
+#turn-screen .card {
+  animation: turnPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes turnPop {
+  from { opacity: 0; transform: scale(0.7); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-.btn-roulette:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(255, 111, 0, 0.5);
+.turn-player-name {
+  font-family: var(--font-title);
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--color-primary);
+  margin: 16px 0;
 }
 
-.btn-roulette:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
+.turn-message {
+  font-size: 1rem;
+  color: #888;
 }
 
-/* ===== MODAL ===== */
+.countdown {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  margin-top: 16px;
+}
+
+/* ===== EVENT MODAL ===== */
 .modal-overlay {
   display: none;
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  inset: 0;
+  background: rgba(0,0,0,0.5);
   z-index: 1000;
   align-items: center;
   justify-content: center;
   padding: 20px;
 }
+.modal-overlay.active { display: flex; }
 
-.modal-overlay.active {
-  display: flex;
-}
-
-.modal {
-  background: white;
+.modal-card {
+  background: var(--color-card);
   border-radius: 20px;
-  padding: 40px;
-  max-width: 500px;
+  padding: 36px 40px;
+  max-width: 480px;
   width: 100%;
   text-align: center;
-  animation: modalIn 0.4s ease;
-  position: relative;
-  overflow: hidden;
+  animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes modalSlideIn {
+  from { opacity: 0; transform: translateY(60px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@keyframes modalIn {
-  from { opacity: 0; transform: scale(0.8) translateY(30px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
+.modal-icon { font-size: 3rem; margin-bottom: 12px; }
+.modal-title { font-family: var(--font-title); font-size: 1.4rem; font-weight: 700; color: var(--color-primary); margin-bottom: 10px; }
+.modal-desc { font-size: 0.95rem; color: #555; line-height: 1.7; margin-bottom: 20px; }
 
-.modal-type-icon {
-  font-size: 3em;
-  margin-bottom: 15px;
-}
-
-.modal-title {
-  font-family: var(--font-title);
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-  color: #0f3460;
-  margin-bottom: 12px;
-}
-
-.modal-description {
-  font-size: var(--font-size-md);
-  color: #555;
-  margin-bottom: 20px;
-  line-height: 1.6;
-}
-
-.modal-effects {
+.effects-row {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   justify-content: center;
   margin-bottom: 20px;
   flex-wrap: wrap;
 }
-
-.effect-badge {
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.85em;
+.effect-tag {
+  padding: 5px 12px;
+  border-radius: 16px;
+  font-size: 0.8rem;
   font-weight: 600;
 }
+.effect-pos { background: #e8f5e9; color: var(--color-success); }
+.effect-neg { background: #fce4ec; color: var(--color-danger); }
 
-.effect-positive { background: #e8f5e9; color: #2e7d32; }
-.effect-negative { background: #fce4ec; color: #c62828; }
-.effect-neutral { background: #f5f5f5; color: #616161; }
-
-.choice-buttons {
+.choices-col {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 16px;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .btn-choice {
-  padding: 14px 24px;
-  font-size: 1em;
+  padding: 12px 20px;
+  font-size: 0.95rem;
   font-weight: 600;
-  border: 2px solid #0f3460;
+  border: 2px solid var(--color-primary);
   border-radius: 12px;
   background: white;
-  color: #0f3460;
+  color: var(--color-primary);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  font-family: var(--font-body);
 }
+.btn-choice:hover { background: var(--color-primary); color: white; }
 
-.btn-choice:hover {
-  background: #0f3460;
-  color: white;
+/* ===== CONFETTI ===== */
+.confetti-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2000;
+  overflow: hidden;
 }
-
-.btn-modal-close {
-  padding: 12px 36px;
-  font-size: 1em;
-  background: linear-gradient(135deg, #0f3460, #1a1a2e);
-  color: white;
-  border: none;
-  border-radius: 50px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: -20px;
+  animation: confettiFall 3s linear forwards;
 }
-
-.btn-modal-close:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(15, 52, 96, 0.4);
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
 }
 
 /* ===== RESULT SCREEN ===== */
-#result-screen, #ending-screen {
-  text-align: center;
-}
-
-.result-container, .ending-container {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 24px;
-  padding: 50px 60px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+.result-card {
+  background: var(--color-card);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 8px 40px rgba(26,58,107,0.08);
   max-width: 600px;
   width: 100%;
 }
 
-.result-title {
-  font-family: var(--font-title);
-  font-size: var(--font-size-xl);
-  font-weight: 900;
-  color: #0f3460;
-  margin-bottom: 30px;
+.ranking-list {
+  list-style: none;
+  margin: 24px 0;
 }
-
-.result-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 30px;
-}
-
-.result-stat-row {
+.ranking-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 12px 20px;
-  background: #f5f5f5;
+  gap: 16px;
+  padding: 14px 20px;
   border-radius: 12px;
+  margin-bottom: 10px;
+  background: #f8f8f8;
+  transition: all 0.3s ease;
 }
-
-.result-stat-label {
-  font-weight: 600;
-  color: #555;
-}
-
-.result-stat-value {
-  font-size: 1.3em;
-  font-weight: 700;
-}
-
-.total-score {
-  font-size: 2.5em;
+.ranking-item:first-child { background: #fff8e8; border: 2px solid var(--color-accent); }
+.rank-num {
+  font-family: var(--font-title);
+  font-size: 1.5rem;
   font-weight: 900;
-  color: #0f3460;
-  margin: 20px 0;
+  color: var(--color-primary);
+  min-width: 36px;
 }
-
-.rank-display {
-  font-size: 4em;
+.ranking-item:first-child .rank-num { color: var(--color-accent); }
+.rank-name { font-weight: 700; flex: 1; }
+.rank-score { font-size: 1.2rem; font-weight: 700; color: var(--color-primary); }
+.rank-grade {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
   font-weight: 900;
-  margin: 10px 0 20px;
+  padding: 2px 10px;
+  border-radius: 8px;
 }
-
-.rank-S { color: #ff6f00; text-shadow: 0 0 20px rgba(255, 111, 0, 0.5); }
-.rank-A { color: #e53935; }
-.rank-B { color: #0f3460; }
-.rank-C { color: #757575; }
+.grade-S { background: #fff3e0; color: #e65100; }
+.grade-A { background: #fce4ec; color: #c62828; }
+.grade-B { background: #e3f2fd; color: #1565c0; }
+.grade-C { background: #f5f5f5; color: #616161; }
 
 /* ===== ENDING SCREEN ===== */
-.ending-icon {
-  font-size: 4em;
-  margin-bottom: 15px;
+.ending-card {
+  background: var(--color-card);
+  border-radius: 20px;
+  padding: 48px;
+  box-shadow: 0 8px 40px rgba(26,58,107,0.08);
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
 }
-
-.ending-title {
-  font-family: var(--font-title);
-  font-size: var(--font-size-xl);
-  font-weight: 900;
-  margin-bottom: 15px;
-  color: #0f3460;
-}
-
-.ending-message {
-  font-size: var(--font-size-md);
+.ending-icon { font-size: 4rem; margin-bottom: 12px; }
+.ending-title { font-family: var(--font-title); font-size: 2rem; font-weight: 900; color: var(--color-primary); margin-bottom: 20px; }
+.ending-text {
+  font-size: 1rem;
   color: #555;
-  line-height: 1.8;
-  margin-bottom: 30px;
+  line-height: 2;
+  margin-bottom: 32px;
+  min-height: 120px;
   white-space: pre-line;
 }
 
+/* ===== PLAYER COLORS ===== */
+.p-color-1 { background: #1a3a6b; }
+.p-color-2 { background: #c62828; }
+.p-color-3 { background: #2e7d32; }
+.p-color-4 { background: #6a1b9a; }
+.p-border-1 { border-left-color: #1a3a6b !important; }
+.p-border-2 { border-left-color: #c62828 !important; }
+.p-border-3 { border-left-color: #2e7d32 !important; }
+.p-border-4 { border-left-color: #6a1b9a !important; }
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-  .character-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .title-container {
-    padding: 40px 30px;
-  }
-  .game-title {
-    font-size: 2.2em;
-  }
-  .board-grid {
-    gap: 4px;
-  }
-  .board-cell {
-    font-size: 0.6em;
-  }
-  .stats-bar {
-    gap: 12px;
-    padding: 12px 16px;
-  }
-  .result-container, .ending-container {
-    padding: 30px 20px;
-  }
+  .card { padding: 32px 24px; }
+  .title-xl { font-size: 2rem; }
+  .char-grid { grid-template-columns: repeat(2, 1fr); }
+  .game-header { gap: 8px; }
+  .player-stat-card { min-width: 140px; padding: 10px 12px; }
+  .board-grid { gap: 4px; }
+  .cell { font-size: 0.55rem; }
+  .cell-icon { font-size: 1.1rem; }
 }
 </style>
 </head>
 <body>
 
-<!-- TITLE SCREEN -->
+<!-- SCREEN 1: TITLE -->
 <div id="title-screen" class="screen active">
-  <div class="title-container">
-    <div class="game-title">人生ゲーム</div>
-    <div class="game-subtitle">AODAISHO.ver</div>
-    <div class="game-slogan">〜 "おもしろい"をサイエンスしよう 〜</div>
-    <button class="btn btn-primary" onclick="showScreen('character-screen')">🎮 ゲームスタート</button>
+  <div class="card">
+    <div class="title-logo">AODAISHO</div>
+    <h1 class="title-xl">人生ゲーム</h1>
+    <p class="subtitle">〜 会社の歴史を体験しよう 〜</p>
+    <button class="btn btn-primary" onclick="showScreen('count-screen')">🎮 ゲームスタート</button>
   </div>
 </div>
 
-<!-- CHARACTER SELECT -->
-<div id="character-screen" class="screen">
-  <h2 class="character-screen-title">🎭 キャラクターを選んでください</h2>
-  <div class="character-grid" id="character-grid"></div>
-  <button class="btn btn-primary" id="btn-start-game" onclick="startGame()" disabled>ゲーム開始</button>
+<!-- SCREEN 2: PLAYER COUNT -->
+<div id="count-screen" class="screen">
+  <div class="card">
+    <h2 class="title-lg">何人でプレイしますか？</h2>
+    <div class="count-grid">
+      <button class="count-btn" onclick="selectCount(1)">1</button>
+      <button class="count-btn" onclick="selectCount(2)">2</button>
+      <button class="count-btn" onclick="selectCount(3)">3</button>
+      <button class="count-btn" onclick="selectCount(4)">4</button>
+    </div>
+    <button class="btn btn-primary" id="btn-to-setup" onclick="startSetup()" disabled>次へ →</button>
+  </div>
 </div>
 
-<!-- GAME BOARD -->
+<!-- SCREEN 3: PLAYER SETUP -->
+<div id="setup-screen" class="screen">
+  <div class="setup-card" id="setup-card"></div>
+</div>
+
+<!-- SCREEN 4: MAIN GAME -->
 <div id="game-screen" class="screen">
-  <div class="stats-bar">
-    <div class="stat-item stat-money">
-      <div class="stat-label">💰 資金</div>
-      <div class="stat-value" id="stat-money">100</div>
-    </div>
-    <div class="stat-item stat-motivation">
-      <div class="stat-label">🔥 モチベーション</div>
-      <div class="stat-value" id="stat-motivation">50</div>
-    </div>
-    <div class="stat-item stat-contribution">
-      <div class="stat-label">⭐ 会社貢献度</div>
-      <div class="stat-value" id="stat-contribution">0</div>
-    </div>
-    <div class="stat-item stat-position">
-      <div class="stat-label">📍 現在地</div>
-      <div class="stat-value" id="stat-position">0/25</div>
-    </div>
-  </div>
-  <div class="board-container">
+  <div class="game-header" id="game-header"></div>
+  <div class="board-wrapper">
     <div class="board-grid" id="board-grid"></div>
   </div>
-  <div class="roulette-section">
-    <div class="roulette-display" id="roulette-display">?</div>
-    <button class="btn-roulette" id="btn-roulette" onclick="spinRoulette()">🎲 ルーレット回す！</button>
-  </div>
-</div>
-
-<!-- RESULT SCREEN -->
-<div id="result-screen" class="screen">
-  <div class="result-container">
-    <h2 class="result-title">📊 結果発表</h2>
-    <div class="result-stats">
-      <div class="result-stat-row">
-        <span class="result-stat-label">💰 資金</span>
-        <span class="result-stat-value" id="result-money">0</span>
-      </div>
-      <div class="result-stat-row">
-        <span class="result-stat-label">🔥 モチベーション</span>
-        <span class="result-stat-value" id="result-motivation">0</span>
-      </div>
-      <div class="result-stat-row">
-        <span class="result-stat-label">⭐ 会社貢献度</span>
-        <span class="result-stat-value" id="result-contribution">0</span>
-      </div>
+  <div class="game-footer">
+    <div class="turn-indicator" id="turn-indicator">-</div>
+    <div class="roulette-container">
+      <div class="roulette-wheel" id="roulette-wheel">?</div>
+      <button class="btn-roll" id="btn-roll" onclick="spinRoulette()">🎲 ルーレット</button>
     </div>
-    <div>総合スコア</div>
-    <div class="total-score" id="total-score">0</div>
-    <div>ランク</div>
-    <div class="rank-display" id="rank-display">-</div>
-    <button class="btn btn-primary" onclick="showEnding()">エンディングを見る →</button>
   </div>
 </div>
 
-<!-- ENDING SCREEN -->
+<!-- SCREEN 5: TURN TRANSITION -->
+<div id="turn-screen" class="screen">
+  <div class="card">
+    <div style="font-size:3rem;" id="turn-icon">🎯</div>
+    <div class="turn-player-name" id="turn-player-name">-</div>
+    <div class="turn-message">タブレットを渡してね 📱</div>
+    <div class="countdown" id="turn-countdown">3</div>
+  </div>
+</div>
+
+<!-- SCREEN 6: RESULTS -->
+<div id="result-screen" class="screen">
+  <div class="result-card">
+    <h2 class="title-lg">📊 結果発表</h2>
+    <ol class="ranking-list" id="ranking-list"></ol>
+    <button class="btn btn-primary" onclick="showEnding()">エンディングへ →</button>
+  </div>
+</div>
+
+<!-- SCREEN 7: ENDING -->
 <div id="ending-screen" class="screen">
-  <div class="ending-container">
+  <div class="ending-card">
     <div class="ending-icon" id="ending-icon">🏆</div>
     <h2 class="ending-title" id="ending-title">-</h2>
-    <p class="ending-message" id="ending-message">-</p>
-    <button class="btn btn-primary" onclick="resetGame()">🔄 スタートに戻る</button>
+    <div class="ending-text" id="ending-text"></div>
+    <button class="btn btn-primary" onclick="resetAll()">🔄 もう一度遊ぶ</button>
   </div>
 </div>
 
 <!-- EVENT MODAL -->
 <div class="modal-overlay" id="modal-overlay">
-  <div class="modal" id="modal">
-    <div class="modal-type-icon" id="modal-icon">📢</div>
-    <h3 class="modal-title" id="modal-title">-</h3>
-    <p class="modal-description" id="modal-description">-</p>
-    <div class="modal-effects" id="modal-effects"></div>
-    <div id="modal-choices"></div>
-    <button class="btn-modal-close" id="btn-modal-close" onclick="closeModal()">OK</button>
+  <div class="modal-card" id="modal-card">
+    <div class="modal-icon" id="m-icon">📢</div>
+    <h3 class="modal-title" id="m-title">-</h3>
+    <p class="modal-desc" id="m-desc">-</p>
+    <div class="effects-row" id="m-effects"></div>
+    <div id="m-choices"></div>
+    <button class="btn btn-primary" id="m-ok" onclick="closeModal()">OK</button>
   </div>
 </div>
 
+<!-- CONFETTI -->
+<div class="confetti-container" id="confetti-container"></div>
+
 <script>
-// ===== GAME DATA =====
-const characters = [
-  { id: 'D', name: '男性D', role: '戦略家', icon: '🧠', skill: '初期モチベーション +20', bonus: { motivation: 20 }, passive: null },
-  { id: 'S', name: '男性S', role: 'エンジニア', icon: '💻', skill: '初期資金 +50', bonus: { money: 50 }, passive: null },
-  { id: 'G', name: '男性G', role: '期待の星', icon: '🌟', skill: '初期会社貢献度 +20', bonus: { contribution: 20 }, passive: null },
-  { id: 'A', name: '女性A', role: 'ムードメーカー', icon: '🎉', skill: 'モチベーション減少半減', bonus: {}, passive: 'halfMotivationLoss' },
-  { id: 'H', name: '女性H', role: '総務担当', icon: '📋', skill: '資金減少半減', bonus: {}, passive: 'halfMoneyLoss' },
-  { id: 'K', name: '女性K', role: '教育担当', icon: '📚', skill: '会社貢献度減少半減', bonus: {}, passive: 'halfContributionLoss' }
+// ===== DATA =====
+const CHARACTERS = [
+  { id:'D', name:'男性D', role:'戦略家', icon:'🧠', skill:'初期モチベ +20', bonus:{motivation:20}, passive:null },
+  { id:'S', name:'男性S', role:'エンジニア', icon:'💻', skill:'初期資金 +50', bonus:{money:50}, passive:null },
+  { id:'G', name:'男性G', role:'期待の星', icon:'🌟', skill:'初期貢献度 +20', bonus:{contribution:20}, passive:null },
+  { id:'A', name:'女性A', role:'ムードメーカー', icon:'🎉', skill:'モチベ減少半減', bonus:{}, passive:'halfMotivationLoss' },
+  { id:'H', name:'女性H', role:'総務担当', icon:'📋', skill:'資金減少半減', bonus:{}, passive:'halfMoneyLoss' },
+  { id:'K', name:'女性K', role:'教育担当', icon:'📚', skill:'貢献度減少半減', bonus:{}, passive:'halfContributionLoss' }
 ];
 
-const companyEvents = [
-  {
-    type: "history",
-    title: "AODAISHO設立",
-    description: "2021年11月、代表・土屋大樹が東京都渋谷区にて株式会社AODAISHOを設立。「"おもしろい"をサイエンスしよう」を掲げ、新たな挑戦が始まる！",
-    effects: { money: 0, motivation: 20, contribution: 10 }
-  },
-  {
-    type: "choice",
-    title: "初の大型案件",
-    description: "大手企業から採用コンサルティングのオファーが届いた。難易度は高いが、実績になる！",
-    choices: [
-      { text: "チャレンジする", effects: { money: 80, motivation: -15, contribution: 40 }},
-      { text: "見送る", effects: { money: 20, motivation: 5, contribution: 5 }}
-    ]
-  },
-  {
-    type: "bonus",
-    title: "SNSコンサル事業開始",
-    description: "TikTok・Instagram・Xのコンサルティング事業を本格スタート。各SNSの特性を活かした戦略的マーケティングを提供開始！",
-    effects: { money: 30, motivation: 25, contribution: 20 }
-  },
-  {
-    type: "crisis",
-    title: "クライアントトラブル",
-    description: "クライアントの期待値とのギャップが発生。クレド「成果にこだわる」を胸に全社で対応。",
-    effects: { money: -50, motivation: -20, contribution: 25 }
-  },
-  {
-    type: "celebration",
-    title: "TikTok 1000万再生突破",
-    description: "運用支援中のTikTokアカウントが累計1000万再生を突破！チーム一丸で喜びを分かち合った。",
-    effects: { money: 40, motivation: 30, contribution: 15 }
-  },
-  {
-    type: "history",
-    title: "Web開発事業拡大",
-    description: "LP・HP・Webアプリの企画から開発まで一気通貫で対応する体制を構築。ビジネスのデジタル化を加速！",
-    effects: { money: -20, motivation: 15, contribution: 20 }
-  },
-  {
-    type: "choice",
-    title: "社員研修の提案",
-    description: "チームメンバーからスキルアップ研修の要望が。クレド「仲間の成長に協力する」に基づき…",
-    choices: [
-      { text: "大規模に実施", effects: { money: -40, motivation: 25, contribution: 30 }},
-      { text: "最小限で対応", effects: { money: -10, motivation: 5, contribution: 10 }}
-    ]
-  },
-  {
-    type: "credo",
-    title: "クレド浸透プロジェクト",
-    description: "9つのクレドを全社に浸透させるプロジェクトを開始。「誠実である」「責務を全うする」「人の心を大切にする」——行動指針が文化になる。",
-    effects: { money: -10, motivation: 20, contribution: 25 }
-  },
-  {
-    type: "bonus",
-    title: "渋谷・神宮前オフィス",
-    description: "神宮前6丁目にオフィスを構える。渋谷のクリエイティブな空気の中で「非常識戦略」を生み出す拠点に！",
-    effects: { money: -30, motivation: 25, contribution: 15 }
-  },
-  {
-    type: "crisis",
-    title: "競合の台頭",
-    description: "SNSコンサル市場に大手が参入。「業界の常識を疑い、競争優位をつくる」——非常識戦略の真価が問われる。",
-    effects: { money: -30, motivation: -15, contribution: 10 }
-  },
-  {
-    type: "choice",
-    title: "AIX事業への投資",
-    description: "AIXコンサルティングを採用領域に導入するか検討中。先行投資は大きいが…",
-    choices: [
-      { text: "全力でAIX推進", effects: { money: -50, motivation: 15, contribution: 35 }},
-      { text: "様子を見る", effects: { money: 10, motivation: -5, contribution: 5 }}
-    ]
-  },
-  {
-    type: "celebration",
-    title: "TikTok 5000万再生達成",
-    description: "累計5,000万再生のノウハウが蓄積！ホワイトペーパーとして体系化し、業界トップクラスの実績に。",
-    effects: { money: 60, motivation: 30, contribution: 25 }
-  },
-  {
-    type: "history",
-    title: "教育研修事業拡充",
-    description: "人事戦略設計から教育研修まで、企業の人材確保を包括的にサポートする体制が整う。",
-    effects: { money: 20, motivation: 15, contribution: 20 }
-  },
-  {
-    type: "choice",
-    title: "新規クライアントの決断",
-    description: "大企業から「再現性のある採用の仕組みを作ってほしい」との依頼。リソースは限られるが…",
-    choices: [
-      { text: "受注する（再現性を証明）", effects: { money: 60, motivation: -10, contribution: 35 }},
-      { text: "リソース確保を優先", effects: { money: 10, motivation: 10, contribution: 10 }}
-    ]
-  },
-  {
-    type: "crisis",
-    title: "メンバー離脱の危機",
-    description: "主力メンバーが独立を検討…クレド「自分との約束を守る」を全員で語り合い、ビジョンを再共有。",
-    effects: { money: -20, motivation: -25, contribution: -10 }
-  },
-  {
-    type: "bonus",
-    title: "クライアントファースト実証",
-    description: "顧客成果を起点にした支援が実を結び、複数クライアントから追加案件の依頼が殺到！",
-    effects: { money: 80, motivation: 20, contribution: 20 }
-  },
-  {
-    type: "credo",
-    title: "美意識と成長",
-    description: "「常に美意識を持ち続ける」「常に期待以上の価値である」——デザインからサービス品質まで全てに美学を貫く。",
-    effects: { money: 0, motivation: 20, contribution: 20 }
-  },
-  {
-    type: "choice",
-    title: "「場の発明」への挑戦",
-    description: "AODAISHO独自の新コンセプト事業を立ち上げるチャンス。リスクは高いが、ビジョン実現に直結する。",
-    choices: [
-      { text: "場の発明に挑戦する", effects: { money: -40, motivation: 20, contribution: 40 }},
-      { text: "既存事業を磨く", effects: { money: 30, motivation: 5, contribution: 15 }}
-    ]
-  },
-  {
-    type: "celebration",
-    title: "創立記念日",
-    description: "設立からの歩みを全員で振り返る。苦しいときも楽しいときも、「礼儀礼節を重んじ」「人の心を大切に」してきた仲間たちと乾杯！",
-    effects: { money: -15, motivation: 35, contribution: 20 }
-  },
-  {
-    type: "bonus",
-    title: "過去最高の成果",
-    description: "「"おもしろい"をサイエンスしよう」を体現し、社会に広く普及するビジネスの創造に成功！全パラメータ大幅UP！",
-    effects: { money: 70, motivation: 25, contribution: 30 }
-  }
+const EVENTS = [
+  { type:"history", title:"AODAISHO設立", description:"2021年11月、代表・土屋大樹が渋谷区にて株式会社AODAISHOを設立。「"おもしろい"をサイエンスしよう」を掲げ、挑戦が始まる！", effects:{money:0,motivation:20,contribution:10} },
+  { type:"choice", title:"初の大型案件", description:"大手企業から採用コンサルティングのオファー。難易度は高いが、実績になる！", choices:[{text:"チャレンジする",effects:{money:80,motivation:-15,contribution:40}},{text:"見送る",effects:{money:20,motivation:5,contribution:5}}] },
+  { type:"bonus", title:"SNSコンサル事業開始", description:"TikTok・Instagram・Xのコンサルティングを本格スタート！戦略的マーケティングを提供開始。", effects:{money:30,motivation:25,contribution:20} },
+  { type:"crisis", title:"クライアントトラブル", description:"期待値とのギャップが発生。クレド「成果にこだわる」を胸に全社で対応。", effects:{money:-50,motivation:-20,contribution:25} },
+  { type:"celebration", title:"TikTok 1000万再生突破", description:"運用支援中のアカウントが累計1000万再生突破！チーム一丸で喜びを分かち合った。", effects:{money:40,motivation:30,contribution:15} },
+  { type:"history", title:"Web開発事業拡大", description:"LP・HP・Webアプリの企画から開発まで一気通貫で対応する体制を構築！", effects:{money:-20,motivation:15,contribution:20} },
+  { type:"choice", title:"社員研修の提案", description:"メンバーからスキルアップ研修の要望。クレド「仲間の成長に協力する」に基づき…", choices:[{text:"大規模に実施",effects:{money:-40,motivation:25,contribution:30}},{text:"最小限で対応",effects:{money:-10,motivation:5,contribution:10}}] },
+  { type:"credo", title:"クレド浸透プロジェクト", description:"9つのクレドを全社に浸透。「誠実である」「責務を全うする」「人の心を大切にする」——行動指針が文化に。", effects:{money:-10,motivation:20,contribution:25} },
+  { type:"bonus", title:"渋谷・神宮前オフィス", description:"神宮前6丁目にオフィスを構える。渋谷のクリエイティブな空気の中で「非常識戦略」を生み出す拠点に！", effects:{money:-30,motivation:25,contribution:15} },
+  { type:"crisis", title:"競合の台頭", description:"SNSコンサル市場に大手が参入。「業界の常識を疑い、競争優位をつくる」——非常識戦略の真価が問われる。", effects:{money:-30,motivation:-15,contribution:10} },
+  { type:"choice", title:"AIX事業への投資", description:"AIXコンサルティングを採用領域に導入するか検討中。先行投資は大きいが…", choices:[{text:"全力でAIX推進",effects:{money:-50,motivation:15,contribution:35}},{text:"様子を見る",effects:{money:10,motivation:-5,contribution:5}}] },
+  { type:"celebration", title:"TikTok 5000万再生達成", description:"累計5,000万再生！ホワイトペーパーとして体系化し、業界トップクラスの実績に。", effects:{money:60,motivation:30,contribution:25} },
+  { type:"history", title:"教育研修事業拡充", description:"人事戦略設計から教育研修まで、企業の人材確保を包括的にサポートする体制が整う。", effects:{money:20,motivation:15,contribution:20} },
+  { type:"choice", title:"新規クライアントの決断", description:"大企業から「再現性のある採用の仕組みを作ってほしい」との依頼。リソースは限られるが…", choices:[{text:"受注する",effects:{money:60,motivation:-10,contribution:35}},{text:"リソース確保優先",effects:{money:10,motivation:10,contribution:10}}] },
+  { type:"crisis", title:"メンバー離脱の危機", description:"主力メンバーが独立を検討…「自分との約束を守る」を全員で語り合い、ビジョンを再共有。", effects:{money:-20,motivation:-25,contribution:-10} },
+  { type:"bonus", title:"クライアントファースト実証", description:"顧客成果を起点にした支援が実を結び、追加案件の依頼が殺到！", effects:{money:80,motivation:20,contribution:20} },
+  { type:"credo", title:"美意識と成長", description:"「常に美意識を持ち続ける」「常に期待以上の価値である」——全てに美学を貫く。", effects:{money:0,motivation:20,contribution:20} },
+  { type:"choice", title:"「場の発明」への挑戦", description:"AODAISHO独自の新コンセプト事業を立ち上げるチャンス。リスクは高いが、ビジョン実現に直結。", choices:[{text:"場の発明に挑戦",effects:{money:-40,motivation:20,contribution:40}},{text:"既存事業を磨く",effects:{money:30,motivation:5,contribution:15}}] },
+  { type:"celebration", title:"創立記念日", description:"設立からの歩みを全員で振り返り。「礼儀礼節を重んじ」「人の心を大切に」してきた仲間たちと乾杯！", effects:{money:-15,motivation:35,contribution:20} },
+  { type:"bonus", title:"過去最高の成果", description:"「"おもしろい"をサイエンスしよう」を体現し、社会に広く普及するビジネスの創造に成功！", effects:{money:70,motivation:25,contribution:30} }
 ];
 
-// Board cell definitions (25 cells)
-const boardCells = [];
-function generateBoard() {
-  boardCells.length = 0;
-  boardCells.push({ type: 'start', label: 'スタート', icon: '🚀' });
-
-  const eventIndices = [];
-  const totalEventSlots = 22;
-  const eventsToPlace = Math.min(companyEvents.length, 20);
-  const step = totalEventSlots / eventsToPlace;
-
-  for (let i = 0; i < eventsToPlace; i++) {
-    eventIndices.push(Math.round(1 + i * step));
-  }
-
-  let eventIdx = 0;
-  for (let i = 1; i <= 23; i++) {
-    if (eventIndices.includes(i) && eventIdx < companyEvents.length) {
-      const ev = companyEvents[eventIdx];
-      boardCells.push({
-        type: ev.type,
-        label: ev.title.substring(0, 6),
-        icon: getEventIcon(ev.type),
-        eventIndex: eventIdx
-      });
-      eventIdx++;
-    } else {
-      boardCells.push({ type: 'rest', label: '休憩', icon: '☕' });
-    }
-  }
-
-  boardCells.push({ type: 'goal', label: 'ゴール', icon: '🏁' });
-}
-
-function getEventIcon(type) {
-  const icons = { history: '📜', choice: '🤔', bonus: '🎁', crisis: '⚠️', celebration: '🎊', credo: '📖' };
-  return icons[type] || '📌';
-}
+const PLAYER_COLORS = ['#1a3a6b','#c62828','#2e7d32','#6a1b9a'];
+const PLAYER_TOKENS = ['🔵','🔴','🟢','🟣'];
 
 // ===== GAME STATE =====
-let gameState = {
-  character: null,
-  position: 0,
-  money: 100,
-  motivation: 50,
-  contribution: 0,
-  isSpinning: false
-};
+let playerCount = 0;
+let players = [];
+let currentPlayerIdx = 0;
+let boardCells = [];
+let goalRankCounter = 0;
+let setupIdx = 0;
+let isSpinning = false;
 
-// ===== SCREEN MANAGEMENT =====
+// ===== SCREEN =====
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-// ===== CHARACTER SELECT =====
-function renderCharacters() {
-  const grid = document.getElementById('character-grid');
-  grid.innerHTML = characters.map(c => `
-    <div class="character-card" data-id="${c.id}" onclick="selectCharacter('${c.id}')">
-      <div class="character-icon">${c.icon}</div>
-      <div class="character-name">${c.name}</div>
-      <div class="character-role">${c.role}</div>
-      <div class="character-skill">${c.skill}</div>
+// ===== PLAYER COUNT =====
+function selectCount(n) {
+  playerCount = n;
+  document.querySelectorAll('.count-btn').forEach((b,i) => b.classList.toggle('selected', i+1===n));
+  document.getElementById('btn-to-setup').disabled = false;
+}
+
+function startSetup() {
+  players = [];
+  for (let i = 0; i < playerCount; i++) {
+    players.push({ id:i+1, name:'', character:null, money:100, motivation:50, contribution:0, position:0, isFinished:false, goalRank:null });
+  }
+  setupIdx = 0;
+  goalRankCounter = 0;
+  renderSetup();
+  showScreen('setup-screen');
+}
+
+// ===== SETUP =====
+function renderSetup() {
+  const p = players[setupIdx];
+  const takenChars = players.filter((_,i) => i!==setupIdx).map(x => x.character).filter(Boolean);
+  const card = document.getElementById('setup-card');
+  card.innerHTML = `
+    <span class="player-badge p-color-${p.id}">プレイヤー${p.id}</span>
+    <h2 class="title-lg">名前を入力</h2>
+    <input class="input-field" id="name-input" placeholder="名前を入力..." value="${p.name}" maxlength="8" />
+    <h3 style="font-family:var(--font-title);margin-bottom:12px;color:var(--color-primary);">キャラクター選択</h3>
+    <div class="char-grid">
+      ${CHARACTERS.map(c => {
+        const taken = takenChars.includes(c.id);
+        const selected = p.character === c.id;
+        return `<div class="char-card ${selected?'selected':''} ${taken?'taken':''}" onclick="pickChar('${c.id}')">
+          <div class="icon">${c.icon}</div>
+          <div class="name">${c.name}</div>
+          <div class="role">${c.role}</div>
+          <div class="skill">${c.skill}</div>
+        </div>`;
+      }).join('')}
     </div>
-  `).join('');
+    <div style="display:flex;gap:12px;justify-content:center;">
+      ${setupIdx > 0 ? '<button class="btn btn-outline" onclick="prevSetup()">← 戻る</button>' : ''}
+      <button class="btn btn-primary" id="btn-next-setup" onclick="nextSetup()">${setupIdx < playerCount-1 ? '次へ →' : 'ゲーム開始！'}</button>
+    </div>
+  `;
 }
 
-function selectCharacter(id) {
-  gameState.character = characters.find(c => c.id === id);
-  document.querySelectorAll('.character-card').forEach(card => {
-    card.classList.toggle('selected', card.dataset.id === id);
+function pickChar(id) {
+  players[setupIdx].character = id;
+  renderSetup();
+}
+
+function prevSetup() {
+  saveName();
+  setupIdx--;
+  renderSetup();
+}
+
+function nextSetup() {
+  saveName();
+  const p = players[setupIdx];
+  if (!p.name.trim()) { p.name = `プレイヤー${p.id}`; }
+  if (!p.character) { alert('キャラクターを選んでください'); return; }
+
+  if (setupIdx < playerCount - 1) {
+    setupIdx++;
+    renderSetup();
+  } else {
+    initGame();
+  }
+}
+
+function saveName() {
+  const input = document.getElementById('name-input');
+  if (input) players[setupIdx].name = input.value;
+}
+
+// ===== GAME INIT =====
+function initGame() {
+  // Apply character bonuses
+  players.forEach(p => {
+    const ch = CHARACTERS.find(c => c.id === p.character);
+    if (ch.bonus.money) p.money += ch.bonus.money;
+    if (ch.bonus.motivation) p.motivation += ch.bonus.motivation;
+    if (ch.bonus.contribution) p.contribution += ch.bonus.contribution;
   });
-  document.getElementById('btn-start-game').disabled = false;
-}
-
-// ===== GAME START =====
-function startGame() {
-  if (!gameState.character) return;
-
-  gameState.money = 100 + (gameState.character.bonus.money || 0);
-  gameState.motivation = 50 + (gameState.character.bonus.motivation || 0);
-  gameState.contribution = 0 + (gameState.character.bonus.contribution || 0);
-  gameState.position = 0;
 
   generateBoard();
-  renderBoard();
-  updateStats();
+  currentPlayerIdx = 0;
+  renderGame();
   showScreen('game-screen');
 }
 
-// ===== BOARD RENDERING =====
-function renderBoard() {
-  const grid = document.getElementById('board-grid');
-  const rows = 5;
-  const cols = 5;
-  const orderedCells = [];
+function generateBoard() {
+  boardCells = [];
+  boardCells.push({ type:'start', label:'スタート', icon:'🚀' });
+  const slots = 23;
+  const evCount = Math.min(EVENTS.length, 20);
+  const step = slots / evCount;
+  const eventPositions = [];
+  for (let i = 0; i < evCount; i++) eventPositions.push(Math.round(1 + i * step));
 
-  for (let row = 0; row < rows; row++) {
-    const rowCells = [];
-    for (let col = 0; col < cols; col++) {
-      const idx = row * cols + col;
-      if (idx < boardCells.length) {
-        rowCells.push(idx);
-      }
+  let eIdx = 0;
+  for (let i = 1; i <= slots; i++) {
+    if (eventPositions.includes(i) && eIdx < EVENTS.length) {
+      const ev = EVENTS[eIdx];
+      boardCells.push({ type:ev.type, label:ev.title.slice(0,5), icon:getIcon(ev.type), eventIndex:eIdx });
+      eIdx++;
+    } else {
+      boardCells.push({ type:'rest', label:'休憩', icon:'☕' });
     }
-    if (row % 2 === 1) rowCells.reverse();
-    orderedCells.push(...rowCells);
   }
+  boardCells.push({ type:'goal', label:'ゴール', icon:'🏁' });
+}
 
-  grid.innerHTML = orderedCells.map((cellIdx) => {
-    const cell = boardCells[cellIdx];
-    if (!cell) return '<div class="board-cell"></div>';
-    const isCurrent = cellIdx === gameState.position;
-    return `
-      <div class="board-cell ${cell.type} ${isCurrent ? 'current' : ''}" data-cell="${cellIdx}">
-        <span class="cell-number">${cellIdx}</span>
-        <span class="cell-icon">${cell.icon}</span>
-        <span class="cell-label">${cell.label}</span>
-        ${isCurrent ? '<span class="player-token">' + (gameState.character ? gameState.character.icon : '🔵') + '</span>' : ''}
+function getIcon(t) {
+  return {history:'📜',choice:'🤔',bonus:'🎁',crisis:'⚠️',celebration:'🎊',credo:'📖'}[t]||'📌';
+}
+
+// ===== RENDER GAME =====
+function renderGame() {
+  renderHeader();
+  renderBoard();
+  renderFooter();
+}
+
+function renderHeader() {
+  const hdr = document.getElementById('game-header');
+  hdr.innerHTML = players.map(p => {
+    const isActive = p.id === players[currentPlayerIdx].id && !p.isFinished;
+    const ch = CHARACTERS.find(c => c.id === p.character);
+    return `<div class="player-stat-card ${isActive?'active-turn p-border-'+p.id:''} ${p.isFinished?'finished':''}">
+      <div class="psc-name">${ch.icon} ${p.name}</div>
+      <div class="psc-stats">
+        <div class="psc-stat psc-stat-money"><span class="psc-stat-label">💰資金</span><span class="psc-stat-value">${p.money}</span></div>
+        <div class="psc-stat psc-stat-moti"><span class="psc-stat-label">🔥モチベ</span><span class="psc-stat-value">${p.motivation}</span></div>
+        <div class="psc-stat psc-stat-cont"><span class="psc-stat-label">⭐貢献</span><span class="psc-stat-value">${p.contribution}</span></div>
       </div>
-    `;
+    </div>`;
   }).join('');
 }
 
-// ===== STATS UPDATE =====
-function updateStats() {
-  gameState.motivation = Math.max(0, Math.min(100, gameState.motivation));
-  document.getElementById('stat-money').textContent = gameState.money;
-  document.getElementById('stat-motivation').textContent = gameState.motivation;
-  document.getElementById('stat-contribution').textContent = gameState.contribution;
-  document.getElementById('stat-position').textContent = `${gameState.position}/25`;
+function renderBoard() {
+  const grid = document.getElementById('board-grid');
+  const ordered = [];
+  for (let row = 0; row < 5; row++) {
+    const rowCells = [];
+    for (let col = 0; col < 5; col++) {
+      const idx = row * 5 + col;
+      if (idx < boardCells.length) rowCells.push(idx);
+    }
+    if (row % 2 === 1) rowCells.reverse();
+    ordered.push(...rowCells);
+  }
+
+  grid.innerHTML = ordered.map(ci => {
+    const cell = boardCells[ci];
+    if (!cell) return '<div class="cell"></div>';
+    const tokens = players.filter(p => p.position === ci).map((p,i) => `<span class="token">${PLAYER_TOKENS[p.id-1]}</span>`).join('');
+    return `<div class="cell ${cell.type}">
+      <span class="cell-num">${ci}</span>
+      <span class="cell-icon">${cell.icon}</span>
+      <span class="cell-label">${cell.label}</span>
+      ${tokens ? `<span class="cell-tokens">${tokens}</span>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderFooter() {
+  const p = players[currentPlayerIdx];
+  const ch = CHARACTERS.find(c => c.id === p.character);
+  document.getElementById('turn-indicator').innerHTML = `${ch.icon} <strong>${p.name}</strong> のターン`;
 }
 
 // ===== ROULETTE =====
 function spinRoulette() {
-  if (gameState.isSpinning) return;
-  if (gameState.position >= 24) {
-    showResults();
-    return;
-  }
+  if (isSpinning) return;
+  const p = players[currentPlayerIdx];
+  if (p.isFinished) { nextTurn(); return; }
 
-  gameState.isSpinning = true;
-  const display = document.getElementById('roulette-display');
-  const btn = document.getElementById('btn-roulette');
+  isSpinning = true;
+  const wheel = document.getElementById('roulette-wheel');
+  const btn = document.getElementById('btn-roll');
   btn.disabled = true;
-  display.classList.add('spinning');
+  wheel.classList.add('spinning');
 
   let count = 0;
-  const maxCount = 20;
   const interval = setInterval(() => {
-    display.textContent = Math.floor(Math.random() * 6) + 1;
+    wheel.textContent = Math.floor(Math.random() * 6) + 1;
     count++;
-    if (count >= maxCount) {
+    if (count >= 18) {
       clearInterval(interval);
       const result = Math.floor(Math.random() * 6) + 1;
-      display.textContent = result;
-      display.classList.remove('spinning');
+      wheel.textContent = result;
+      wheel.classList.remove('spinning');
       movePlayer(result);
     }
   }, 80);
 }
 
 function movePlayer(steps) {
-  const targetPosition = Math.min(gameState.position + steps, 24);
-  let current = gameState.position;
+  const p = players[currentPlayerIdx];
+  const target = Math.min(p.position + steps, 24);
+  let cur = p.position;
 
-  const moveInterval = setInterval(() => {
-    current++;
-    if (current > targetPosition) {
-      current = targetPosition;
-    }
-    gameState.position = current;
+  const interval = setInterval(() => {
+    cur++;
+    if (cur > target) cur = target;
+    p.position = cur;
     renderBoard();
-    updateStats();
 
-    if (current >= targetPosition) {
-      clearInterval(moveInterval);
-      setTimeout(() => {
-        checkCell();
-      }, 300);
+    if (cur >= target) {
+      clearInterval(interval);
+      setTimeout(() => checkLanding(), 300);
     }
-  }, 300);
+  }, 250);
 }
 
-function checkCell() {
-  const cell = boardCells[gameState.position];
+function checkLanding() {
+  const p = players[currentPlayerIdx];
 
-  if (gameState.position >= 24) {
-    gameState.isSpinning = false;
-    setTimeout(() => showResults(), 500);
+  if (p.position >= 24) {
+    goalRankCounter++;
+    p.isFinished = true;
+    p.goalRank = goalRankCounter;
+    showGoalModal(p);
     return;
   }
 
+  const cell = boardCells[p.position];
   if (cell && cell.eventIndex !== undefined) {
-    showEvent(companyEvents[cell.eventIndex]);
+    showEventModal(EVENTS[cell.eventIndex]);
   } else if (cell && cell.type === 'rest') {
-    gameState.motivation = Math.min(100, gameState.motivation + 5);
-    updateStats();
+    p.motivation = Math.min(100, p.motivation + 5);
+    renderGame();
     showRestModal();
   } else {
-    gameState.isSpinning = false;
-    document.getElementById('btn-roulette').disabled = false;
+    finishTurn();
   }
+}
+
+function showGoalModal(p) {
+  const bonus = (5 - p.goalRank) * 20;
+  p.contribution += bonus;
+  fireConfetti();
+  openModal('🏁', 'ゴール！', `${p.name}さんが${p.goalRank}位でゴール！\nゴール順位ボーナス: 会社貢献度 +${bonus}`, [{label:`⭐ +${bonus}`, positive:true}], null, () => {
+    renderGame();
+    checkGameEnd();
+  });
 }
 
 function showRestModal() {
-  const overlay = document.getElementById('modal-overlay');
-  document.getElementById('modal-icon').textContent = '☕';
-  document.getElementById('modal-title').textContent = '休憩タイム';
-  document.getElementById('modal-description').textContent = 'ちょっと一息。モチベーションが少し回復した！';
-  document.getElementById('modal-effects').innerHTML = '<span class="effect-badge effect-positive">🔥 モチベ +5</span>';
-  document.getElementById('modal-choices').innerHTML = '';
-  document.getElementById('btn-modal-close').style.display = 'inline-block';
-  overlay.classList.add('active');
+  openModal('☕', '休憩タイム', 'ちょっと一息。モチベーションが少し回復した！', [{label:'🔥 +5', positive:true}], null, finishTurn);
 }
 
-// ===== EVENT DISPLAY =====
-function showEvent(event) {
-  const overlay = document.getElementById('modal-overlay');
-  const icons = { history: '📜', choice: '🤔', bonus: '🎁', crisis: '⚠️', celebration: '🎊', credo: '📖' };
-
-  document.getElementById('modal-icon').textContent = icons[event.type] || '📌';
-  document.getElementById('modal-title').textContent = event.title;
-  document.getElementById('modal-description').textContent = event.description;
-
-  const choicesDiv = document.getElementById('modal-choices');
-  const effectsDiv = document.getElementById('modal-effects');
-  const closeBtn = document.getElementById('btn-modal-close');
-
+function showEventModal(event) {
+  const icons = {history:'📜',choice:'🤔',bonus:'🎁',crisis:'⚠️',celebration:'🎊',credo:'📖'};
   if (event.type === 'choice') {
-    effectsDiv.innerHTML = '';
-    closeBtn.style.display = 'none';
-    choicesDiv.innerHTML = '<div class="choice-buttons">' +
-      event.choices.map((choice, idx) => `
-        <button class="btn-choice" onclick="makeChoice(${idx})">${choice.text}</button>
-      `).join('') + '</div>';
+    openModal(icons[event.type], event.title, event.description, [], event.choices, null);
   } else {
-    choicesDiv.innerHTML = '';
-    closeBtn.style.display = 'inline-block';
-    effectsDiv.innerHTML = renderEffects(event.effects);
     applyEffects(event.effects);
-    updateStats();
+    renderGame();
+    const tags = effectTags(event.effects);
+    if (event.type === 'bonus' || event.type === 'celebration') fireConfetti();
+    openModal(icons[event.type], event.title, event.description, tags, null, finishTurn);
   }
-
-  overlay.classList.add('active');
 }
 
-function makeChoice(idx) {
-  const cell = boardCells[gameState.position];
-  const event = companyEvents[cell.eventIndex];
-  const choice = event.choices[idx];
+// ===== MODAL =====
+function openModal(icon, title, desc, tags, choices, onClose) {
+  document.getElementById('m-icon').textContent = icon;
+  document.getElementById('m-title').textContent = title;
+  document.getElementById('m-desc').textContent = desc;
+  document.getElementById('m-effects').innerHTML = tags ? tags.map(t => `<span class="effect-tag ${t.positive?'effect-pos':'effect-neg'}">${t.label}</span>`).join('') : '';
 
-  document.getElementById('modal-effects').innerHTML = renderEffects(choice.effects);
-  document.getElementById('modal-choices').innerHTML = '';
-  document.getElementById('btn-modal-close').style.display = 'inline-block';
+  const choicesDiv = document.getElementById('m-choices');
+  const okBtn = document.getElementById('m-ok');
 
-  applyEffects(choice.effects);
-  updateStats();
-}
-
-function renderEffects(effects) {
-  let html = '';
-  if (effects.money !== 0) {
-    const cls = effects.money > 0 ? 'effect-positive' : 'effect-negative';
-    html += `<span class="effect-badge ${cls}">💰 ${effects.money > 0 ? '+' : ''}${effects.money}</span>`;
-  }
-  if (effects.motivation !== 0) {
-    const cls = effects.motivation > 0 ? 'effect-positive' : 'effect-negative';
-    html += `<span class="effect-badge ${cls}">🔥 ${effects.motivation > 0 ? '+' : ''}${effects.motivation}</span>`;
-  }
-  if (effects.contribution !== 0) {
-    const cls = effects.contribution > 0 ? 'effect-positive' : 'effect-negative';
-    html += `<span class="effect-badge ${cls}">⭐ ${effects.contribution > 0 ? '+' : ''}${effects.contribution}</span>`;
-  }
-  return html;
-}
-
-function applyEffects(effects) {
-  const passive = gameState.character ? gameState.character.passive : null;
-
-  let moneyChange = effects.money || 0;
-  let motivationChange = effects.motivation || 0;
-  let contributionChange = effects.contribution || 0;
-
-  if (passive === 'halfMoneyLoss' && moneyChange < 0) {
-    moneyChange = Math.ceil(moneyChange / 2);
-  }
-  if (passive === 'halfMotivationLoss' && motivationChange < 0) {
-    motivationChange = Math.ceil(motivationChange / 2);
-  }
-  if (passive === 'halfContributionLoss' && contributionChange < 0) {
-    contributionChange = Math.ceil(contributionChange / 2);
+  if (choices) {
+    okBtn.style.display = 'none';
+    choicesDiv.innerHTML = `<div class="choices-col">${choices.map((c,i) => `<button class="btn-choice" onclick="makeChoice(${i})">${c.text}</button>`).join('')}</div>`;
+  } else {
+    okBtn.style.display = 'inline-block';
+    choicesDiv.innerHTML = '';
   }
 
-  gameState.money += moneyChange;
-  gameState.motivation += motivationChange;
-  gameState.contribution += contributionChange;
-
-  gameState.motivation = Math.max(0, Math.min(100, gameState.motivation));
+  window._modalOnClose = onClose;
+  document.getElementById('modal-overlay').classList.add('active');
 }
 
 function closeModal() {
   document.getElementById('modal-overlay').classList.remove('active');
-  gameState.isSpinning = false;
-  document.getElementById('btn-roulette').disabled = false;
+  if (window._modalOnClose) { window._modalOnClose(); window._modalOnClose = null; }
+}
+
+function makeChoice(idx) {
+  const p = players[currentPlayerIdx];
+  const cell = boardCells[p.position];
+  const event = EVENTS[cell.eventIndex];
+  const choice = event.choices[idx];
+
+  applyEffects(choice.effects);
+  renderGame();
+
+  const tags = effectTags(choice.effects);
+  document.getElementById('m-effects').innerHTML = tags.map(t => `<span class="effect-tag ${t.positive?'effect-pos':'effect-neg'}">${t.label}</span>`).join('');
+  document.getElementById('m-choices').innerHTML = '';
+  document.getElementById('m-ok').style.display = 'inline-block';
+  window._modalOnClose = finishTurn;
+}
+
+function effectTags(eff) {
+  const tags = [];
+  if (eff.money) tags.push({label:`💰 ${eff.money>0?'+':''}${eff.money}`, positive:eff.money>0});
+  if (eff.motivation) tags.push({label:`🔥 ${eff.motivation>0?'+':''}${eff.motivation}`, positive:eff.motivation>0});
+  if (eff.contribution) tags.push({label:`⭐ ${eff.contribution>0?'+':''}${eff.contribution}`, positive:eff.contribution>0});
+  return tags;
+}
+
+function applyEffects(eff) {
+  const p = players[currentPlayerIdx];
+  const ch = CHARACTERS.find(c => c.id === p.character);
+  let dm = eff.money||0, dmo = eff.motivation||0, dc = eff.contribution||0;
+
+  if (ch.passive === 'halfMoneyLoss' && dm < 0) dm = Math.ceil(dm/2);
+  if (ch.passive === 'halfMotivationLoss' && dmo < 0) dmo = Math.ceil(dmo/2);
+  if (ch.passive === 'halfContributionLoss' && dc < 0) dc = Math.ceil(dc/2);
+
+  p.money += dm;
+  p.motivation = Math.max(0, Math.min(100, p.motivation + dmo));
+  p.contribution += dc;
+}
+
+// ===== TURN =====
+function finishTurn() {
+  isSpinning = false;
+  document.getElementById('btn-roll').disabled = false;
+
+  if (checkGameEnd()) return;
+  advanceTurn();
+}
+
+function advanceTurn() {
+  let next = (currentPlayerIdx + 1) % players.length;
+  let loops = 0;
+  while (players[next].isFinished && loops < players.length) {
+    next = (next + 1) % players.length;
+    loops++;
+  }
+
+  if (loops >= players.length) { showResults(); return; }
+
+  currentPlayerIdx = next;
+
+  if (playerCount > 1) {
+    showTurnTransition();
+  } else {
+    renderGame();
+  }
+}
+
+function showTurnTransition() {
+  const p = players[currentPlayerIdx];
+  const ch = CHARACTERS.find(c => c.id === p.character);
+  document.getElementById('turn-icon').textContent = ch.icon;
+  document.getElementById('turn-player-name').textContent = `${p.name} さんのターン！`;
+  showScreen('turn-screen');
+
+  let sec = 3;
+  const cd = document.getElementById('turn-countdown');
+  cd.textContent = sec;
+  const iv = setInterval(() => {
+    sec--;
+    cd.textContent = sec;
+    if (sec <= 0) {
+      clearInterval(iv);
+      renderGame();
+      showScreen('game-screen');
+    }
+  }, 1000);
+}
+
+function checkGameEnd() {
+  if (players.every(p => p.isFinished)) {
+    setTimeout(showResults, 500);
+    return true;
+  }
+  return false;
 }
 
 // ===== RESULTS =====
 function showResults() {
-  document.getElementById('result-money').textContent = gameState.money;
-  document.getElementById('result-motivation').textContent = gameState.motivation;
-  document.getElementById('result-contribution').textContent = gameState.contribution;
+  const sorted = [...players].sort((a, b) => {
+    const sa = a.money + a.motivation + a.contribution + (a.goalRank ? (5-a.goalRank)*20 : 0);
+    const sb = b.money + b.motivation + b.contribution + (b.goalRank ? (5-b.goalRank)*20 : 0);
+    return sb - sa;
+  });
 
-  const totalScore = gameState.money + gameState.motivation + gameState.contribution;
-  document.getElementById('total-score').textContent = totalScore;
-
-  let rank, rankClass;
-  if (totalScore >= 350) { rank = 'S'; rankClass = 'rank-S'; }
-  else if (totalScore >= 250) { rank = 'A'; rankClass = 'rank-A'; }
-  else if (totalScore >= 150) { rank = 'B'; rankClass = 'rank-B'; }
-  else { rank = 'C'; rankClass = 'rank-C'; }
-
-  const rankEl = document.getElementById('rank-display');
-  rankEl.textContent = rank;
-  rankEl.className = 'rank-display ' + rankClass;
+  const list = document.getElementById('ranking-list');
+  list.innerHTML = sorted.map((p, i) => {
+    const score = p.money + p.motivation + p.contribution + (p.goalRank ? (5-p.goalRank)*20 : 0);
+    const grade = score >= 350 ? 'S' : score >= 250 ? 'A' : score >= 150 ? 'B' : 'C';
+    const ch = CHARACTERS.find(c => c.id === p.character);
+    return `<li class="ranking-item">
+      <span class="rank-num">${i+1}位</span>
+      <span class="rank-name">${ch.icon} ${p.name}</span>
+      <span class="rank-score">${score}pt</span>
+      <span class="rank-grade grade-${grade}">${grade}</span>
+    </li>`;
+  }).join('');
 
   showScreen('result-screen');
 }
 
 // ===== ENDING =====
 function showEnding() {
+  const sorted = [...players].sort((a, b) => {
+    const sa = a.money + a.motivation + a.contribution;
+    const sb = b.money + b.motivation + b.contribution;
+    return sb - sa;
+  });
+  const winner = sorted[0];
   let icon, title, message;
 
-  if (gameState.contribution >= 100) {
-    icon = '🏆';
-    title = '伝説の社員エンド';
-    message = `あなたはAODAISHOの歴史に名を刻む伝説のメンバーとなりました。
-
-「場の発明」を通じて"おもしろい"を科学的にアプローチし、
-社会に広く普及するビジネスを創造する——
-その志を誰よりも体現した存在です。
-
-クレド「成果にこだわる」「責務を全うする」を胸に、
-これからもAODAISHOの未来を切り拓いてください。`;
-  } else if (gameState.money >= 300) {
-    icon = '💎';
-    title = '大富豪エンド';
-    message = `卓越したビジネスセンスで、大きな成果を生み出しました。
-
-「クライアントファースト」を貫き、
-顧客成果を起点に本質課題へ最短で導く支援を実現。
-
-「再現性」のある仕組みを構築し、
-継続的に成果を生むビジネスモデルを確立しました。
-
-AODAISHOの「非常識戦略」の申し子です！`;
-  } else if (gameState.motivation <= 20) {
-    icon = '😮‍💨';
-    title = '燃え尽きエンド';
-    message = `全力で走り続けた結果、少し疲れてしまったようです。
-
-でも大丈夫。クレドの一つ「人の心を大切にする」——
-それは自分自身の心も含まれます。
-
-「仲間の成長に協力する」仲間たちが、
-あなたの回復を待っています。
-
-また一緒に"おもしろい"をサイエンスしましょう。`;
+  if (winner.contribution >= 100) {
+    icon = '🏆'; title = '伝説の社員エンド';
+    message = `${winner.name}はAODAISHOの歴史に名を刻む伝説のメンバーとなった。\n\n「場の発明」を通じて"おもしろい"を科学的にアプローチし、\n社会に広く普及するビジネスを創造する——\nその志を誰よりも体現した存在。\n\nクレド「成果にこだわる」「責務を全うする」を胸に、\nこれからもAODAISHOの未来を切り拓く。`;
+  } else if (winner.money >= 300) {
+    icon = '💎'; title = '大富豪エンド';
+    message = `${winner.name}は卓越したビジネスセンスで大きな成果を生み出した。\n\n「クライアントファースト」を貫き、\n顧客成果を起点に本質課題へ最短で導く支援を実現。\n\n「再現性」のある仕組みを構築し、\n継続的に成果を生むビジネスモデルを確立した。`;
+  } else if (winner.motivation <= 20) {
+    icon = '😮‍💨'; title = '燃え尽きエンド';
+    message = `${winner.name}は全力で走り続けた結果、少し疲れてしまった。\n\nでも大丈夫。「人の心を大切にする」——\nそれは自分自身の心も含まれる。\n\n仲間たちが回復を待っている。\nまた一緒に"おもしろい"をサイエンスしよう。`;
   } else {
-    icon = '🌱';
-    title = 'バランス成長エンド';
-    message = `着実に、バランスよく成長を続けてきました。
-
-「常に期待以上の価値である」ことを意識しながら、
-「礼儀礼節を重んじ」「誠実である」姿勢を貫いた——
-AODAISHOらしい歩みです。
-
-「"おもしろい"をサイエンスしよう」
-この旗の下に、これからも前へ。`;
+    icon = '🌱'; title = 'バランス成長エンド';
+    message = `${winner.name}は着実に、バランスよく成長を続けてきた。\n\n「常に期待以上の価値である」ことを意識しながら、\n「礼儀礼節を重んじ」「誠実である」姿勢を貫いた——\nAODAISHOらしい歩み。\n\n「"おもしろい"をサイエンスしよう」\nこの旗の下に、これからも前へ。`;
   }
 
   document.getElementById('ending-icon').textContent = icon;
   document.getElementById('ending-title').textContent = title;
-  document.getElementById('ending-message').textContent = message;
+
+  // Typewriter effect
+  const textEl = document.getElementById('ending-text');
+  textEl.textContent = '';
+  let charIdx = 0;
+  const typeInterval = setInterval(() => {
+    if (charIdx < message.length) {
+      textEl.textContent += message[charIdx];
+      charIdx++;
+    } else {
+      clearInterval(typeInterval);
+    }
+  }, 40);
 
   showScreen('ending-screen');
 }
 
-// ===== RESET =====
-function resetGame() {
-  gameState = {
-    character: null,
-    position: 0,
-    money: 100,
-    motivation: 50,
-    contribution: 0,
-    isSpinning: false
-  };
-  document.querySelectorAll('.character-card').forEach(c => c.classList.remove('selected'));
-  document.getElementById('btn-start-game').disabled = true;
-  document.getElementById('roulette-display').textContent = '?';
-  document.getElementById('btn-roulette').disabled = false;
-  showScreen('title-screen');
+// ===== CONFETTI =====
+function fireConfetti() {
+  const container = document.getElementById('confetti-container');
+  const colors = ['#e8a020','#1a3a6b','#2e7d32','#c62828','#6a1b9a','#ff6f00','#00acc1'];
+  for (let i = 0; i < 50; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+    piece.style.animationDelay = Math.random() * 1 + 's';
+    piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+    piece.style.width = (6 + Math.random()*8) + 'px';
+    piece.style.height = (6 + Math.random()*8) + 'px';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    container.appendChild(piece);
+  }
+  setTimeout(() => { container.innerHTML = ''; }, 4000);
 }
 
-// ===== INIT =====
-renderCharacters();
+// ===== RESET =====
+function resetAll() {
+  players = [];
+  playerCount = 0;
+  currentPlayerIdx = 0;
+  goalRankCounter = 0;
+  isSpinning = false;
+  document.querySelectorAll('.count-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('btn-to-setup').disabled = true;
+  document.getElementById('roulette-wheel').textContent = '?';
+  showScreen('title-screen');
+}
 </script>
 </body>
 </html>
