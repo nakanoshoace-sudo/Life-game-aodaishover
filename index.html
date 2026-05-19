@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>人生ゲーム AODAISHO.ver</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;600;700&display=swap" rel="stylesheet">
+<title>人生ゲーム AODAISHO.ver マリオパーティー仕様</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
   --color-primary: #1a3a6b;
@@ -15,724 +15,352 @@
   --color-card: #ffffff;
   --font-title: 'Noto Serif JP', serif;
   --font-body: 'Noto Sans JP', sans-serif;
+  --bonus: #4fc3f7;
+  --pinch: #ef5350;
+  --fate: #ffca28;
+  --history: #ab47bc;
+  --battle: #ff7043;
+  --hell: #880e4f;
+  --boss: #ffd700;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* { margin:0; padding:0; box-sizing:border-box; }
 
 body {
   font-family: var(--font-body);
   background: var(--color-bg);
-  min-height: 100vh;
-  overflow-x: hidden;
-  color: #333;
+  min-height:100vh;
+  overflow-x:hidden;
+  color:#333;
 }
 
-/* ===== SCREENS ===== */
-.screen {
-  display: none;
-  width: 100%;
-  min-height: 100vh;
-  padding: 24px;
-  animation: fadeIn 0.5s ease;
-}
-.screen.active {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
+/* SCREENS */
+.screen { display:none; width:100%; min-height:100vh; padding:20px; animation:fadeIn .4s ease; }
+.screen.active { display:flex; flex-direction:column; align-items:center; justify-content:center; }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+@keyframes fadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes popIn { 0%{transform:scale(0) rotate(-10deg);opacity:0} 60%{transform:scale(1.2) rotate(3deg)} 100%{transform:scale(1) rotate(0);opacity:1} }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+@keyframes shake { 0%,100%{transform:translateX(0)} 10%{transform:translateX(-8px)} 20%{transform:translateX(8px)} 30%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 50%{transform:translateX(-4px)} 60%{transform:translateX(4px)} }
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+@keyframes slideUp { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+@keyframes glow { 0%,100%{box-shadow:0 0 5px var(--color-accent)} 50%{box-shadow:0 0 30px var(--color-accent), 0 0 60px var(--color-accent)} }
+@keyframes flashRed { 0%,100%{background:rgba(136,14,79,0)} 50%{background:rgba(136,14,79,0.3)} }
+@keyframes confettiFall { 0%{transform:translateY(-100%) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
+@keyframes numberPop { 0%{transform:scale(0);opacity:0} 50%{transform:scale(1.5)} 100%{transform:scale(1);opacity:1} }
+@keyframes starBurst { 0%{transform:scale(0) rotate(0deg);opacity:1} 100%{transform:scale(3) rotate(180deg);opacity:0} }
 
-/* ===== COMMON ===== */
-.card {
-  background: var(--color-card);
-  border-radius: 20px;
-  padding: 48px 56px;
-  box-shadow: 0 8px 40px rgba(26,58,107,0.08), 0 2px 8px rgba(0,0,0,0.04);
-  max-width: 700px;
-  width: 100%;
-  text-align: center;
-}
+/* TITLE SCREEN */
+#title-screen { background:linear-gradient(135deg, #1a3a6b 0%, #2d5aa0 50%, #1a3a6b 100%); text-align:center; }
+#title-screen h1 { font-family:var(--font-title); font-size:3.2rem; color:#fff; text-shadow:3px 3px 0 rgba(0,0,0,0.3); margin-bottom:8px; }
+#title-screen .subtitle { font-size:1.4rem; color:var(--color-accent); font-weight:700; margin-bottom:6px; }
+#title-screen .version { font-size:1rem; color:rgba(255,255,255,0.7); margin-bottom:40px; }
+.start-btn { background:linear-gradient(135deg, var(--color-accent), #f5b731); color:#fff; font-size:1.5rem; font-weight:800; padding:18px 60px; border:none; border-radius:50px; cursor:pointer; box-shadow:0 6px 20px rgba(232,160,32,0.4); transition:all .2s; font-family:var(--font-body); }
+.start-btn:hover { transform:translateY(-3px) scale(1.05); box-shadow:0 10px 30px rgba(232,160,32,0.6); }
+.start-btn:active { transform:translateY(0) scale(0.98); }
 
-.title-xl {
-  font-family: var(--font-title);
-  font-size: 2.8rem;
-  font-weight: 900;
-  color: var(--color-primary);
-  margin-bottom: 8px;
-}
+/* COUNT SCREEN */
+#count-screen { background:linear-gradient(180deg, #f0f4ff 0%, var(--color-bg) 100%); }
+#count-screen h2 { font-family:var(--font-title); font-size:2rem; margin-bottom:30px; color:var(--color-primary); }
+.count-btns { display:flex; gap:16px; margin-bottom:30px; }
+.count-btn { width:70px; height:70px; border-radius:50%; border:3px solid var(--color-primary); background:#fff; font-size:1.8rem; font-weight:800; cursor:pointer; transition:all .2s; color:var(--color-primary); }
+.count-btn.selected { background:var(--color-primary); color:#fff; transform:scale(1.15); box-shadow:0 4px 15px rgba(26,58,107,0.4); }
+.count-btn:hover { transform:scale(1.1); }
 
-.title-lg {
-  font-family: var(--font-title);
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: var(--color-primary);
-  margin-bottom: 16px;
-}
+/* NAME SCREEN */
+#name-screen { background:linear-gradient(180deg, #fff8e1 0%, var(--color-bg) 100%); }
+#name-screen h2 { font-family:var(--font-title); font-size:1.8rem; margin-bottom:24px; color:var(--color-primary); }
+.name-inputs { display:flex; flex-direction:column; gap:14px; margin-bottom:24px; width:100%; max-width:400px; }
+.name-row { display:flex; align-items:center; gap:12px; }
+.name-row .player-color { width:28px; height:28px; border-radius:50%; flex-shrink:0; }
+.name-row input { flex:1; padding:12px 16px; border:2px solid #ddd; border-radius:12px; font-size:1rem; font-family:var(--font-body); transition:border-color .2s; }
+.name-row input:focus { outline:none; border-color:var(--color-accent); }
 
-.subtitle {
-  font-size: 1.1rem;
-  color: #666;
-  margin-bottom: 32px;
-}
+/* GAME SCREEN */
+#game-screen { padding:10px; min-height:100vh; justify-content:flex-start; background:#f0f0e8; }
+.player-status-bar { display:flex; gap:8px; width:100%; max-width:1024px; margin-bottom:10px; flex-wrap:wrap; }
+.player-card { flex:1; min-width:140px; background:#fff; border-radius:12px; padding:10px 12px; box-shadow:0 2px 8px rgba(0,0,0,0.1); border-top:4px solid #ccc; transition:all .3s; }
+.player-card.active-player { transform:scale(1.03); box-shadow:0 4px 16px rgba(0,0,0,0.2); animation:pulse 1.5s infinite; }
+.player-card .p-name { font-weight:700; font-size:.9rem; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.player-card .p-stats { font-size:.7rem; color:#666; line-height:1.5; }
+.player-card .p-item { font-size:.7rem; color:var(--color-accent); margin-top:2px; }
 
-.btn {
-  padding: 14px 40px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  font-family: var(--font-body);
-  border: none;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  display: inline-block;
-}
+/* BOARD */
+.board-container { width:100%; max-width:1024px; overflow-x:auto; margin-bottom:10px; }
+.board { display:grid; grid-template-columns:repeat(5, 1fr); gap:6px; padding:8px; background:#fff; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,0.1); }
+.cell { position:relative; aspect-ratio:1; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.7rem; font-weight:600; cursor:default; transition:all .2s; border:2px solid rgba(0,0,0,0.1); }
+.cell .cell-num { position:absolute; top:2px; left:5px; font-size:.55rem; opacity:0.6; }
+.cell .cell-icon { font-size:1.4rem; }
+.cell .cell-label { font-size:.5rem; margin-top:1px; opacity:0.8; }
+.cell.type-bonus { background:linear-gradient(135deg, #e3f2fd, #bbdefb); border-color:#4fc3f7; }
+.cell.type-pinch { background:linear-gradient(135deg, #ffebee, #ffcdd2); border-color:#ef5350; }
+.cell.type-fate { background:linear-gradient(135deg, #fffde7, #fff9c4); border-color:#ffca28; }
+.cell.type-history { background:linear-gradient(135deg, #f3e5f5, #e1bee7); border-color:#ab47bc; }
+.cell.type-battle { background:linear-gradient(135deg, #fbe9e7, #ffccbc); border-color:#ff7043; }
+.cell.type-hell { background:linear-gradient(135deg, #fce4ec, #f8bbd0); border-color:#880e4f; }
+.cell.type-boss { background:linear-gradient(135deg, #fff8e1, #ffecb3); border-color:#ffd700; animation:glow 2s infinite; }
+.cell.type-start { background:linear-gradient(135deg, #e8f5e9, #c8e6c9); border-color:#66bb6a; }
+.cell.type-goal { background:linear-gradient(135deg, #fff3e0, #ffe0b2); border-color:#ffa726; }
 
-.btn-primary {
-  background: var(--color-primary);
-  color: white;
-  box-shadow: 0 6px 20px rgba(26,58,107,0.3);
-}
-.btn-primary:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 10px 30px rgba(26,58,107,0.4);
-}
-.btn-primary:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  transform: none;
-}
+/* PIECES */
+.piece { position:absolute; width:18px; height:18px; border-radius:50%; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,0.3); z-index:10; transition:all .5s cubic-bezier(0.34, 1.56, 0.64, 1); font-size:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; }
 
-.btn-accent {
-  background: var(--color-accent);
-  color: white;
-  box-shadow: 0 6px 20px rgba(232,160,32,0.3);
-}
-.btn-accent:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 10px 30px rgba(232,160,32,0.4);
-}
+/* CONTROLS */
+.controls { display:flex; align-items:center; gap:12px; width:100%; max-width:1024px; flex-wrap:wrap; }
+.turn-info { font-family:var(--font-title); font-size:1.1rem; font-weight:700; color:var(--color-primary); }
+.roulette-btn { background:linear-gradient(135deg, #e53935, #ff5722); color:#fff; font-size:1.2rem; font-weight:800; padding:14px 36px; border:none; border-radius:30px; cursor:pointer; box-shadow:0 4px 15px rgba(229,57,53,0.4); transition:all .2s; font-family:var(--font-body); }
+.roulette-btn:hover:not(:disabled) { transform:scale(1.05); box-shadow:0 6px 20px rgba(229,57,53,0.5); }
+.roulette-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+.item-btn { background:linear-gradient(135deg, #7b1fa2, #9c27b0); color:#fff; font-size:.9rem; font-weight:700; padding:10px 20px; border:none; border-radius:20px; cursor:pointer; transition:all .2s; }
+.item-btn:hover:not(:disabled) { transform:scale(1.05); }
+.item-btn:disabled { opacity:0.4; cursor:not-allowed; }
+.roulette-display { font-size:2.5rem; font-weight:900; color:var(--color-danger); min-width:60px; text-align:center; font-family:var(--font-title); }
 
-.btn-outline {
-  background: transparent;
-  color: var(--color-primary);
-  border: 2px solid var(--color-primary);
-}
-.btn-outline:hover {
-  background: var(--color-primary);
-  color: white;
-}
+/* EVENT MODAL */
+.event-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(6px); z-index:1000; align-items:center; justify-content:center; padding:20px; }
+.event-overlay.show { display:flex; }
+.event-card { background:#fff; border-radius:24px; padding:40px 32px; max-width:500px; width:100%; text-align:center; animation:popIn .5s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow:0 20px 60px rgba(0,0,0,0.3); position:relative; overflow:hidden; }
+.event-card .event-emoji { font-size:96px; margin-bottom:16px; animation:bounce 1s ease infinite; }
+.event-card .event-title { font-family:var(--font-title); font-size:1.6rem; font-weight:900; margin-bottom:12px; color:var(--color-primary); }
+.event-card .event-desc { font-size:1rem; line-height:1.7; color:#555; margin-bottom:20px; }
+.event-card .event-effects { display:flex; justify-content:center; gap:16px; margin-bottom:20px; flex-wrap:wrap; }
+.effect-badge { padding:6px 14px; border-radius:20px; font-weight:700; font-size:.9rem; animation:numberPop .4s ease; }
+.effect-badge.positive { background:#e8f5e9; color:#2e7d32; }
+.effect-badge.negative { background:#ffebee; color:#c62828; }
+.event-card .event-close-btn { background:var(--color-primary); color:#fff; border:none; padding:12px 36px; border-radius:25px; font-size:1rem; font-weight:700; cursor:pointer; transition:all .2s; }
+.event-card .event-close-btn:hover { transform:scale(1.05); background:#2d5aa0; }
 
-/* ===== TITLE SCREEN ===== */
-.title-logo {
-  font-family: var(--font-title);
-  font-size: 1rem;
-  color: var(--color-accent);
-  letter-spacing: 4px;
-  margin-bottom: 12px;
-  text-transform: uppercase;
-}
+/* SHAKE EFFECT */
+.shaking { animation:shake .5s ease; }
+.flash-red { animation:flashRed .3s ease 3; }
 
-/* ===== PLAYER COUNT ===== */
-.count-grid {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
+/* CONFETTI */
+.confetti-piece { position:fixed; width:10px; height:10px; top:-10px; z-index:2000; animation:confettiFall 3s linear forwards; pointer-events:none; }
 
-.count-btn {
-  width: 80px;
-  height: 80px;
-  border-radius: 16px;
-  border: 3px solid #e0e0e0;
-  background: white;
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--color-primary);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-family: var(--font-body);
-}
-.count-btn:hover { border-color: var(--color-accent); transform: scale(1.05); }
-.count-btn.selected { border-color: var(--color-accent); background: #fff8e8; box-shadow: 0 0 15px rgba(232,160,32,0.3); }
+/* MINI-GAME OVERLAYS */
+.minigame-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); z-index:1100; align-items:center; justify-content:center; padding:20px; }
+.minigame-overlay.show { display:flex; }
+.minigame-card { background:#fff; border-radius:24px; padding:40px; max-width:500px; width:100%; text-align:center; animation:slideUp .4s ease; }
+.minigame-card h3 { font-family:var(--font-title); font-size:1.5rem; margin-bottom:16px; color:var(--color-primary); }
+.minigame-card p { margin-bottom:20px; color:#555; line-height:1.6; }
+.tap-area { width:200px; height:200px; border-radius:50%; background:linear-gradient(135deg, #e53935, #ff5722); color:#fff; font-size:3rem; font-weight:900; display:flex; align-items:center; justify-content:center; margin:20px auto; cursor:pointer; user-select:none; transition:transform .1s; box-shadow:0 8px 25px rgba(229,57,53,0.4); }
+.tap-area:active { transform:scale(0.9); }
+.tap-counter { font-size:2rem; font-weight:900; color:var(--color-danger); margin:10px 0; }
+.tap-timer { font-size:1.2rem; color:#666; }
 
-/* ===== PLAYER SETUP ===== */
-.setup-card {
-  background: var(--color-card);
-  border-radius: 20px;
-  padding: 32px;
-  box-shadow: 0 8px 40px rgba(26,58,107,0.08);
-  max-width: 600px;
-  width: 100%;
-  text-align: center;
-}
+/* JANKEN */
+.janken-choices { display:flex; gap:16px; justify-content:center; margin:20px 0; }
+.janken-btn { width:80px; height:80px; border-radius:50%; border:3px solid #ddd; background:#fff; font-size:2.5rem; cursor:pointer; transition:all .2s; }
+.janken-btn:hover { transform:scale(1.15); border-color:var(--color-accent); }
+.janken-result { font-size:1.5rem; font-weight:800; margin:16px 0; }
 
-.player-badge {
-  display: inline-block;
-  padding: 4px 16px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: white;
-  margin-bottom: 16px;
-}
+/* SLOT MACHINE */
+.slot-machine { display:flex; gap:8px; justify-content:center; margin:20px 0; }
+.slot-reel { width:70px; height:90px; border:3px solid var(--color-primary); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:2.5rem; overflow:hidden; background:#f9f9f9; }
+.slot-reel.spinning { animation:spin .3s linear infinite; }
+.slot-stop-btn { background:linear-gradient(135deg, var(--color-accent), #f5b731); color:#fff; padding:12px 30px; border:none; border-radius:25px; font-size:1rem; font-weight:700; cursor:pointer; margin-top:16px; }
 
-.input-field {
-  width: 100%;
-  max-width: 300px;
-  padding: 12px 20px;
-  font-size: 1rem;
-  font-family: var(--font-body);
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  outline: none;
-  transition: border-color 0.3s ease;
-  margin-bottom: 24px;
-}
-.input-field:focus { border-color: var(--color-primary); }
+/* TURN TRANSITION */
+.turn-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg, var(--color-primary), #2d5aa0); z-index:900; align-items:center; justify-content:center; flex-direction:column; }
+.turn-overlay.show { display:flex; }
+.turn-overlay h2 { color:#fff; font-family:var(--font-title); font-size:2.5rem; margin-bottom:16px; animation:popIn .5s ease; }
+.turn-overlay .countdown { color:var(--color-accent); font-size:4rem; font-weight:900; }
 
-.char-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-}
+/* ENDING */
+#ending-screen { background:linear-gradient(135deg, #1a3a6b, #0d47a1); min-height:100vh; text-align:center; }
+#ending-screen h1 { font-family:var(--font-title); font-size:2.5rem; color:#fff; margin-bottom:24px; }
+.ranking-list { list-style:none; width:100%; max-width:500px; }
+.ranking-item { background:rgba(255,255,255,0.1); backdrop-filter:blur(5px); border-radius:16px; padding:16px 20px; margin-bottom:12px; display:flex; align-items:center; gap:16px; animation:slideUp .5s ease; color:#fff; }
+.ranking-item .rank { font-size:2rem; font-weight:900; }
+.ranking-item .rank-name { font-size:1.2rem; font-weight:700; flex:1; }
+.ranking-item .rank-score { font-size:1rem; opacity:0.8; }
+.ranking-item:first-child { background:linear-gradient(135deg, rgba(255,215,0,0.3), rgba(255,193,7,0.2)); border:2px solid rgba(255,215,0,0.5); }
+.play-again-btn { margin-top:30px; background:linear-gradient(135deg, var(--color-accent), #f5b731); color:#fff; font-size:1.2rem; font-weight:800; padding:16px 50px; border:none; border-radius:30px; cursor:pointer; }
 
-.char-card {
-  padding: 16px 8px;
-  border-radius: 14px;
-  border: 2px solid #e8e8e8;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: white;
-}
-.char-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
-.char-card.selected { border-color: var(--color-accent); background: #fffcf5; }
-.char-card.taken { opacity: 0.35; pointer-events: none; }
-.char-card .icon { font-size: 2.2rem; margin-bottom: 6px; }
-.char-card .name { font-family: var(--font-title); font-size: 0.95rem; font-weight: 700; color: var(--color-primary); }
-.char-card .role { font-size: 0.75rem; color: #888; margin: 2px 0; }
-.char-card .skill { font-size: 0.7rem; color: var(--color-primary); background: #eef2fa; padding: 3px 8px; border-radius: 8px; display: inline-block; margin-top: 4px; }
-
-/* ===== GAME SCREEN ===== */
-#game-screen {
-  justify-content: flex-start;
-  padding: 12px;
-}
-
-.game-header {
-  width: 100%;
-  max-width: 1000px;
-  display: flex;
-  gap: 12px;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.player-stat-card {
-  background: var(--color-card);
-  border-radius: 14px;
-  padding: 12px 18px;
-  box-shadow: 0 3px 12px rgba(0,0,0,0.05);
-  min-width: 180px;
-  flex: 1;
-  max-width: 240px;
-  border-left: 4px solid transparent;
-  transition: all 0.3s ease;
-}
-.player-stat-card.active-turn { border-left-color: var(--color-accent); box-shadow: 0 4px 20px rgba(232,160,32,0.2); }
-.player-stat-card.finished { opacity: 0.5; }
-
-.psc-name {
-  font-family: var(--font-title);
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--color-primary);
-  margin-bottom: 6px;
-}
-.psc-stats {
-  display: flex;
-  gap: 10px;
-  font-size: 0.75rem;
-}
-.psc-stat { display: flex; flex-direction: column; align-items: center; }
-.psc-stat-label { color: #999; font-size: 0.65rem; }
-.psc-stat-value { font-weight: 700; font-size: 0.9rem; }
-.psc-stat-money .psc-stat-value { color: var(--color-accent); }
-.psc-stat-moti .psc-stat-value { color: var(--color-danger); }
-.psc-stat-cont .psc-stat-value { color: var(--color-success); }
-
-.board-wrapper {
-  background: var(--color-card);
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 8px 40px rgba(26,58,107,0.08);
-  width: 100%;
-  max-width: 1000px;
-  margin-bottom: 12px;
-}
-
-.board-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
-}
-
-.cell {
-  aspect-ratio: 1;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  border: 2px solid #eee;
-  transition: all 0.3s ease;
-  padding: 3px;
-  font-size: 0.65rem;
-}
-.cell.start { background: #eef2fa; border-color: var(--color-primary); }
-.cell.goal { background: #fff8e8; border-color: var(--color-accent); }
-.cell.history { background: #e8f5e9; border-color: #66bb6a; }
-.cell.choice { background: #fff8e1; border-color: #ffc107; }
-.cell.bonus { background: #e3f2fd; border-color: #42a5f5; }
-.cell.crisis { background: #fce4ec; border-color: #ef5350; }
-.cell.celebration { background: #f3e5f5; border-color: #ab47bc; }
-.cell.credo { background: #e0f2f1; border-color: #26a69a; }
-.cell.rest { background: #fafafa; border-color: #e0e0e0; }
-
-.cell-num { position: absolute; top: 2px; left: 5px; font-size: 0.6rem; color: #bbb; }
-.cell-icon { font-size: 1.4rem; }
-.cell-label { text-align: center; line-height: 1.1; font-weight: 600; margin-top: 2px; }
-
-.cell-tokens {
-  position: absolute;
-  bottom: 2px;
-  right: 2px;
-  display: flex;
-  gap: 1px;
-  font-size: 0.8rem;
-}
-
-.token {
-  animation: tokenBounce 1.2s ease infinite;
-}
-@keyframes tokenBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
-}
-
-.game-footer {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-top: 8px;
-}
-
-.turn-indicator {
-  font-family: var(--font-title);
-  font-size: 1.1rem;
-  color: var(--color-primary);
-}
-
-.roulette-container {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.roulette-wheel {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary), #0d2240);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.2rem;
-  font-weight: 900;
-  color: white;
-  box-shadow: 0 4px 16px rgba(26,58,107,0.3);
-  transition: transform 0.1s;
-}
-.roulette-wheel.spinning {
-  animation: rouletteSpin 0.15s linear infinite;
-}
-@keyframes rouletteSpin {
-  0% { transform: rotate(0deg) scale(1); }
-  25% { transform: rotate(8deg) scale(1.06); }
-  50% { transform: rotate(0deg) scale(1); }
-  75% { transform: rotate(-8deg) scale(1.06); }
-}
-
-.btn-roll {
-  padding: 12px 32px;
-  font-size: 1.05rem;
-  background: linear-gradient(135deg, var(--color-accent), #d4900a);
-  color: white;
-  border: none;
-  border-radius: 50px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(232,160,32,0.35);
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  font-family: var(--font-body);
-}
-.btn-roll:hover { transform: translateY(-2px) scale(1.03); }
-.btn-roll:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-/* ===== TURN TRANSITION ===== */
-#turn-screen .card {
-  animation: turnPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-@keyframes turnPop {
-  from { opacity: 0; transform: scale(0.7); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-.turn-player-name {
-  font-family: var(--font-title);
-  font-size: 2.5rem;
-  font-weight: 900;
-  color: var(--color-primary);
-  margin: 16px 0;
-}
-
-.turn-message {
-  font-size: 1rem;
-  color: #888;
-}
-
-.countdown {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--color-accent);
-  margin-top: 16px;
-}
-
-/* ===== EVENT MODAL ===== */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-.modal-overlay.active { display: flex; }
-
-.modal-card {
-  background: var(--color-card);
-  border-radius: 20px;
-  padding: 36px 40px;
-  max-width: 480px;
-  width: 100%;
-  text-align: center;
-  animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-@keyframes modalSlideIn {
-  from { opacity: 0; transform: translateY(60px) scale(0.9); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.modal-icon { font-size: 3rem; margin-bottom: 12px; }
-.modal-title { font-family: var(--font-title); font-size: 1.4rem; font-weight: 700; color: var(--color-primary); margin-bottom: 10px; }
-.modal-desc { font-size: 0.95rem; color: #555; line-height: 1.7; margin-bottom: 20px; }
-
-.effects-row {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-.effect-tag {
-  padding: 5px 12px;
-  border-radius: 16px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-.effect-pos { background: #e8f5e9; color: var(--color-success); }
-.effect-neg { background: #fce4ec; color: var(--color-danger); }
-
-.choices-col {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.btn-choice {
-  padding: 12px 20px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  border: 2px solid var(--color-primary);
-  border-radius: 12px;
-  background: white;
-  color: var(--color-primary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: var(--font-body);
-}
-.btn-choice:hover { background: var(--color-primary); color: white; }
-
-/* ===== CONFETTI ===== */
-.confetti-container {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2000;
-  overflow: hidden;
-}
-.confetti-piece {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  top: -20px;
-  animation: confettiFall 3s linear forwards;
-}
-@keyframes confettiFall {
-  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-}
-
-/* ===== RESULT SCREEN ===== */
-.result-card {
-  background: var(--color-card);
-  border-radius: 20px;
-  padding: 40px;
-  box-shadow: 0 8px 40px rgba(26,58,107,0.08);
-  max-width: 600px;
-  width: 100%;
-}
-
-.ranking-list {
-  list-style: none;
-  margin: 24px 0;
-}
-.ranking-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 14px 20px;
-  border-radius: 12px;
-  margin-bottom: 10px;
-  background: #f8f8f8;
-  transition: all 0.3s ease;
-}
-.ranking-item:first-child { background: #fff8e8; border: 2px solid var(--color-accent); }
-.rank-num {
-  font-family: var(--font-title);
-  font-size: 1.5rem;
-  font-weight: 900;
-  color: var(--color-primary);
-  min-width: 36px;
-}
-.ranking-item:first-child .rank-num { color: var(--color-accent); }
-.rank-name { font-weight: 700; flex: 1; }
-.rank-score { font-size: 1.2rem; font-weight: 700; color: var(--color-primary); }
-.rank-grade {
-  font-family: var(--font-title);
-  font-size: 1.1rem;
-  font-weight: 900;
-  padding: 2px 10px;
-  border-radius: 8px;
-}
-.grade-S { background: #fff3e0; color: #e65100; }
-.grade-A { background: #fce4ec; color: #c62828; }
-.grade-B { background: #e3f2fd; color: #1565c0; }
-.grade-C { background: #f5f5f5; color: #616161; }
-
-/* ===== ENDING SCREEN ===== */
-.ending-card {
-  background: var(--color-card);
-  border-radius: 20px;
-  padding: 48px;
-  box-shadow: 0 8px 40px rgba(26,58,107,0.08);
-  max-width: 600px;
-  width: 100%;
-  text-align: center;
-}
-.ending-icon { font-size: 4rem; margin-bottom: 12px; }
-.ending-title { font-family: var(--font-title); font-size: 2rem; font-weight: 900; color: var(--color-primary); margin-bottom: 20px; }
-.ending-text {
-  font-size: 1rem;
-  color: #555;
-  line-height: 2;
-  margin-bottom: 32px;
-  min-height: 120px;
-  white-space: pre-line;
-}
-
-/* ===== PLAYER COLORS ===== */
-.p-color-1 { background: #1a3a6b; }
-.p-color-2 { background: #c62828; }
-.p-color-3 { background: #2e7d32; }
-.p-color-4 { background: #6a1b9a; }
-.p-border-1 { border-left-color: #1a3a6b !important; }
-.p-border-2 { border-left-color: #c62828 !important; }
-.p-border-3 { border-left-color: #2e7d32 !important; }
-.p-border-4 { border-left-color: #6a1b9a !important; }
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
-  .card { padding: 32px 24px; }
-  .title-xl { font-size: 2rem; }
-  .char-grid { grid-template-columns: repeat(2, 1fr); }
-  .game-header { gap: 8px; }
-  .player-stat-card { min-width: 140px; padding: 10px 12px; }
-  .board-grid { gap: 4px; }
-  .cell { font-size: 0.55rem; }
-  .cell-icon { font-size: 1.1rem; }
+/* RESPONSIVE */
+@media (max-width:768px) {
+  .board { grid-template-columns:repeat(5,1fr); gap:4px; padding:4px; }
+  .cell { font-size:.6rem; }
+  .cell .cell-icon { font-size:1.1rem; }
+  .player-card { min-width:100px; padding:8px; }
+  .player-card .p-name { font-size:.75rem; }
+  .player-card .p-stats { font-size:.6rem; }
+  #title-screen h1 { font-size:2.2rem; }
+  .event-card { padding:24px 20px; }
+  .event-card .event-emoji { font-size:64px; }
 }
 </style>
 </head>
 <body>
 
-<!-- SCREEN 1: TITLE -->
+<!-- TITLE -->
 <div id="title-screen" class="screen active">
-  <div class="card">
-    <div class="title-logo">AODAISHO</div>
-    <h1 class="title-xl">人生ゲーム</h1>
-    <p class="subtitle">〜 会社の歴史を体験しよう 〜</p>
-    <button class="btn btn-primary" onclick="showScreen('count-screen')">🎮 ゲームスタート</button>
-  </div>
+  <h1>人生ゲーム</h1>
+  <div class="subtitle">AODAISHO.ver</div>
+  <div class="version">〜 マリオパーティー仕様 〜</div>
+  <button class="start-btn" onclick="showScreen('count-screen')">🎮 ゲームスタート</button>
 </div>
 
-<!-- SCREEN 2: PLAYER COUNT -->
+<!-- PLAYER COUNT -->
 <div id="count-screen" class="screen">
-  <div class="card">
-    <h2 class="title-lg">何人でプレイしますか？</h2>
-    <div class="count-grid">
-      <button class="count-btn" onclick="selectCount(1)">1</button>
-      <button class="count-btn" onclick="selectCount(2)">2</button>
-      <button class="count-btn" onclick="selectCount(3)">3</button>
-      <button class="count-btn" onclick="selectCount(4)">4</button>
-    </div>
-    <button class="btn btn-primary" id="btn-to-setup" onclick="startSetup()" disabled>次へ →</button>
+  <h2>何人でプレイする？</h2>
+  <div class="count-btns">
+    <button class="count-btn" onclick="selectCount(1)">1</button>
+    <button class="count-btn" onclick="selectCount(2)">2</button>
+    <button class="count-btn" onclick="selectCount(3)">3</button>
+    <button class="count-btn" onclick="selectCount(4)">4</button>
   </div>
+  <button class="start-btn" id="count-next-btn" disabled onclick="showScreen('name-screen')">次へ →</button>
 </div>
 
-<!-- SCREEN 3: PLAYER SETUP -->
-<div id="setup-screen" class="screen">
-  <div class="setup-card" id="setup-card"></div>
+<!-- NAME INPUT -->
+<div id="name-screen" class="screen">
+  <h2>名前を入力しよう</h2>
+  <div class="name-inputs" id="name-inputs"></div>
+  <button class="start-btn" onclick="startGame()">ゲーム開始！</button>
 </div>
 
-<!-- SCREEN 4: MAIN GAME -->
+<!-- GAME -->
 <div id="game-screen" class="screen">
-  <div class="game-header" id="game-header"></div>
-  <div class="board-wrapper">
-    <div class="board-grid" id="board-grid"></div>
+  <div class="player-status-bar" id="player-status-bar"></div>
+  <div class="board-container">
+    <div class="board" id="board"></div>
   </div>
-  <div class="game-footer">
-    <div class="turn-indicator" id="turn-indicator">-</div>
-    <div class="roulette-container">
-      <div class="roulette-wheel" id="roulette-wheel">?</div>
-      <button class="btn-roll" id="btn-roll" onclick="spinRoulette()">🎲 ルーレット</button>
-    </div>
-  </div>
-</div>
-
-<!-- SCREEN 5: TURN TRANSITION -->
-<div id="turn-screen" class="screen">
-  <div class="card">
-    <div style="font-size:3rem;" id="turn-icon">🎯</div>
-    <div class="turn-player-name" id="turn-player-name">-</div>
-    <div class="turn-message">タブレットを渡してね 📱</div>
-    <div class="countdown" id="turn-countdown">3</div>
+  <div class="controls">
+    <div class="turn-info" id="turn-info"></div>
+    <div class="roulette-display" id="roulette-display">?</div>
+    <button class="roulette-btn" id="roulette-btn" onclick="spinRoulette()">🎲 ルーレット</button>
+    <button class="item-btn" id="item-btn" disabled onclick="useItem()">🎒 アイテム</button>
   </div>
 </div>
 
-<!-- SCREEN 6: RESULTS -->
-<div id="result-screen" class="screen">
-  <div class="result-card">
-    <h2 class="title-lg">📊 結果発表</h2>
-    <ol class="ranking-list" id="ranking-list"></ol>
-    <button class="btn btn-primary" onclick="showEnding()">エンディングへ →</button>
-  </div>
-</div>
-
-<!-- SCREEN 7: ENDING -->
+<!-- ENDING -->
 <div id="ending-screen" class="screen">
-  <div class="ending-card">
-    <div class="ending-icon" id="ending-icon">🏆</div>
-    <h2 class="ending-title" id="ending-title">-</h2>
-    <div class="ending-text" id="ending-text"></div>
-    <button class="btn btn-primary" onclick="resetAll()">🔄 もう一度遊ぶ</button>
+  <h1>🏆 結果発表 🏆</h1>
+  <ul class="ranking-list" id="ranking-list"></ul>
+  <button class="play-again-btn" onclick="location.reload()">もう一回遊ぶ！</button>
+</div>
+
+<!-- EVENT OVERLAY -->
+<div class="event-overlay" id="event-overlay">
+  <div class="event-card" id="event-card">
+    <div class="event-emoji" id="event-emoji"></div>
+    <div class="event-title" id="event-title"></div>
+    <div class="event-desc" id="event-desc"></div>
+    <div class="event-effects" id="event-effects"></div>
+    <button class="event-close-btn" onclick="closeEvent()">OK</button>
   </div>
 </div>
 
-<!-- EVENT MODAL -->
-<div class="modal-overlay" id="modal-overlay">
-  <div class="modal-card" id="modal-card">
-    <div class="modal-icon" id="m-icon">📢</div>
-    <h3 class="modal-title" id="m-title">-</h3>
-    <p class="modal-desc" id="m-desc">-</p>
-    <div class="effects-row" id="m-effects"></div>
-    <div id="m-choices"></div>
-    <button class="btn btn-primary" id="m-ok" onclick="closeModal()">OK</button>
-  </div>
+<!-- MINIGAME OVERLAY -->
+<div class="minigame-overlay" id="minigame-overlay">
+  <div class="minigame-card" id="minigame-card"></div>
 </div>
 
-<!-- CONFETTI -->
-<div class="confetti-container" id="confetti-container"></div>
+<!-- TURN TRANSITION -->
+<div class="turn-overlay" id="turn-overlay">
+  <h2 id="turn-overlay-text"></h2>
+  <div class="countdown" id="turn-countdown"></div>
+</div>
 
 <script>
-// ===== DATA =====
-const CHARACTERS = [
-  { id:'D', name:'男性D', role:'戦略家', icon:'🧠', skill:'初期モチベ +20', bonus:{motivation:20}, passive:null },
-  { id:'S', name:'男性S', role:'エンジニア', icon:'💻', skill:'初期資金 +50', bonus:{money:50}, passive:null },
-  { id:'G', name:'男性G', role:'期待の星', icon:'🌟', skill:'初期貢献度 +20', bonus:{contribution:20}, passive:null },
-  { id:'A', name:'女性A', role:'ムードメーカー', icon:'🎉', skill:'モチベ減少半減', bonus:{}, passive:'halfMotivationLoss' },
-  { id:'H', name:'女性H', role:'総務担当', icon:'📋', skill:'資金減少半減', bonus:{}, passive:'halfMoneyLoss' },
-  { id:'K', name:'女性K', role:'教育担当', icon:'📚', skill:'貢献度減少半減', bonus:{}, passive:'halfContributionLoss' }
-];
-
-const EVENTS = [
-  { type:"history", title:"AODAISHO設立", description:"2021年11月、代表・土屋大樹が渋谷区にて株式会社AODAISHOを設立。「おもしろいをサイエンスしよう」を掲げ、挑戦が始まる！", effects:{money:0,motivation:20,contribution:10} },
-  { type:"choice", title:"初の大型案件", description:"大手企業から採用コンサルティングのオファー。難易度は高いが、実績になる！", choices:[{text:"チャレンジする",effects:{money:80,motivation:-15,contribution:40}},{text:"見送る",effects:{money:20,motivation:5,contribution:5}}] },
-  { type:"bonus", title:"SNSコンサル事業開始", description:"TikTok・Instagram・Xのコンサルティングを本格スタート！戦略的マーケティングを提供開始。", effects:{money:30,motivation:25,contribution:20} },
-  { type:"crisis", title:"クライアントトラブル", description:"期待値とのギャップが発生。クレド「成果にこだわる」を胸に全社で対応。", effects:{money:-50,motivation:-20,contribution:25} },
-  { type:"celebration", title:"TikTok 1000万再生突破", description:"運用支援中のアカウントが累計1000万再生突破！チーム一丸で喜びを分かち合った。", effects:{money:40,motivation:30,contribution:15} },
-  { type:"history", title:"Web開発事業拡大", description:"LP・HP・Webアプリの企画から開発まで一気通貫で対応する体制を構築！", effects:{money:-20,motivation:15,contribution:20} },
-  { type:"choice", title:"社員研修の提案", description:"メンバーからスキルアップ研修の要望。クレド「仲間の成長に協力する」に基づき…", choices:[{text:"大規模に実施",effects:{money:-40,motivation:25,contribution:30}},{text:"最小限で対応",effects:{money:-10,motivation:5,contribution:10}}] },
-  { type:"credo", title:"クレド浸透プロジェクト", description:"9つのクレドを全社に浸透。「誠実である」「責務を全うする」「人の心を大切にする」——行動指針が文化に。", effects:{money:-10,motivation:20,contribution:25} },
-  { type:"bonus", title:"渋谷・神宮前オフィス", description:"神宮前6丁目にオフィスを構える。渋谷のクリエイティブな空気の中で「非常識戦略」を生み出す拠点に！", effects:{money:-30,motivation:25,contribution:15} },
-  { type:"crisis", title:"競合の台頭", description:"SNSコンサル市場に大手が参入。「業界の常識を疑い、競争優位をつくる」——非常識戦略の真価が問われる。", effects:{money:-30,motivation:-15,contribution:10} },
-  { type:"choice", title:"AIX事業への投資", description:"AIXコンサルティングを採用領域に導入するか検討中。先行投資は大きいが…", choices:[{text:"全力でAIX推進",effects:{money:-50,motivation:15,contribution:35}},{text:"様子を見る",effects:{money:10,motivation:-5,contribution:5}}] },
-  { type:"celebration", title:"TikTok 5000万再生達成", description:"累計5,000万再生！ホワイトペーパーとして体系化し、業界トップクラスの実績に。", effects:{money:60,motivation:30,contribution:25} },
-  { type:"history", title:"教育研修事業拡充", description:"人事戦略設計から教育研修まで、企業の人材確保を包括的にサポートする体制が整う。", effects:{money:20,motivation:15,contribution:20} },
-  { type:"choice", title:"新規クライアントの決断", description:"大企業から「再現性のある採用の仕組みを作ってほしい」との依頼。リソースは限られるが…", choices:[{text:"受注する",effects:{money:60,motivation:-10,contribution:35}},{text:"リソース確保優先",effects:{money:10,motivation:10,contribution:10}}] },
-  { type:"crisis", title:"メンバー離脱の危機", description:"主力メンバーが独立を検討…「自分との約束を守る」を全員で語り合い、ビジョンを再共有。", effects:{money:-20,motivation:-25,contribution:-10} },
-  { type:"bonus", title:"クライアントファースト実証", description:"顧客成果を起点にした支援が実を結び、追加案件の依頼が殺到！", effects:{money:80,motivation:20,contribution:20} },
-  { type:"credo", title:"美意識と成長", description:"「常に美意識を持ち続ける」「常に期待以上の価値である」——全てに美学を貫く。", effects:{money:0,motivation:20,contribution:20} },
-  { type:"choice", title:"「場の発明」への挑戦", description:"AODAISHO独自の新コンセプト事業を立ち上げるチャンス。リスクは高いが、ビジョン実現に直結。", choices:[{text:"場の発明に挑戦",effects:{money:-40,motivation:20,contribution:40}},{text:"既存事業を磨く",effects:{money:30,motivation:5,contribution:15}}] },
-  { type:"celebration", title:"創立記念日", description:"設立からの歩みを全員で振り返り。「礼儀礼節を重んじ」「人の心を大切に」してきた仲間たちと乾杯！", effects:{money:-15,motivation:35,contribution:20} },
-  { type:"bonus", title:"過去最高の成果", description:"おもしろいをサイエンスしようを体現し、社会に広く普及するビジネスの創造に成功！", effects:{money:70,motivation:25,contribution:30} }
-];
-
-const PLAYER_COLORS = ['#1a3a6b','#c62828','#2e7d32','#6a1b9a'];
-const PLAYER_TOKENS = ['🔵','🔴','🟢','🟣'];
-
 // ===== GAME STATE =====
 let playerCount = 0;
 let players = [];
-let currentPlayerIdx = 0;
-let boardCells = [];
-let goalRankCounter = 0;
-let setupIdx = 0;
+let currentPlayerIndex = 0;
 let isSpinning = false;
+let turnNumber = 1;
+let gameEnded = false;
+const TOTAL_CELLS = 25;
+const PLAYER_COLORS = ['#e53935','#1e88e5','#43a047','#f9a825'];
+const PLAYER_LABELS = ['P1','P2','P3','P4'];
 
-// ===== SCREEN =====
+// ===== BOARD LAYOUT =====
+const boardLayout = [
+  {type:'start', icon:'🚀', label:'START'},
+  {type:'bonus', icon:'🔵', label:'ボーナス'},
+  {type:'fate', icon:'🟡', label:'運命'},
+  {type:'pinch', icon:'🔴', label:'ピンチ'},
+  {type:'history', icon:'⭐', label:'歴史'},
+  {type:'battle', icon:'🆚', label:'対決'},
+  {type:'bonus', icon:'🔵', label:'ボーナス'},
+  {type:'boss', icon:'🎭', label:'社長'},
+  {type:'pinch', icon:'🔴', label:'ピンチ'},
+  {type:'fate', icon:'🟡', label:'運命'},
+  {type:'hell', icon:'💀', label:'地獄'},
+  {type:'bonus', icon:'🔵', label:'ボーナス'},
+  {type:'history', icon:'⭐', label:'歴史'},
+  {type:'battle', icon:'🆚', label:'対決'},
+  {type:'pinch', icon:'🔴', label:'ピンチ'},
+  {type:'fate', icon:'🟡', label:'運命'},
+  {type:'bonus', icon:'🔵', label:'ボーナス'},
+  {type:'hell', icon:'💀', label:'地獄'},
+  {type:'boss', icon:'🎭', label:'社長'},
+  {type:'history', icon:'⭐', label:'歴史'},
+  {type:'pinch', icon:'🔴', label:'ピンチ'},
+  {type:'bonus', icon:'🔵', label:'ボーナス'},
+  {type:'battle', icon:'🆚', label:'対決'},
+  {type:'fate', icon:'🟡', label:'運命'},
+  {type:'goal', icon:'🏁', label:'GOAL'}
+];
+
+// ===== EVENTS =====
+const bonusEvents = [
+  {emoji:'💰', title:'お給料日サバイバル', description:'今月も生き残った証として給料が振り込まれた。財布が一瞬だけ厚くなる季節。使う前に消えるのはなぜだろう？', effects:{money:80, motivation:15, contribution:5}},
+  {emoji:'🍕', title:'社長の謎おごり宣言', description:'社長が突然「今日は俺のおごりだ！」と宣言。全員が一瞬固まった後、高級焼肉店へ直行。翌日の仕事効率が謎に向上した。', effects:{money:30, motivation:40, contribution:5}},
+  {emoji:'🏆', title:'MVP受賞の奇跡', description:'「今月のMVPはあなたです！」社内全員から拍手喝采。クオカード5000円を受け取り、なぜか涙腺が緩んだ。', effects:{money:50, motivation:35, contribution:30}},
+  {emoji:'📈', title:'残業代正確支払いの伝説', description:'経理担当が「今月は全部正確に計算しました」と言った瞬間、オフィスに奇跡が起きた。語り継がれる出来事である。', effects:{money:70, motivation:25, contribution:10}},
+  {emoji:'🎉', title:'謎の有給消化指令', description:'上司から突然「明日は休んでいいぞ」の一言。理由は不明。聞かない方がいい。ありがたく温泉に直行した。', effects:{money:10, motivation:50, contribution:0}}
+];
+
+const pinchEvents = [
+  {emoji:'😱', title:'会議室への恐怖の召喚', description:'「ちょっといいですか」この7文字で人は3kg痩せる。結果は単なる雑談だったが、心臓の消耗は本物だった。', effects:{money:0, motivation:-35, contribution:10}},
+  {emoji:'💻', title:'本番環境破壊事件', description:'やってしまった。全社員に影響するシステムに謎データを投入。Slackが地獄絵図に。でも乗り越えた。強くなった。', effects:{money:-60, motivation:-25, contribution:-15}},
+  {emoji:'📊', title:'定時後爆弾投下事件', description:'退社5分前に「明日の朝イチで資料お願い」のメッセージ。送信者は既に帰宅済み。これが伝説の「定時後爆弾」。', effects:{money:0, motivation:-45, contribution:20}},
+  {emoji:'🤒', title:'月曜朝の体調正直症候群', description:'なぜ月曜の朝だけ体が正直なのか。38.5度。でも「大事な会議が...」と言いかけた自分を誰かが止めてほしかった。', effects:{money:0, motivation:-40, contribution:-5}},
+  {emoji:'🖨️', title:'プリンター反乱事件', description:'大事なプレゼン当日、プリンターが突然「エラーコード：E-NEMESIS」を表示。IT部門の「再起動してください」が虚しく響く。', effects:{money:-25, motivation:-25, contribution:-5}}
+];
+
+const fateResults = [
+  {emoji:'🌟', title:'大吉！', description:'天が味方した！全パラメータ爆上がり！', effects:{money:60, motivation:30, contribution:20}},
+  {emoji:'😊', title:'中吉', description:'そこそこラッキー。悪くない一日。', effects:{money:30, motivation:20, contribution:10}},
+  {emoji:'🙂', title:'小吉', description:'微妙に良いことがあった気がする。', effects:{money:15, motivation:10, contribution:5}},
+  {emoji:'😐', title:'末吉', description:'良いんだか悪いんだか。まあ生きてるだけで丸儲け。', effects:{money:0, motivation:5, contribution:0}},
+  {emoji:'😰', title:'凶', description:'今日は大人しくしておこう...', effects:{money:-30, motivation:-20, contribution:-10}},
+  {emoji:'💀', title:'大凶！！', description:'なぜ引いた。なぜこのタイミングで。人生で一番いらないガチャを引いてしまった。', effects:{money:-60, motivation:-40, contribution:-20}}
+];
+
+const historyEvents = [
+  {emoji:'🏢', title:'AODAISHO創立 (2021.11.18)', description:'渋谷区神宮前。一人のオフィスから全ては始まった。「おもしろいをサイエンスしよう」——その言葉が未来を変える。', effects:{money:20, motivation:40, contribution:30}},
+  {emoji:'📱', title:'TikTok 5000万再生突破', description:'バズの法則を科学的に解析。気づけば再生数は天文学的数字に。「再現性」という武器を手に入れた瞬間。', effects:{money:50, motivation:30, contribution:25}},
+  {emoji:'🤝', title:'リクルートコンサル事業開始', description:'人材業界に切り込む。クライアントファーストを掲げ、本質課題に最短でたどり着く支援を開始。', effects:{money:40, motivation:25, contribution:20}},
+  {emoji:'💡', title:'9つのクレド制定', description:'誠実である。責務を全うする。人の心を大切にする。——会社の魂が言語化された日。', effects:{money:10, motivation:45, contribution:35}},
+  {emoji:'🌐', title:'Web開発事業本格始動', description:'「場の発明」をデジタルで体現。コードの一行一行に哲学を込めて、クライアントの未来を構築する。', effects:{money:45, motivation:30, contribution:25}}
+];
+
+const bossEvents = [
+  {emoji:'👔', title:'社長の気まぐれ昇給', description:'社長が急に「頑張ってるね」と言い出した。その日の夕方、謎の臨時ボーナスが振り込まれた。何が起きたのか誰も分からない。', effects:{money:100, motivation:30, contribution:10}},
+  {emoji:'🎰', title:'社長とじゃんけん大会', description:'負けたら今月の残業確定。勝ったら特別休暇。社長のじゃんけんは読めない。なぜならランダムだから。', effects:{money:0, motivation:-10, contribution:15}},
+  {emoji:'🍣', title:'社長の寿司ミーティング', description:'「重要な話がある」と呼ばれたら寿司屋だった。大トロを食べながら来期の戦略を聞く。情報量が多すぎる。', effects:{money:50, motivation:50, contribution:20}},
+  {emoji:'📢', title:'社長の無茶振りチャレンジ', description:'「来週までに新規事業3つ考えて」——笑顔で言う社長。でもこの無茶振りから生まれた事業が後に柱になる。', effects:{money:-20, motivation:-15, contribution:40}},
+  {emoji:'🎪', title:'社長プレゼンツ社員旅行', description:'行き先は当日発表。「サプライズだ！」と笑う社長。着いた先は...グランピング。最高かよ。', effects:{money:-30, motivation:60, contribution:25}}
+];
+
+const hellEvents = [
+  {emoji:'💀', title:'全パラメータ崩壊', description:'何が起きたか分からない。気づいたら全てが減っていた。これが人生の理不尽。でも明日は来る。たぶん。', effects:{money:-50, motivation:-50, contribution:-30}},
+  {emoji:'🔥', title:'炎上案件直撃', description:'クライアントのSNSが大炎上。なぜか自分が火消し担当に。三日三晩の対応で得たものは...強さだけ。', effects:{money:-40, motivation:-60, contribution:-20}},
+  {emoji:'👻', title:'深夜のサーバーダウン', description:'午前3時。スマホが鳴り止まない。サーバーが完全に死んだ。パジャマのまま出社。こういう日もある。', effects:{money:-30, motivation:-50, contribution:-25}}
+];
+
+// ===== ITEMS =====
+const ITEMS = [
+  {id:'drink', name:'社長の栄養ドリンク', emoji:'🥤', desc:'全パラメータ+30回復'},
+  {id:'blame', name:'他部署への責任転嫁', emoji:'📋', desc:'次のマイナスイベントを無効化'},
+  {id:'meeting', name:'緊急会議召集令', emoji:'📣', desc:'全員を自分のマスに呼び戻す'}
+];
+
+// ===== SCREEN MANAGEMENT =====
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -741,490 +369,643 @@ function showScreen(id) {
 // ===== PLAYER COUNT =====
 function selectCount(n) {
   playerCount = n;
-  document.querySelectorAll('.count-btn').forEach((b,i) => b.classList.toggle('selected', i+1===n));
-  document.getElementById('btn-to-setup').disabled = false;
+  document.querySelectorAll('.count-btn').forEach((btn,i) => {
+    btn.classList.toggle('selected', i === n-1);
+  });
+  document.getElementById('count-next-btn').disabled = false;
+  buildNameInputs();
 }
 
-function startSetup() {
-  players = [];
+function buildNameInputs() {
+  const container = document.getElementById('name-inputs');
+  container.innerHTML = '';
   for (let i = 0; i < playerCount; i++) {
-    players.push({ id:i+1, name:'', character:null, money:100, motivation:50, contribution:0, position:0, isFinished:false, goalRank:null });
+    const row = document.createElement('div');
+    row.className = 'name-row';
+    row.innerHTML = `<div class="player-color" style="background:${PLAYER_COLORS[i]}"></div><input type="text" id="pname-${i}" placeholder="プレイヤー${i+1}の名前" maxlength="8">`;
+    container.appendChild(row);
   }
-  setupIdx = 0;
-  goalRankCounter = 0;
-  renderSetup();
-  showScreen('setup-screen');
-}
-
-// ===== SETUP =====
-function renderSetup() {
-  const p = players[setupIdx];
-  const takenChars = players.filter((_,i) => i!==setupIdx).map(x => x.character).filter(Boolean);
-  const card = document.getElementById('setup-card');
-  card.innerHTML = `
-    <span class="player-badge p-color-${p.id}">プレイヤー${p.id}</span>
-    <h2 class="title-lg">名前を入力</h2>
-    <input class="input-field" id="name-input" placeholder="名前を入力..." value="${p.name}" maxlength="8" />
-    <h3 style="font-family:var(--font-title);margin-bottom:12px;color:var(--color-primary);">キャラクター選択</h3>
-    <div class="char-grid">
-      ${CHARACTERS.map(c => {
-        const taken = takenChars.includes(c.id);
-        const selected = p.character === c.id;
-        return `<div class="char-card ${selected?'selected':''} ${taken?'taken':''}" onclick="pickChar('${c.id}')">
-          <div class="icon">${c.icon}</div>
-          <div class="name">${c.name}</div>
-          <div class="role">${c.role}</div>
-          <div class="skill">${c.skill}</div>
-        </div>`;
-      }).join('')}
-    </div>
-    <div style="display:flex;gap:12px;justify-content:center;">
-      ${setupIdx > 0 ? '<button class="btn btn-outline" onclick="prevSetup()">← 戻る</button>' : ''}
-      <button class="btn btn-primary" id="btn-next-setup" onclick="nextSetup()">${setupIdx < playerCount-1 ? '次へ →' : 'ゲーム開始！'}</button>
-    </div>
-  `;
-}
-
-function pickChar(id) {
-  players[setupIdx].character = id;
-  renderSetup();
-}
-
-function prevSetup() {
-  saveName();
-  setupIdx--;
-  renderSetup();
-}
-
-function nextSetup() {
-  saveName();
-  const p = players[setupIdx];
-  if (!p.name.trim()) { p.name = `プレイヤー${p.id}`; }
-  if (!p.character) { alert('キャラクターを選んでください'); return; }
-
-  if (setupIdx < playerCount - 1) {
-    setupIdx++;
-    renderSetup();
-  } else {
-    initGame();
-  }
-}
-
-function saveName() {
-  const input = document.getElementById('name-input');
-  if (input) players[setupIdx].name = input.value;
 }
 
 // ===== GAME INIT =====
-function initGame() {
-  // Apply character bonuses
-  players.forEach(p => {
-    const ch = CHARACTERS.find(c => c.id === p.character);
-    if (ch.bonus.money) p.money += ch.bonus.money;
-    if (ch.bonus.motivation) p.motivation += ch.bonus.motivation;
-    if (ch.bonus.contribution) p.contribution += ch.bonus.contribution;
-  });
-
-  generateBoard();
-  currentPlayerIdx = 0;
-  renderGame();
+function startGame() {
+  players = [];
+  for (let i = 0; i < playerCount; i++) {
+    const nameInput = document.getElementById(`pname-${i}`);
+    const name = nameInput.value.trim() || `プレイヤー${i+1}`;
+    players.push({ name, color: PLAYER_COLORS[i], label: PLAYER_LABELS[i], position: 0, money: 100, motivation: 100, contribution: 0, item: null, shield: false, finished: false, finishOrder: 0 });
+  }
+  currentPlayerIndex = 0;
+  turnNumber = 1;
+  gameEnded = false;
   showScreen('game-screen');
+  buildBoard();
+  renderStatus();
+  renderPieces();
+  updateControls();
 }
 
-function generateBoard() {
-  boardCells = [];
-  boardCells.push({ type:'start', label:'スタート', icon:'🚀' });
-  const slots = 23;
-  const evCount = Math.min(EVENTS.length, 20);
-  const step = slots / evCount;
-  const eventPositions = [];
-  for (let i = 0; i < evCount; i++) eventPositions.push(Math.round(1 + i * step));
-
-  let eIdx = 0;
-  for (let i = 1; i <= slots; i++) {
-    if (eventPositions.includes(i) && eIdx < EVENTS.length) {
-      const ev = EVENTS[eIdx];
-      boardCells.push({ type:ev.type, label:ev.title.slice(0,5), icon:getIcon(ev.type), eventIndex:eIdx });
-      eIdx++;
-    } else {
-      boardCells.push({ type:'rest', label:'休憩', icon:'☕' });
-    }
-  }
-  boardCells.push({ type:'goal', label:'ゴール', icon:'🏁' });
-}
-
-function getIcon(t) {
-  return {history:'📜',choice:'🤔',bonus:'🎁',crisis:'⚠️',celebration:'🎊',credo:'📖'}[t]||'📌';
-}
-
-// ===== RENDER GAME =====
-function renderGame() {
-  renderHeader();
-  renderBoard();
-  renderFooter();
-}
-
-function renderHeader() {
-  const hdr = document.getElementById('game-header');
-  hdr.innerHTML = players.map(p => {
-    const isActive = p.id === players[currentPlayerIdx].id && !p.isFinished;
-    const ch = CHARACTERS.find(c => c.id === p.character);
-    return `<div class="player-stat-card ${isActive?'active-turn p-border-'+p.id:''} ${p.isFinished?'finished':''}">
-      <div class="psc-name">${ch.icon} ${p.name}</div>
-      <div class="psc-stats">
-        <div class="psc-stat psc-stat-money"><span class="psc-stat-label">💰資金</span><span class="psc-stat-value">${p.money}</span></div>
-        <div class="psc-stat psc-stat-moti"><span class="psc-stat-label">🔥モチベ</span><span class="psc-stat-value">${p.motivation}</span></div>
-        <div class="psc-stat psc-stat-cont"><span class="psc-stat-label">⭐貢献</span><span class="psc-stat-value">${p.contribution}</span></div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function renderBoard() {
-  const grid = document.getElementById('board-grid');
-  const ordered = [];
+// ===== BOARD =====
+function buildBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  // Snake pattern: rows of 5, alternating direction
+  const order = [];
   for (let row = 0; row < 5; row++) {
-    const rowCells = [];
-    for (let col = 0; col < 5; col++) {
-      const idx = row * 5 + col;
-      if (idx < boardCells.length) rowCells.push(idx);
+    if (row % 2 === 0) {
+      for (let col = 0; col < 5; col++) order.push(row * 5 + col);
+    } else {
+      for (let col = 4; col >= 0; col--) order.push(row * 5 + col);
     }
-    if (row % 2 === 1) rowCells.reverse();
-    ordered.push(...rowCells);
   }
-
-  grid.innerHTML = ordered.map(ci => {
-    const cell = boardCells[ci];
-    if (!cell) return '<div class="cell"></div>';
-    const tokens = players.filter(p => p.position === ci).map((p,i) => `<span class="token">${PLAYER_TOKENS[p.id-1]}</span>`).join('');
-    return `<div class="cell ${cell.type}">
-      <span class="cell-num">${ci}</span>
-      <span class="cell-icon">${cell.icon}</span>
-      <span class="cell-label">${cell.label}</span>
-      ${tokens ? `<span class="cell-tokens">${tokens}</span>` : ''}
-    </div>`;
-  }).join('');
+  // Create cells in grid order, but assign board positions using snake
+  const cellElements = new Array(25);
+  for (let i = 0; i < 25; i++) {
+    const boardIndex = order[i];
+    const data = boardLayout[boardIndex];
+    const cell = document.createElement('div');
+    cell.className = `cell type-${data.type}`;
+    cell.id = `cell-${boardIndex}`;
+    cell.innerHTML = `<span class="cell-num">${boardIndex}</span><span class="cell-icon">${data.icon}</span><span class="cell-label">${data.label}</span>`;
+    cellElements[i] = cell;
+  }
+  cellElements.forEach(c => board.appendChild(c));
 }
 
-function renderFooter() {
-  const p = players[currentPlayerIdx];
-  const ch = CHARACTERS.find(c => c.id === p.character);
-  document.getElementById('turn-indicator').innerHTML = `${ch.icon} <strong>${p.name}</strong> のターン`;
+function getCellElement(position) {
+  return document.getElementById(`cell-${position}`);
+}
+
+// ===== RENDER =====
+function renderStatus() {
+  const bar = document.getElementById('player-status-bar');
+  bar.innerHTML = '';
+  players.forEach((p, i) => {
+    const isActive = i === currentPlayerIndex && !p.finished;
+    const card = document.createElement('div');
+    card.className = `player-card${isActive ? ' active-player' : ''}`;
+    card.style.borderTopColor = p.color;
+    const itemText = p.item ? `${ITEMS.find(it=>it.id===p.item).emoji} ${ITEMS.find(it=>it.id===p.item).name}` : 'なし';
+    card.innerHTML = `<div class="p-name" style="color:${p.color}">${p.label} ${p.name}</div><div class="p-stats">💰${p.money} ❤️${p.motivation} ⭐${p.contribution}</div><div class="p-item">🎒${itemText}</div>`;
+    bar.appendChild(card);
+  });
+}
+
+function renderPieces() {
+  document.querySelectorAll('.piece').forEach(p => p.remove());
+  // Group by position
+  const groups = {};
+  players.forEach((p, i) => {
+    const pos = p.finished ? TOTAL_CELLS - 1 : p.position;
+    if (!groups[pos]) groups[pos] = [];
+    groups[pos].push(i);
+  });
+  Object.entries(groups).forEach(([pos, indices]) => {
+    const cell = getCellElement(parseInt(pos));
+    if (!cell) return;
+    indices.forEach((pi, stackIndex) => {
+      const piece = document.createElement('div');
+      piece.className = 'piece';
+      piece.style.background = players[pi].color;
+      piece.style.bottom = `${4 + stackIndex * 14}px`;
+      piece.style.right = `${4 + stackIndex * 6}px`;
+      piece.textContent = players[pi].label.replace('P','');
+      cell.appendChild(piece);
+    });
+  });
+}
+
+function updateControls() {
+  const p = players[currentPlayerIndex];
+  document.getElementById('turn-info').textContent = `Turn ${turnNumber} - ${p.name} のターン`;
+  document.getElementById('roulette-btn').disabled = isSpinning || p.finished;
+  document.getElementById('roulette-display').textContent = '?';
+  const itemBtn = document.getElementById('item-btn');
+  itemBtn.disabled = !p.item;
+  itemBtn.textContent = p.item ? `🎒 ${ITEMS.find(it=>it.id===p.item).emoji} 使う` : '🎒 アイテム';
 }
 
 // ===== ROULETTE =====
 function spinRoulette() {
-  if (isSpinning) return;
-  const p = players[currentPlayerIdx];
-  if (p.isFinished) { nextTurn(); return; }
-
+  if (isSpinning || gameEnded) return;
   isSpinning = true;
-  const wheel = document.getElementById('roulette-wheel');
-  const btn = document.getElementById('btn-roll');
+  const btn = document.getElementById('roulette-btn');
+  const display = document.getElementById('roulette-display');
   btn.disabled = true;
-  wheel.classList.add('spinning');
 
   let count = 0;
+  const maxCount = 20;
   const interval = setInterval(() => {
-    wheel.textContent = Math.floor(Math.random() * 6) + 1;
+    display.textContent = Math.floor(Math.random() * 6) + 1;
     count++;
-    if (count >= 18) {
+    if (count >= maxCount) {
       clearInterval(interval);
       const result = Math.floor(Math.random() * 6) + 1;
-      wheel.textContent = result;
-      wheel.classList.remove('spinning');
+      display.textContent = result;
+      display.style.animation = 'numberPop .4s ease';
+      setTimeout(() => { display.style.animation = ''; }, 400);
       movePlayer(result);
     }
   }, 80);
 }
 
 function movePlayer(steps) {
-  const p = players[currentPlayerIdx];
-  const target = Math.min(p.position + steps, 24);
-  let cur = p.position;
+  const p = players[currentPlayerIndex];
+  let target = Math.min(p.position + steps, TOTAL_CELLS - 1);
 
-  const interval = setInterval(() => {
-    cur++;
-    if (cur > target) cur = target;
-    p.position = cur;
-    renderBoard();
-
-    if (cur >= target) {
-      clearInterval(interval);
-      setTimeout(() => checkLanding(), 300);
+  // Animate movement step by step
+  let current = p.position;
+  const moveInterval = setInterval(() => {
+    current++;
+    if (current > target) {
+      clearInterval(moveInterval);
+      p.position = target;
+      renderPieces();
+      // Check if reached goal
+      if (target >= TOTAL_CELLS - 1) {
+        p.finished = true;
+        p.finishOrder = players.filter(pp => pp.finished).length;
+        showGoalEvent(p);
+      } else {
+        triggerCellEvent(target);
+      }
+      return;
     }
-  }, 250);
+    p.position = current;
+    renderPieces();
+  }, 300);
 }
 
-function checkLanding() {
-  const p = players[currentPlayerIdx];
+function showGoalEvent(p) {
+  const bonuses = [60, 40, 20, 0];
+  const bonus = bonuses[p.finishOrder - 1] || 0;
+  p.contribution += bonus;
+  showEventCard('🏁', `${p.name} ゴール！`, `${p.finishOrder}位でゴール！ 貢献度ボーナス +${bonus}`, {contribution: bonus});
+}
 
-  if (p.position >= 24) {
-    goalRankCounter++;
-    p.isFinished = true;
-    p.goalRank = goalRankCounter;
-    showGoalModal(p);
+// ===== CELL EVENTS =====
+function triggerCellEvent(position) {
+  const cell = boardLayout[position];
+  switch(cell.type) {
+    case 'bonus': triggerBonusEvent(); break;
+    case 'pinch': triggerPinchEvent(); break;
+    case 'fate': triggerFateEvent(); break;
+    case 'history': triggerHistoryEvent(); break;
+    case 'battle': triggerBattleEvent(); break;
+    case 'hell': triggerHellEvent(); break;
+    case 'boss': triggerBossEvent(); break;
+    default: endTurn(); break;
+  }
+}
+
+function triggerBonusEvent() {
+  spawnConfetti();
+  const event = bonusEvents[Math.floor(Math.random() * bonusEvents.length)];
+  applyEffects(event.effects);
+  showEventCard(event.emoji, event.title, event.description, event.effects);
+}
+
+function triggerPinchEvent() {
+  document.body.classList.add('shaking');
+  setTimeout(() => document.body.classList.remove('shaking'), 500);
+  const p = players[currentPlayerIndex];
+  if (p.shield) {
+    p.shield = false;
+    showEventCard('🛡️', '責任転嫁発動！', 'アイテム「他部署への責任転嫁」が発動！ マイナスイベントを完全回避した！', {});
+    return;
+  }
+  const event = pinchEvents[Math.floor(Math.random() * pinchEvents.length)];
+  applyEffects(event.effects);
+  showEventCard(event.emoji, event.title, event.description, event.effects);
+}
+
+function triggerFateEvent() {
+  showSlotMachine();
+}
+
+function triggerHistoryEvent() {
+  const event = historyEvents[Math.floor(Math.random() * historyEvents.length)];
+  applyEffects(event.effects);
+  showEventCard(event.emoji, event.title, event.description, event.effects);
+}
+
+function triggerBattleEvent() {
+  if (playerCount <= 1) {
+    // Solo: tap challenge instead
+    showTapChallenge();
+  } else {
+    showJanken();
+  }
+}
+
+function triggerHellEvent() {
+  document.body.classList.add('flash-red');
+  setTimeout(() => document.body.classList.remove('flash-red'), 900);
+  const p = players[currentPlayerIndex];
+  if (p.shield) {
+    p.shield = false;
+    showEventCard('🛡️', '責任転嫁発動！', '地獄マスのダメージを完全回避！ アイテムの力は偉大だ！', {});
+    return;
+  }
+  const event = hellEvents[Math.floor(Math.random() * hellEvents.length)];
+  applyEffects(event.effects);
+  showEventCard(event.emoji, event.title, event.description, event.effects);
+}
+
+function triggerBossEvent() {
+  const event = bossEvents[Math.floor(Math.random() * bossEvents.length)];
+  applyEffects(event.effects);
+  showEventCard(event.emoji, event.title, event.description, event.effects);
+}
+
+// ===== EFFECTS =====
+function applyEffects(effects) {
+  const p = players[currentPlayerIndex];
+  if (effects.money) p.money += effects.money;
+  if (effects.motivation) p.motivation += effects.motivation;
+  if (effects.contribution) p.contribution += effects.contribution;
+  // Clamp values
+  p.money = Math.max(0, p.money);
+  p.motivation = Math.max(0, p.motivation);
+  p.contribution = Math.max(0, p.contribution);
+}
+
+// ===== EVENT CARD =====
+function showEventCard(emoji, title, description, effects) {
+  document.getElementById('event-emoji').textContent = emoji;
+  document.getElementById('event-title').textContent = title;
+  document.getElementById('event-desc').textContent = description;
+  const effectsDiv = document.getElementById('event-effects');
+  effectsDiv.innerHTML = '';
+  if (effects.money) {
+    const badge = document.createElement('span');
+    badge.className = `effect-badge ${effects.money > 0 ? 'positive' : 'negative'}`;
+    badge.textContent = `💰 ${effects.money > 0 ? '+' : ''}${effects.money}`;
+    effectsDiv.appendChild(badge);
+  }
+  if (effects.motivation) {
+    const badge = document.createElement('span');
+    badge.className = `effect-badge ${effects.motivation > 0 ? 'positive' : 'negative'}`;
+    badge.textContent = `❤️ ${effects.motivation > 0 ? '+' : ''}${effects.motivation}`;
+    effectsDiv.appendChild(badge);
+  }
+  if (effects.contribution) {
+    const badge = document.createElement('span');
+    badge.className = `effect-badge ${effects.contribution > 0 ? 'positive' : 'negative'}`;
+    badge.textContent = `⭐ ${effects.contribution > 0 ? '+' : ''}${effects.contribution}`;
+    effectsDiv.appendChild(badge);
+  }
+  document.getElementById('event-overlay').classList.add('show');
+  renderStatus();
+}
+
+function closeEvent() {
+  document.getElementById('event-overlay').classList.remove('show');
+  checkGameEnd();
+}
+
+function checkGameEnd() {
+  if (players.every(p => p.finished)) {
+    showEnding();
+  } else {
+    endTurn();
+  }
+}
+
+// ===== ITEMS =====
+function useItem() {
+  const p = players[currentPlayerIndex];
+  if (!p.item) return;
+  const item = ITEMS.find(it => it.id === p.item);
+  switch(p.item) {
+    case 'drink':
+      p.money += 30;
+      p.motivation += 30;
+      p.contribution += 30;
+      p.item = null;
+      showEventCard(item.emoji, item.name + ' 使用！', '全パラメータが30回復！ 社長特製の味がする...！', {money:30, motivation:30, contribution:30});
+      return;
+    case 'blame':
+      p.shield = true;
+      p.item = null;
+      showEventCard(item.emoji, item.name + ' セット！', '次のマイナスイベントを自動で回避するぞ！ 他部署のみなさんごめんなさい！', {});
+      return;
+    case 'meeting':
+      players.forEach((pp, i) => {
+        if (i !== currentPlayerIndex && !pp.finished) {
+          pp.position = p.position;
+        }
+      });
+      p.item = null;
+      renderPieces();
+      showEventCard(item.emoji, item.name + ' 発動！', '全員がこのマスに強制召集された！ 恐怖の「緊急会議」パワー！', {});
+      return;
+  }
+}
+
+// Give random item at random intervals
+function maybeGiveItem() {
+  const p = players[currentPlayerIndex];
+  if (p.item) return;
+  if (Math.random() < 0.2) {
+    const item = ITEMS[Math.floor(Math.random() * ITEMS.length)];
+    p.item = item.id;
+  }
+}
+
+// ===== MINIGAMES =====
+
+// --- SLOT MACHINE (FATE) ---
+function showSlotMachine() {
+  const overlay = document.getElementById('minigame-overlay');
+  const card = document.getElementById('minigame-card');
+  const reels = ['🌟','😊','🙂','😐','😰','💀'];
+  let stopped = [false, false, false];
+  let reelValues = [0, 0, 0];
+  let intervals = [];
+
+  card.innerHTML = `
+    <h3>🎰 運命のスロット 🎰</h3>
+    <p>STOPボタンでリールを止めろ！<br>揃った絵柄で運命が決まる！</p>
+    <div class="slot-machine">
+      <div class="slot-reel spinning" id="reel-0">${reels[0]}</div>
+      <div class="slot-reel spinning" id="reel-1">${reels[0]}</div>
+      <div class="slot-reel spinning" id="reel-2">${reels[0]}</div>
+    </div>
+    <button class="slot-stop-btn" id="slot-stop-btn" onclick="stopNextReel()">STOP!</button>
+    <div id="slot-result" style="margin-top:12px;font-size:1.2rem;font-weight:700;"></div>
+  `;
+  overlay.classList.add('show');
+
+  // Spin reels
+  for (let i = 0; i < 3; i++) {
+    intervals.push(setInterval(() => {
+      if (stopped[i]) return;
+      reelValues[i] = Math.floor(Math.random() * reels.length);
+      document.getElementById(`reel-${i}`).textContent = reels[reelValues[i]];
+    }, 100 + i * 30));
+  }
+
+  window._slotState = { stopped, reelValues, intervals, reels, currentReel: 0 };
+}
+
+function stopNextReel() {
+  const state = window._slotState;
+  if (!state) return;
+  const idx = state.currentReel;
+  if (idx >= 3) return;
+  state.stopped[idx] = true;
+  clearInterval(state.intervals[idx]);
+  const reel = document.getElementById(`reel-${idx}`);
+  reel.classList.remove('spinning');
+  reel.style.animation = 'numberPop .3s ease';
+  state.currentReel++;
+
+  if (state.currentReel >= 3) {
+    document.getElementById('slot-stop-btn').disabled = true;
+    setTimeout(() => resolveSlot(), 500);
+  }
+}
+
+function resolveSlot() {
+  const state = window._slotState;
+  // Determine result based on best reel value (lower index = better)
+  const bestVal = Math.min(...state.reelValues);
+  const result = fateResults[bestVal];
+  document.getElementById('slot-result').textContent = `${result.emoji} ${result.title}`;
+  applyEffects(result.effects);
+
+  setTimeout(() => {
+    document.getElementById('minigame-overlay').classList.remove('show');
+    showEventCard(result.emoji, result.title, result.description, result.effects);
+  }, 1200);
+}
+
+// --- TAP CHALLENGE ---
+function showTapChallenge() {
+  const overlay = document.getElementById('minigame-overlay');
+  const card = document.getElementById('minigame-card');
+  const target = 15 + Math.floor(Math.random() * 10); // 15-24 taps needed
+
+  card.innerHTML = `
+    <h3>👊 連打チャレンジ！</h3>
+    <p>${target}回タップで成功！<br>3秒以内にクリックしまくれ！</p>
+    <div class="tap-area" id="tap-area" onclick="registerTap()">👊</div>
+    <div class="tap-counter" id="tap-counter">0 / ${target}</div>
+    <div class="tap-timer" id="tap-timer">準備中...</div>
+  `;
+  overlay.classList.add('show');
+
+  window._tapState = { count: 0, target, started: false, ended: false };
+
+  setTimeout(() => {
+    if (window._tapState.ended) return;
+    window._tapState.started = true;
+    document.getElementById('tap-timer').textContent = '3.0秒';
+    let timeLeft = 3000;
+    const timer = setInterval(() => {
+      timeLeft -= 100;
+      if (timeLeft <= 0 || window._tapState.ended) {
+        clearInterval(timer);
+        endTapChallenge();
+        return;
+      }
+      document.getElementById('tap-timer').textContent = `${(timeLeft/1000).toFixed(1)}秒`;
+    }, 100);
+  }, 1000);
+}
+
+function registerTap() {
+  const state = window._tapState;
+  if (!state || !state.started || state.ended) return;
+  state.count++;
+  const counter = document.getElementById('tap-counter');
+  counter.textContent = `${state.count} / ${state.target}`;
+  const area = document.getElementById('tap-area');
+  area.style.transform = 'scale(0.9)';
+  setTimeout(() => { area.style.transform = ''; }, 50);
+
+  if (state.count >= state.target) {
+    state.ended = true;
+    endTapChallenge();
+  }
+}
+
+function endTapChallenge() {
+  const state = window._tapState;
+  if (!state) return;
+  state.ended = true;
+  const success = state.count >= state.target;
+
+  setTimeout(() => {
+    document.getElementById('minigame-overlay').classList.remove('show');
+    if (success) {
+      spawnConfetti();
+      applyEffects({money:40, motivation:20, contribution:15});
+      showEventCard('🎊', '連打チャレンジ成功！', `見事${state.count}回の連打を達成！ 指が光速を超えた！`, {money:40, motivation:20, contribution:15});
+    } else {
+      applyEffects({money:-20, motivation:-15, contribution:0});
+      showEventCard('😵', '連打チャレンジ失敗...', `${state.count}/${state.target}回... あと少しだったのに！ 次こそは！`, {money:-20, motivation:-15, contribution:0});
+    }
+  }, 800);
+}
+
+// --- JANKEN ---
+function showJanken() {
+  const overlay = document.getElementById('minigame-overlay');
+  const card = document.getElementById('minigame-card');
+  // Pick opponent (random other player)
+  const opponents = players.filter((p, i) => i !== currentPlayerIndex && !p.finished);
+  if (opponents.length === 0) {
+    showTapChallenge();
+    return;
+  }
+  const opponent = opponents[Math.floor(Math.random() * opponents.length)];
+  window._jankenOpponent = opponent;
+
+  card.innerHTML = `
+    <h3>🆚 じゃんけん対決！</h3>
+    <p><strong>${players[currentPlayerIndex].name}</strong> vs <strong>${opponent.name}</strong></p>
+    <p>あなたの手を選べ！</p>
+    <div class="janken-choices">
+      <button class="janken-btn" onclick="playJanken('rock')">✊</button>
+      <button class="janken-btn" onclick="playJanken('scissors')">✌️</button>
+      <button class="janken-btn" onclick="playJanken('paper')">🖐️</button>
+    </div>
+    <div class="janken-result" id="janken-result"></div>
+  `;
+  overlay.classList.add('show');
+}
+
+function playJanken(choice) {
+  const choices = ['rock','scissors','paper'];
+  const emojis = {rock:'✊', scissors:'✌️', paper:'🖐️'};
+  const opChoice = choices[Math.floor(Math.random() * 3)];
+  const result = document.getElementById('janken-result');
+
+  let outcome;
+  if (choice === opChoice) outcome = 'draw';
+  else if ((choice === 'rock' && opChoice === 'scissors') || (choice === 'scissors' && opChoice === 'paper') || (choice === 'paper' && opChoice === 'rock')) outcome = 'win';
+  else outcome = 'lose';
+
+  result.textContent = `${emojis[choice]} vs ${emojis[opChoice]}`;
+  document.querySelectorAll('.janken-btn').forEach(b => b.disabled = true);
+
+  setTimeout(() => {
+    document.getElementById('minigame-overlay').classList.remove('show');
+    if (outcome === 'win') {
+      spawnConfetti();
+      applyEffects({money:50, motivation:20, contribution:15});
+      showEventCard('🎉', 'じゃんけん勝利！', `${window._jankenOpponent.name}に完全勝利！ 勝者には栄光を！`, {money:50, motivation:20, contribution:15});
+    } else if (outcome === 'lose') {
+      applyEffects({money:-30, motivation:-15, contribution:-5});
+      showEventCard('😭', 'じゃんけん敗北...', `${window._jankenOpponent.name}に負けた... 次は負けない！`, {money:-30, motivation:-15, contribution:-5});
+    } else {
+      applyEffects({money:10, motivation:10, contribution:5});
+      showEventCard('🤝', 'あいこ！', `${window._jankenOpponent.name}と引き分け。仲良しの証！`, {money:10, motivation:10, contribution:5});
+    }
+  }, 1500);
+}
+
+// ===== CONFETTI =====
+function spawnConfetti() {
+  const colors = ['#e53935','#1e88e5','#43a047','#f9a825','#ab47bc','#ff7043','#26c6da'];
+  for (let i = 0; i < 40; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.width = (Math.random() * 8 + 6) + 'px';
+    piece.style.height = (Math.random() * 8 + 6) + 'px';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+    piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
+    piece.style.animationDelay = (Math.random() * 0.5) + 's';
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 4000);
+  }
+}
+
+// ===== TURN MANAGEMENT =====
+function endTurn() {
+  maybeGiveItem();
+  renderStatus();
+  renderPieces();
+  isSpinning = false;
+
+  // Find next active player
+  let next = (currentPlayerIndex + 1) % playerCount;
+  let loopCount = 0;
+  while (players[next].finished && loopCount < playerCount) {
+    next = (next + 1) % playerCount;
+    loopCount++;
+  }
+
+  if (players.every(p => p.finished)) {
+    showEnding();
     return;
   }
 
-  const cell = boardCells[p.position];
-  if (cell && cell.eventIndex !== undefined) {
-    showEventModal(EVENTS[cell.eventIndex]);
-  } else if (cell && cell.type === 'rest') {
-    p.motivation = Math.min(100, p.motivation + 5);
-    renderGame();
-    showRestModal();
-  } else {
-    finishTurn();
+  if (next <= currentPlayerIndex || next === 0) {
+    turnNumber++;
   }
-}
+  currentPlayerIndex = next;
 
-function showGoalModal(p) {
-  const bonus = (5 - p.goalRank) * 20;
-  p.contribution += bonus;
-  fireConfetti();
-  openModal('🏁', 'ゴール！', `${p.name}さんが${p.goalRank}位でゴール！\nゴール順位ボーナス: 会社貢献度 +${bonus}`, [{label:`⭐ +${bonus}`, positive:true}], null, () => {
-    renderGame();
-    checkGameEnd();
-  });
-}
-
-function showRestModal() {
-  openModal('☕', '休憩タイム', 'ちょっと一息。モチベーションが少し回復した！', [{label:'🔥 +5', positive:true}], null, finishTurn);
-}
-
-function showEventModal(event) {
-  const icons = {history:'📜',choice:'🤔',bonus:'🎁',crisis:'⚠️',celebration:'🎊',credo:'📖'};
-  if (event.type === 'choice') {
-    openModal(icons[event.type], event.title, event.description, [], event.choices, null);
-  } else {
-    applyEffects(event.effects);
-    renderGame();
-    const tags = effectTags(event.effects);
-    if (event.type === 'bonus' || event.type === 'celebration') fireConfetti();
-    openModal(icons[event.type], event.title, event.description, tags, null, finishTurn);
-  }
-}
-
-// ===== MODAL =====
-function openModal(icon, title, desc, tags, choices, onClose) {
-  document.getElementById('m-icon').textContent = icon;
-  document.getElementById('m-title').textContent = title;
-  document.getElementById('m-desc').textContent = desc;
-  document.getElementById('m-effects').innerHTML = tags ? tags.map(t => `<span class="effect-tag ${t.positive?'effect-pos':'effect-neg'}">${t.label}</span>`).join('') : '';
-
-  const choicesDiv = document.getElementById('m-choices');
-  const okBtn = document.getElementById('m-ok');
-
-  if (choices) {
-    okBtn.style.display = 'none';
-    choicesDiv.innerHTML = `<div class="choices-col">${choices.map((c,i) => `<button class="btn-choice" onclick="makeChoice(${i})">${c.text}</button>`).join('')}</div>`;
-  } else {
-    okBtn.style.display = 'inline-block';
-    choicesDiv.innerHTML = '';
-  }
-
-  window._modalOnClose = onClose;
-  document.getElementById('modal-overlay').classList.add('active');
-}
-
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('active');
-  if (window._modalOnClose) { window._modalOnClose(); window._modalOnClose = null; }
-}
-
-function makeChoice(idx) {
-  const p = players[currentPlayerIdx];
-  const cell = boardCells[p.position];
-  const event = EVENTS[cell.eventIndex];
-  const choice = event.choices[idx];
-
-  applyEffects(choice.effects);
-  renderGame();
-
-  const tags = effectTags(choice.effects);
-  document.getElementById('m-effects').innerHTML = tags.map(t => `<span class="effect-tag ${t.positive?'effect-pos':'effect-neg'}">${t.label}</span>`).join('');
-  document.getElementById('m-choices').innerHTML = '';
-  document.getElementById('m-ok').style.display = 'inline-block';
-  window._modalOnClose = finishTurn;
-}
-
-function effectTags(eff) {
-  const tags = [];
-  if (eff.money) tags.push({label:`💰 ${eff.money>0?'+':''}${eff.money}`, positive:eff.money>0});
-  if (eff.motivation) tags.push({label:`🔥 ${eff.motivation>0?'+':''}${eff.motivation}`, positive:eff.motivation>0});
-  if (eff.contribution) tags.push({label:`⭐ ${eff.contribution>0?'+':''}${eff.contribution}`, positive:eff.contribution>0});
-  return tags;
-}
-
-function applyEffects(eff) {
-  const p = players[currentPlayerIdx];
-  const ch = CHARACTERS.find(c => c.id === p.character);
-  let dm = eff.money||0, dmo = eff.motivation||0, dc = eff.contribution||0;
-
-  if (ch.passive === 'halfMoneyLoss' && dm < 0) dm = Math.ceil(dm/2);
-  if (ch.passive === 'halfMotivationLoss' && dmo < 0) dmo = Math.ceil(dmo/2);
-  if (ch.passive === 'halfContributionLoss' && dc < 0) dc = Math.ceil(dc/2);
-
-  p.money += dm;
-  p.motivation = Math.max(0, Math.min(100, p.motivation + dmo));
-  p.contribution += dc;
-}
-
-// ===== TURN =====
-function finishTurn() {
-  isSpinning = false;
-  document.getElementById('btn-roll').disabled = false;
-
-  if (checkGameEnd()) return;
-  advanceTurn();
-}
-
-function advanceTurn() {
-  let next = (currentPlayerIdx + 1) % players.length;
-  let loops = 0;
-  while (players[next].isFinished && loops < players.length) {
-    next = (next + 1) % players.length;
-    loops++;
-  }
-
-  if (loops >= players.length) { showResults(); return; }
-
-  currentPlayerIdx = next;
-
+  // Turn transition
   if (playerCount > 1) {
     showTurnTransition();
   } else {
-    renderGame();
+    updateControls();
+    renderStatus();
   }
 }
 
 function showTurnTransition() {
-  const p = players[currentPlayerIdx];
-  const ch = CHARACTERS.find(c => c.id === p.character);
-  document.getElementById('turn-icon').textContent = ch.icon;
-  document.getElementById('turn-player-name').textContent = `${p.name} さんのターン！`;
-  showScreen('turn-screen');
+  const overlay = document.getElementById('turn-overlay');
+  const text = document.getElementById('turn-overlay-text');
+  const countdown = document.getElementById('turn-countdown');
+  const p = players[currentPlayerIndex];
+  text.innerHTML = `<span style="color:${p.color}">● </span>${p.name} のターン！`;
+  overlay.classList.add('show');
 
-  let sec = 3;
-  const cd = document.getElementById('turn-countdown');
-  cd.textContent = sec;
-  const iv = setInterval(() => {
-    sec--;
-    cd.textContent = sec;
-    if (sec <= 0) {
-      clearInterval(iv);
-      renderGame();
-      showScreen('game-screen');
+  let count = 3;
+  countdown.textContent = count;
+  const timer = setInterval(() => {
+    count--;
+    if (count <= 0) {
+      clearInterval(timer);
+      overlay.classList.remove('show');
+      updateControls();
+      renderStatus();
+    } else {
+      countdown.textContent = count;
     }
   }, 1000);
 }
 
-function checkGameEnd() {
-  if (players.every(p => p.isFinished)) {
-    setTimeout(showResults, 500);
-    return true;
-  }
-  return false;
-}
-
-// ===== RESULTS =====
-function showResults() {
-  const sorted = [...players].sort((a, b) => {
-    const sa = a.money + a.motivation + a.contribution + (a.goalRank ? (5-a.goalRank)*20 : 0);
-    const sb = b.money + b.motivation + b.contribution + (b.goalRank ? (5-b.goalRank)*20 : 0);
-    return sb - sa;
-  });
-
-  const list = document.getElementById('ranking-list');
-  list.innerHTML = sorted.map((p, i) => {
-    const score = p.money + p.motivation + p.contribution + (p.goalRank ? (5-p.goalRank)*20 : 0);
-    const grade = score >= 350 ? 'S' : score >= 250 ? 'A' : score >= 150 ? 'B' : 'C';
-    const ch = CHARACTERS.find(c => c.id === p.character);
-    return `<li class="ranking-item">
-      <span class="rank-num">${i+1}位</span>
-      <span class="rank-name">${ch.icon} ${p.name}</span>
-      <span class="rank-score">${score}pt</span>
-      <span class="rank-grade grade-${grade}">${grade}</span>
-    </li>`;
-  }).join('');
-
-  showScreen('result-screen');
-}
-
 // ===== ENDING =====
 function showEnding() {
+  gameEnded = true;
+  // Calculate total score
   const sorted = [...players].sort((a, b) => {
     const sa = a.money + a.motivation + a.contribution;
     const sb = b.money + b.motivation + b.contribution;
     return sb - sa;
   });
-  const winner = sorted[0];
-  let icon, title, message;
-
-  if (winner.contribution >= 100) {
-    icon = '🏆'; title = '伝説の社員エンド';
-    message = `${winner.name}はAODAISHOの歴史に名を刻む伝説のメンバーとなった。\n\n「場の発明」を通じて"おもしろい"を科学的にアプローチし、\n社会に広く普及するビジネスを創造する——\nその志を誰よりも体現した存在。\n\nクレド「成果にこだわる」「責務を全うする」を胸に、\nこれからもAODAISHOの未来を切り拓く。`;
-  } else if (winner.money >= 300) {
-    icon = '💎'; title = '大富豪エンド';
-    message = `${winner.name}は卓越したビジネスセンスで大きな成果を生み出した。\n\n「クライアントファースト」を貫き、\n顧客成果を起点に本質課題へ最短で導く支援を実現。\n\n「再現性」のある仕組みを構築し、\n継続的に成果を生むビジネスモデルを確立した。`;
-  } else if (winner.motivation <= 20) {
-    icon = '😮‍💨'; title = '燃え尽きエンド';
-    message = `${winner.name}は全力で走り続けた結果、少し疲れてしまった。\n\nでも大丈夫。「人の心を大切にする」——\nそれは自分自身の心も含まれる。\n\n仲間たちが回復を待っている。\nまた一緒に"おもしろい"をサイエンスしよう。`;
-  } else {
-    icon = '🌱'; title = 'バランス成長エンド';
-    message = `${winner.name}は着実に、バランスよく成長を続けてきた。\n\n「常に期待以上の価値である」ことを意識しながら、\n「礼儀礼節を重んじ」「誠実である」姿勢を貫いた——\nAODAISHOらしい歩み。\n\n「"おもしろい"をサイエンスしよう」\nこの旗の下に、これからも前へ。`;
-  }
-
-  document.getElementById('ending-icon').textContent = icon;
-  document.getElementById('ending-title').textContent = title;
-
-  // Typewriter effect
-  const textEl = document.getElementById('ending-text');
-  textEl.textContent = '';
-  let charIdx = 0;
-  const typeInterval = setInterval(() => {
-    if (charIdx < message.length) {
-      textEl.textContent += message[charIdx];
-      charIdx++;
-    } else {
-      clearInterval(typeInterval);
-    }
-  }, 40);
 
   showScreen('ending-screen');
-}
+  spawnConfetti();
 
-// ===== CONFETTI =====
-function fireConfetti() {
-  const container = document.getElementById('confetti-container');
-  const colors = ['#e8a020','#1a3a6b','#2e7d32','#c62828','#6a1b9a','#ff6f00','#00acc1'];
-  for (let i = 0; i < 50; i++) {
-    const piece = document.createElement('div');
-    piece.className = 'confetti-piece';
-    piece.style.left = Math.random() * 100 + '%';
-    piece.style.background = colors[Math.floor(Math.random()*colors.length)];
-    piece.style.animationDelay = Math.random() * 1 + 's';
-    piece.style.animationDuration = (2 + Math.random() * 2) + 's';
-    piece.style.width = (6 + Math.random()*8) + 'px';
-    piece.style.height = (6 + Math.random()*8) + 'px';
-    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-    container.appendChild(piece);
-  }
-  setTimeout(() => { container.innerHTML = ''; }, 4000);
-}
-
-// ===== RESET =====
-function resetAll() {
-  players = [];
-  playerCount = 0;
-  currentPlayerIdx = 0;
-  goalRankCounter = 0;
-  isSpinning = false;
-  document.querySelectorAll('.count-btn').forEach(b => b.classList.remove('selected'));
-  document.getElementById('btn-to-setup').disabled = true;
-  document.getElementById('roulette-wheel').textContent = '?';
-  showScreen('title-screen');
+  const list = document.getElementById('ranking-list');
+  list.innerHTML = '';
+  const medals = ['🥇','🥈','🥉','4️⃣'];
+  sorted.forEach((p, i) => {
+    const total = p.money + p.motivation + p.contribution;
+    const item = document.createElement('li');
+    item.className = 'ranking-item';
+    item.style.animationDelay = `${i * 0.2}s`;
+    item.innerHTML = `<span class="rank">${medals[i]}</span><span class="rank-name" style="color:${p.color}">${p.name}</span><span class="rank-score">💰${p.money} ❤️${p.motivation} ⭐${p.contribution} = ${total}pt</span>`;
+    list.appendChild(item);
+  });
 }
 </script>
 </body>
