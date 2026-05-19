@@ -283,13 +283,13 @@ function buildCharStage(){
 
     const tex=new THREE.CanvasTexture(canvas);
     tex.magFilter=THREE.LinearFilter;
-    const mat=new THREE.MeshBasicMaterial({map:tex,transparent:true,side:THREE.DoubleSide,alphaTest:0.05});
-    const geo=new THREE.PlaneGeometry(2.8,3.7);
-    const mesh=new THREE.Mesh(geo,mat);
-    mesh.position.set(x,1.5,z);
-    mesh.userData={charIdx:i,charData:ch};
-    charStageGroup.add(mesh);
-    charBillboards.push(mesh);
+    const mat=new THREE.SpriteMaterial({map:tex,transparent:true,fog:false});
+    const sprite=new THREE.Sprite(mat);
+    sprite.position.set(x,1.5,z);
+    sprite.scale.set(2.8,3.7,1);
+    sprite.userData={charIdx:i,charData:ch};
+    scene.add(sprite);
+    charBillboards.push(sprite);
 
     // Idle float
     gsap.to(mesh.position,{y:1.7,duration:1.8+i*0.15,ease:'sine.inOut',yoyo:true,repeat:-1});
@@ -458,6 +458,7 @@ function spawnTextParticles(texts,color){
 
 function cleanupCharStage(){
   if(charStageGroup){scene.remove(charStageGroup);charStageGroup=null;}
+  charBillboards.forEach(s=>scene.remove(s));
   charBillboards=[];
   if(charSpotlight){scene.remove(charSpotlight);scene.remove(charSpotlight.target);charSpotlight=null;}
 }
@@ -468,7 +469,7 @@ function lighten(hex,amt){const n=parseInt(hex.replace('#',''),16);return '#'+[1
 function initThree(){
   scene=new THREE.Scene();scene.background=new THREE.Color(0x0a0a1a);scene.fog=new THREE.FogExp2(0x0a0a1a,0.01);
   camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,0.1,200);camera.position.set(0,28,22);camera.lookAt(0,0,0);
-  renderer=new THREE.WebGLRenderer({canvas:document.getElementById('three-canvas'),antialias:true});
+  renderer=new THREE.WebGLRenderer({canvas:document.getElementById('three-canvas'),antialias:true,preserveDrawingBuffer:true});
   renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.2;
@@ -501,8 +502,7 @@ function animate(){
   const t=clock.getElapsedTime();
   if(particleSystem){particleSystem.rotation.y=t*0.015;const p=particleSystem.geometry.attributes.position.array;for(let i=1;i<p.length;i+=3)p[i]+=Math.sin(t+i)*.001;particleSystem.geometry.attributes.position.needsUpdate=true;}
   boardTiles.forEach((tile,i)=>{tile.position.y=Math.sin(t*.5+i*.3)*.03;});
-  // Billboard facing camera + keep camera looking at stage center during char select
-  charBillboards.forEach(bb=>bb.lookAt(camera.position));
+  // Keep camera looking at stage center during char select
   if(document.getElementById('char-screen').classList.contains('active')){camera.lookAt(0,1.5,0);}
   renderer.render(scene,camera);
 }
