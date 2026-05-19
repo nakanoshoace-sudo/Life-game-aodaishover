@@ -3,309 +3,867 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>人生ゲーム AODAISHO.ver マリオパーティー仕様</title>
+<title>人生ゲーム AODAISHO.ver - 3D Edition</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.158.0/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
 <style>
 :root {
-  --color-primary: #1a3a6b;
-  --color-accent: #e8a020;
-  --color-success: #2e7d32;
-  --color-danger: #c62828;
-  --color-bg: #faf6f0;
-  --color-card: #ffffff;
+  --neon-blue: #00f5ff;
+  --cyber-purple: #b967db;
+  --matrix-green: #39ff14;
+  --sunset-orange: #ff6b35;
+  --chrome-silver: #c0c0c0;
+  --dark-bg: #0a0a1a;
+  --card-bg: rgba(15, 15, 40, 0.92);
   --font-title: 'Noto Serif JP', serif;
   --font-body: 'Noto Sans JP', sans-serif;
-  --bonus: #4fc3f7;
-  --pinch: #ef5350;
-  --fate: #ffca28;
-  --history: #ab47bc;
-  --battle: #ff7043;
-  --hell: #880e4f;
-  --boss: #ffd700;
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
 
 body {
   font-family: var(--font-body);
-  background: var(--color-bg);
-  min-height:100vh;
-  overflow-x:hidden;
-  color:#333;
+  background: var(--dark-bg);
+  color: #fff;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
 }
 
+#three-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+}
+
+/* UI OVERLAY */
+#ui-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 10;
+  pointer-events: none;
+}
+#ui-overlay > * { pointer-events: auto; }
+
 /* SCREENS */
-.screen { display:none; width:100%; min-height:100vh; padding:20px; animation:fadeIn .4s ease; }
+.screen { display:none; width:100%; height:100%; position:absolute; top:0; left:0; }
 .screen.active { display:flex; flex-direction:column; align-items:center; justify-content:center; }
 
 @keyframes fadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-@keyframes popIn { 0%{transform:scale(0) rotate(-10deg);opacity:0} 60%{transform:scale(1.2) rotate(3deg)} 100%{transform:scale(1) rotate(0);opacity:1} }
-@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-@keyframes shake { 0%,100%{transform:translateX(0)} 10%{transform:translateX(-8px)} 20%{transform:translateX(8px)} 30%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 50%{transform:translateX(-4px)} 60%{transform:translateX(4px)} }
-@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
-@keyframes slideUp { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
-@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-@keyframes glow { 0%,100%{box-shadow:0 0 5px var(--color-accent)} 50%{box-shadow:0 0 30px var(--color-accent), 0 0 60px var(--color-accent)} }
-@keyframes flashRed { 0%,100%{background:rgba(136,14,79,0)} 50%{background:rgba(136,14,79,0.3)} }
-@keyframes confettiFall { 0%{transform:translateY(-100%) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
-@keyframes numberPop { 0%{transform:scale(0);opacity:0} 50%{transform:scale(1.5)} 100%{transform:scale(1);opacity:1} }
-@keyframes starBurst { 0%{transform:scale(0) rotate(0deg);opacity:1} 100%{transform:scale(3) rotate(180deg);opacity:0} }
+@keyframes popIn { 0%{transform:scale(0) rotate(-10deg);opacity:0} 60%{transform:scale(1.15) rotate(2deg)} 100%{transform:scale(1) rotate(0);opacity:1} }
+@keyframes glowPulse { 0%,100%{text-shadow:0 0 10px var(--neon-blue), 0 0 30px var(--neon-blue)} 50%{text-shadow:0 0 20px var(--neon-blue), 0 0 60px var(--neon-blue), 0 0 80px var(--cyber-purple)} }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+@keyframes slideUp { from{transform:translateY(60px);opacity:0} to{transform:translateY(0);opacity:1} }
+@keyframes confettiFall { 0%{transform:translateY(-20px) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(1080deg);opacity:0} }
+@keyframes neonFlicker { 0%,19%,21%,23%,25%,54%,56%,100%{opacity:1} 20%,24%,55%{opacity:0.4} }
+@keyframes spinIn { from{transform:rotate(-180deg) scale(0);opacity:0} to{transform:rotate(0) scale(1);opacity:1} }
 
 /* TITLE SCREEN */
-#title-screen { background:linear-gradient(135deg, #1a3a6b 0%, #2d5aa0 50%, #1a3a6b 100%); text-align:center; }
-#title-screen h1 { font-family:var(--font-title); font-size:3.2rem; color:#fff; text-shadow:3px 3px 0 rgba(0,0,0,0.3); margin-bottom:8px; }
-#title-screen .subtitle { font-size:1.4rem; color:var(--color-accent); font-weight:700; margin-bottom:6px; }
-#title-screen .version { font-size:1rem; color:rgba(255,255,255,0.7); margin-bottom:40px; }
-.start-btn { background:linear-gradient(135deg, var(--color-accent), #f5b731); color:#fff; font-size:1.5rem; font-weight:800; padding:18px 60px; border:none; border-radius:50px; cursor:pointer; box-shadow:0 6px 20px rgba(232,160,32,0.4); transition:all .2s; font-family:var(--font-body); }
-.start-btn:hover { transform:translateY(-3px) scale(1.05); box-shadow:0 10px 30px rgba(232,160,32,0.6); }
-.start-btn:active { transform:translateY(0) scale(0.98); }
+#title-screen {
+  background: radial-gradient(ellipse at center, #1a1a3e 0%, #0a0a1a 70%);
+  text-align: center;
+  animation: fadeIn 1s ease;
+}
+.title-logo {
+  font-family: var(--font-title);
+  font-size: 4rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--neon-blue), var(--cyber-purple), var(--matrix-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: glowPulse 3s ease infinite;
+  margin-bottom: 8px;
+}
+.title-sub {
+  font-size: 1.8rem;
+  color: var(--neon-blue);
+  font-weight: 700;
+  letter-spacing: 4px;
+  margin-bottom: 4px;
+}
+.title-edition {
+  font-size: 1rem;
+  color: var(--cyber-purple);
+  letter-spacing: 8px;
+  margin-bottom: 50px;
+  animation: neonFlicker 4s ease infinite;
+}
+.neon-btn {
+  background: transparent;
+  border: 2px solid var(--neon-blue);
+  color: var(--neon-blue);
+  font-size: 1.4rem;
+  font-weight: 700;
+  padding: 18px 60px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all .3s;
+  text-shadow: 0 0 10px var(--neon-blue);
+  box-shadow: 0 0 15px rgba(0,245,255,0.3), inset 0 0 15px rgba(0,245,255,0.1);
+}
+.neon-btn:hover {
+  background: rgba(0,245,255,0.15);
+  box-shadow: 0 0 30px rgba(0,245,255,0.5), inset 0 0 30px rgba(0,245,255,0.2);
+  transform: scale(1.05);
+}
+.neon-btn:active { transform: scale(0.98); }
 
-/* COUNT SCREEN */
-#count-screen { background:linear-gradient(180deg, #f0f4ff 0%, var(--color-bg) 100%); }
-#count-screen h2 { font-family:var(--font-title); font-size:2rem; margin-bottom:30px; color:var(--color-primary); }
+/* COUNT/NAME SCREENS */
+#count-screen, #name-screen {
+  background: radial-gradient(ellipse at center, rgba(26,26,62,0.95) 0%, rgba(10,10,26,0.98) 70%);
+}
+.screen h2 {
+  font-family: var(--font-title);
+  font-size: 2rem;
+  color: var(--neon-blue);
+  margin-bottom: 30px;
+  text-shadow: 0 0 20px rgba(0,245,255,0.5);
+}
 .count-btns { display:flex; gap:16px; margin-bottom:30px; }
-.count-btn { width:70px; height:70px; border-radius:50%; border:3px solid var(--color-primary); background:#fff; font-size:1.8rem; font-weight:800; cursor:pointer; transition:all .2s; color:var(--color-primary); }
-.count-btn.selected { background:var(--color-primary); color:#fff; transform:scale(1.15); box-shadow:0 4px 15px rgba(26,58,107,0.4); }
-.count-btn:hover { transform:scale(1.1); }
+.count-btn {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  border: 2px solid var(--cyber-purple);
+  background: rgba(185,103,219,0.1);
+  color: var(--cyber-purple);
+  font-size: 1.8rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all .3s;
+}
+.count-btn.selected {
+  background: var(--cyber-purple);
+  color: #fff;
+  box-shadow: 0 0 25px rgba(185,103,219,0.6);
+  transform: scale(1.15);
+}
+.count-btn:hover { transform: scale(1.1); border-color: var(--neon-blue); }
 
-/* NAME SCREEN */
-#name-screen { background:linear-gradient(180deg, #fff8e1 0%, var(--color-bg) 100%); }
-#name-screen h2 { font-family:var(--font-title); font-size:1.8rem; margin-bottom:24px; color:var(--color-primary); }
-.name-inputs { display:flex; flex-direction:column; gap:14px; margin-bottom:24px; width:100%; max-width:400px; }
+.name-inputs { display:flex; flex-direction:column; gap:14px; width:100%; max-width:420px; margin-bottom:28px; }
 .name-row { display:flex; align-items:center; gap:12px; }
-.name-row .player-color { width:28px; height:28px; border-radius:50%; flex-shrink:0; }
-.name-row input { flex:1; padding:12px 16px; border:2px solid #ddd; border-radius:12px; font-size:1rem; font-family:var(--font-body); transition:border-color .2s; }
-.name-row input:focus { outline:none; border-color:var(--color-accent); }
+.name-row .p-dot { width:24px; height:24px; border-radius:50%; flex-shrink:0; box-shadow: 0 0 10px currentColor; }
+.name-row input {
+  flex:1; padding:12px 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1rem;
+  font-family: var(--font-body);
+  transition: border-color .3s;
+}
+.name-row input:focus { outline:none; border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(0,245,255,0.3); }
 
-/* GAME SCREEN */
-#game-screen { padding:10px; min-height:100vh; justify-content:flex-start; background:#f0f0e8; }
-.player-status-bar { display:flex; gap:8px; width:100%; max-width:1024px; margin-bottom:10px; flex-wrap:wrap; }
-.player-card { flex:1; min-width:140px; background:#fff; border-radius:12px; padding:10px 12px; box-shadow:0 2px 8px rgba(0,0,0,0.1); border-top:4px solid #ccc; transition:all .3s; }
-.player-card.active-player { transform:scale(1.03); box-shadow:0 4px 16px rgba(0,0,0,0.2); animation:pulse 1.5s infinite; }
-.player-card .p-name { font-weight:700; font-size:.9rem; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.player-card .p-stats { font-size:.7rem; color:#666; line-height:1.5; }
-.player-card .p-item { font-size:.7rem; color:var(--color-accent); margin-top:2px; }
+/* GAME HUD */
+#game-hud {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 20;
+  pointer-events: none;
+}
+#game-hud.active { display: block; }
+#game-hud > * { pointer-events: auto; }
 
-/* BOARD */
-.board-container { width:100%; max-width:1024px; overflow-x:auto; margin-bottom:10px; }
-.board { display:grid; grid-template-columns:repeat(5, 1fr); gap:6px; padding:8px; background:#fff; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,0.1); }
-.cell { position:relative; aspect-ratio:1; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.7rem; font-weight:600; cursor:default; transition:all .2s; border:2px solid rgba(0,0,0,0.1); }
-.cell .cell-num { position:absolute; top:2px; left:5px; font-size:.55rem; opacity:0.6; }
-.cell .cell-icon { font-size:1.4rem; }
-.cell .cell-label { font-size:.5rem; margin-top:1px; opacity:0.8; }
-.cell.type-bonus { background:linear-gradient(135deg, #e3f2fd, #bbdefb); border-color:#4fc3f7; }
-.cell.type-pinch { background:linear-gradient(135deg, #ffebee, #ffcdd2); border-color:#ef5350; }
-.cell.type-fate { background:linear-gradient(135deg, #fffde7, #fff9c4); border-color:#ffca28; }
-.cell.type-history { background:linear-gradient(135deg, #f3e5f5, #e1bee7); border-color:#ab47bc; }
-.cell.type-battle { background:linear-gradient(135deg, #fbe9e7, #ffccbc); border-color:#ff7043; }
-.cell.type-hell { background:linear-gradient(135deg, #fce4ec, #f8bbd0); border-color:#880e4f; }
-.cell.type-boss { background:linear-gradient(135deg, #fff8e1, #ffecb3); border-color:#ffd700; animation:glow 2s infinite; }
-.cell.type-start { background:linear-gradient(135deg, #e8f5e9, #c8e6c9); border-color:#66bb6a; }
-.cell.type-goal { background:linear-gradient(135deg, #fff3e0, #ffe0b2); border-color:#ffa726; }
+.hud-top {
+  position: absolute;
+  top: 12px; left: 12px; right: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.hud-card {
+  flex: 1;
+  min-width: 150px;
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  border-radius: 14px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: all .3s;
+}
+.hud-card.active-turn {
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 15px rgba(0,245,255,0.3);
+}
+.hud-card .hc-name { font-weight: 700; font-size: .85rem; margin-bottom: 3px; }
+.hud-card .hc-stats { font-size: .7rem; color: rgba(255,255,255,0.7); line-height: 1.5; }
+.hud-card .hc-item { font-size: .65rem; color: var(--cyber-purple); margin-top: 2px; }
 
-/* PIECES */
-.piece { position:absolute; width:18px; height:18px; border-radius:50%; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,0.3); z-index:10; transition:all .5s cubic-bezier(0.34, 1.56, 0.64, 1); font-size:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; }
-
-/* CONTROLS */
-.controls { display:flex; align-items:center; gap:12px; width:100%; max-width:1024px; flex-wrap:wrap; }
-.turn-info { font-family:var(--font-title); font-size:1.1rem; font-weight:700; color:var(--color-primary); }
-.roulette-btn { background:linear-gradient(135deg, #e53935, #ff5722); color:#fff; font-size:1.2rem; font-weight:800; padding:14px 36px; border:none; border-radius:30px; cursor:pointer; box-shadow:0 4px 15px rgba(229,57,53,0.4); transition:all .2s; font-family:var(--font-body); }
-.roulette-btn:hover:not(:disabled) { transform:scale(1.05); box-shadow:0 6px 20px rgba(229,57,53,0.5); }
-.roulette-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
-.item-btn { background:linear-gradient(135deg, #7b1fa2, #9c27b0); color:#fff; font-size:.9rem; font-weight:700; padding:10px 20px; border:none; border-radius:20px; cursor:pointer; transition:all .2s; }
-.item-btn:hover:not(:disabled) { transform:scale(1.05); }
-.item-btn:disabled { opacity:0.4; cursor:not-allowed; }
-.roulette-display { font-size:2.5rem; font-weight:900; color:var(--color-danger); min-width:60px; text-align:center; font-family:var(--font-title); }
+.hud-bottom {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  border-radius: 30px;
+  padding: 12px 28px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.hud-turn-label {
+  font-family: var(--font-title);
+  font-size: 1rem;
+  color: var(--neon-blue);
+}
+.dice-display {
+  font-size: 2.5rem;
+  font-weight: 900;
+  min-width: 50px;
+  text-align: center;
+  color: var(--matrix-green);
+  text-shadow: 0 0 15px var(--matrix-green);
+}
+.roll-btn {
+  background: linear-gradient(135deg, var(--sunset-orange), #ff3d00);
+  color: #fff;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all .2s;
+  box-shadow: 0 4px 15px rgba(255,107,53,0.4);
+}
+.roll-btn:hover:not(:disabled) { transform: scale(1.06); box-shadow: 0 6px 25px rgba(255,107,53,0.6); }
+.roll-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.item-btn {
+  background: linear-gradient(135deg, var(--cyber-purple), #8e24aa);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: .85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+}
+.item-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
 /* EVENT MODAL */
-.event-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(6px); z-index:1000; align-items:center; justify-content:center; padding:20px; }
-.event-overlay.show { display:flex; }
-.event-card { background:#fff; border-radius:24px; padding:40px 32px; max-width:500px; width:100%; text-align:center; animation:popIn .5s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow:0 20px 60px rgba(0,0,0,0.3); position:relative; overflow:hidden; }
-.event-card .event-emoji { font-size:96px; margin-bottom:16px; animation:bounce 1s ease infinite; }
-.event-card .event-title { font-family:var(--font-title); font-size:1.6rem; font-weight:900; margin-bottom:12px; color:var(--color-primary); }
-.event-card .event-desc { font-size:1rem; line-height:1.7; color:#555; margin-bottom:20px; }
-.event-card .event-effects { display:flex; justify-content:center; gap:16px; margin-bottom:20px; flex-wrap:wrap; }
-.effect-badge { padding:6px 14px; border-radius:20px; font-weight:700; font-size:.9rem; animation:numberPop .4s ease; }
-.effect-badge.positive { background:#e8f5e9; color:#2e7d32; }
-.effect-badge.negative { background:#ffebee; color:#c62828; }
-.event-card .event-close-btn { background:var(--color-primary); color:#fff; border:none; padding:12px 36px; border-radius:25px; font-size:1rem; font-weight:700; cursor:pointer; transition:all .2s; }
-.event-card .event-close-btn:hover { transform:scale(1.05); background:#2d5aa0; }
+.event-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.event-overlay.show { display: flex; }
+.event-card {
+  background: var(--card-bg);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 24px;
+  padding: 40px 32px;
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+  animation: popIn .5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(0,245,255,0.1);
+}
+.event-card .ev-emoji { font-size: 80px; margin-bottom: 16px; animation: float 2s ease infinite; }
+.event-card .ev-title { font-family: var(--font-title); font-size: 1.5rem; font-weight: 900; margin-bottom: 12px; color: var(--neon-blue); }
+.event-card .ev-desc { font-size: .95rem; line-height: 1.8; color: rgba(255,255,255,0.8); margin-bottom: 20px; }
+.event-card .ev-effects { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+.ev-badge { padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: .85rem; animation: slideUp .4s ease; }
+.ev-badge.pos { background: rgba(57,255,20,0.15); color: var(--matrix-green); border: 1px solid rgba(57,255,20,0.3); }
+.ev-badge.neg { background: rgba(255,107,53,0.15); color: var(--sunset-orange); border: 1px solid rgba(255,107,53,0.3); }
+.ev-close-btn {
+  background: linear-gradient(135deg, var(--neon-blue), var(--cyber-purple));
+  color: #fff;
+  border: none;
+  padding: 12px 40px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+}
+.ev-close-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(0,245,255,0.4); }
 
-/* SHAKE EFFECT */
-.shaking { animation:shake .5s ease; }
-.flash-red { animation:flashRed .3s ease 3; }
+/* MINIGAME OVERLAY */
+.minigame-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(10px);
+  z-index: 110;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.minigame-overlay.show { display: flex; }
+.mg-card {
+  background: var(--card-bg);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 24px;
+  padding: 40px;
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+  animation: slideUp .4s ease;
+}
+.mg-card h3 { font-family: var(--font-title); font-size: 1.4rem; color: var(--neon-blue); margin-bottom: 12px; }
+.mg-card p { color: rgba(255,255,255,0.7); margin-bottom: 16px; line-height: 1.6; }
 
-/* CONFETTI */
-.confetti-piece { position:fixed; width:10px; height:10px; top:-10px; z-index:2000; animation:confettiFall 3s linear forwards; pointer-events:none; }
+.tap-area {
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--sunset-orange), #ff3d00);
+  color: #fff;
+  font-size: 3rem;
+  display: flex; align-items: center; justify-content: center;
+  margin: 16px auto;
+  cursor: pointer;
+  user-select: none;
+  transition: transform .08s;
+  box-shadow: 0 0 30px rgba(255,107,53,0.4);
+}
+.tap-area:active { transform: scale(0.88); }
+.tap-counter { font-size: 2rem; font-weight: 900; color: var(--matrix-green); margin: 10px 0; }
+.tap-timer { font-size: 1.1rem; color: rgba(255,255,255,0.6); }
 
-/* MINI-GAME OVERLAYS */
-.minigame-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); z-index:1100; align-items:center; justify-content:center; padding:20px; }
-.minigame-overlay.show { display:flex; }
-.minigame-card { background:#fff; border-radius:24px; padding:40px; max-width:500px; width:100%; text-align:center; animation:slideUp .4s ease; }
-.minigame-card h3 { font-family:var(--font-title); font-size:1.5rem; margin-bottom:16px; color:var(--color-primary); }
-.minigame-card p { margin-bottom:20px; color:#555; line-height:1.6; }
-.tap-area { width:200px; height:200px; border-radius:50%; background:linear-gradient(135deg, #e53935, #ff5722); color:#fff; font-size:3rem; font-weight:900; display:flex; align-items:center; justify-content:center; margin:20px auto; cursor:pointer; user-select:none; transition:transform .1s; box-shadow:0 8px 25px rgba(229,57,53,0.4); }
-.tap-area:active { transform:scale(0.9); }
-.tap-counter { font-size:2rem; font-weight:900; color:var(--color-danger); margin:10px 0; }
-.tap-timer { font-size:1.2rem; color:#666; }
+.janken-choices { display: flex; gap: 16px; justify-content: center; margin: 20px 0; }
+.janken-btn {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.05);
+  font-size: 2.5rem;
+  cursor: pointer;
+  transition: all .2s;
+}
+.janken-btn:hover { transform: scale(1.15); border-color: var(--neon-blue); box-shadow: 0 0 20px rgba(0,245,255,0.3); }
 
-/* JANKEN */
-.janken-choices { display:flex; gap:16px; justify-content:center; margin:20px 0; }
-.janken-btn { width:80px; height:80px; border-radius:50%; border:3px solid #ddd; background:#fff; font-size:2.5rem; cursor:pointer; transition:all .2s; }
-.janken-btn:hover { transform:scale(1.15); border-color:var(--color-accent); }
-.janken-result { font-size:1.5rem; font-weight:800; margin:16px 0; }
-
-/* SLOT MACHINE */
-.slot-machine { display:flex; gap:8px; justify-content:center; margin:20px 0; }
-.slot-reel { width:70px; height:90px; border:3px solid var(--color-primary); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:2.5rem; overflow:hidden; background:#f9f9f9; }
-.slot-reel.spinning { animation:spin .3s linear infinite; }
-.slot-stop-btn { background:linear-gradient(135deg, var(--color-accent), #f5b731); color:#fff; padding:12px 30px; border:none; border-radius:25px; font-size:1rem; font-weight:700; cursor:pointer; margin-top:16px; }
+.slot-machine { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
+.slot-reel {
+  width: 70px; height: 90px;
+  border: 2px solid var(--cyber-purple);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.5rem;
+  background: rgba(185,103,219,0.1);
+  transition: all .2s;
+}
+.slot-reel.stopped { border-color: var(--matrix-green); box-shadow: 0 0 15px rgba(57,255,20,0.3); }
+.slot-stop-btn {
+  background: linear-gradient(135deg, var(--cyber-purple), #6a1b9a);
+  color: #fff;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 16px;
+}
 
 /* TURN TRANSITION */
-.turn-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg, var(--color-primary), #2d5aa0); z-index:900; align-items:center; justify-content:center; flex-direction:column; }
-.turn-overlay.show { display:flex; }
-.turn-overlay h2 { color:#fff; font-family:var(--font-title); font-size:2.5rem; margin-bottom:16px; animation:popIn .5s ease; }
-.turn-overlay .countdown { color:var(--color-accent); font-size:4rem; font-weight:900; }
+.turn-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: radial-gradient(ellipse, rgba(10,10,26,0.95), rgba(0,0,0,0.98));
+  z-index: 90;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.turn-overlay.show { display: flex; }
+.turn-overlay h2 { font-family: var(--font-title); font-size: 2.5rem; margin-bottom: 16px; animation: popIn .5s ease; }
+.turn-overlay .countdown { font-size: 5rem; font-weight: 900; color: var(--neon-blue); text-shadow: 0 0 30px var(--neon-blue); }
 
 /* ENDING */
-#ending-screen { background:linear-gradient(135deg, #1a3a6b, #0d47a1); min-height:100vh; text-align:center; }
-#ending-screen h1 { font-family:var(--font-title); font-size:2.5rem; color:#fff; margin-bottom:24px; }
-.ranking-list { list-style:none; width:100%; max-width:500px; }
-.ranking-item { background:rgba(255,255,255,0.1); backdrop-filter:blur(5px); border-radius:16px; padding:16px 20px; margin-bottom:12px; display:flex; align-items:center; gap:16px; animation:slideUp .5s ease; color:#fff; }
-.ranking-item .rank { font-size:2rem; font-weight:900; }
-.ranking-item .rank-name { font-size:1.2rem; font-weight:700; flex:1; }
-.ranking-item .rank-score { font-size:1rem; opacity:0.8; }
-.ranking-item:first-child { background:linear-gradient(135deg, rgba(255,215,0,0.3), rgba(255,193,7,0.2)); border:2px solid rgba(255,215,0,0.5); }
-.play-again-btn { margin-top:30px; background:linear-gradient(135deg, var(--color-accent), #f5b731); color:#fff; font-size:1.2rem; font-weight:800; padding:16px 50px; border:none; border-radius:30px; cursor:pointer; }
+#ending-screen {
+  background: radial-gradient(ellipse at center, #1a1a3e 0%, #0a0a1a 70%);
+}
+#ending-screen h1 {
+  font-family: var(--font-title);
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, var(--neon-blue), var(--cyber-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 30px;
+}
+.ranking-list { list-style: none; width: 100%; max-width: 520px; }
+.ranking-item {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  animation: slideUp .5s ease;
+}
+.ranking-item:first-child { border-color: rgba(255,215,0,0.5); background: rgba(255,215,0,0.08); box-shadow: 0 0 20px rgba(255,215,0,0.1); }
+.ranking-item .rank { font-size: 2rem; }
+.ranking-item .r-name { font-size: 1.1rem; font-weight: 700; flex: 1; }
+.ranking-item .r-score { font-size: .85rem; color: rgba(255,255,255,0.6); }
+.restart-btn { margin-top: 30px; }
+
+/* CONFETTI */
+.confetti-piece {
+  position: fixed;
+  width: 10px; height: 10px;
+  top: -10px;
+  z-index: 200;
+  animation: confettiFall 3s linear forwards;
+  pointer-events: none;
+}
+
+/* SHAKING */
+.shaking { animation: shake .5s ease; }
 
 /* RESPONSIVE */
 @media (max-width:768px) {
-  .board { grid-template-columns:repeat(5,1fr); gap:4px; padding:4px; }
-  .cell { font-size:.6rem; }
-  .cell .cell-icon { font-size:1.1rem; }
-  .player-card { min-width:100px; padding:8px; }
-  .player-card .p-name { font-size:.75rem; }
-  .player-card .p-stats { font-size:.6rem; }
-  #title-screen h1 { font-size:2.2rem; }
-  .event-card { padding:24px 20px; }
-  .event-card .event-emoji { font-size:64px; }
+  .title-logo { font-size: 2.5rem; }
+  .hud-card { min-width: 100px; padding: 8px 10px; }
+  .hud-card .hc-name { font-size: .75rem; }
+  .hud-bottom { padding: 10px 16px; gap: 10px; }
+  .event-card { padding: 24px 20px; }
+  .event-card .ev-emoji { font-size: 56px; }
 }
 </style>
 </head>
 <body>
 
-<!-- TITLE -->
-<div id="title-screen" class="screen active">
-  <h1>人生ゲーム</h1>
-  <div class="subtitle">AODAISHO.ver</div>
-  <div class="version">〜 マリオパーティー仕様 〜</div>
-  <button class="start-btn" onclick="showScreen('count-screen')">🎮 ゲームスタート</button>
-</div>
+<canvas id="three-canvas"></canvas>
 
-<!-- PLAYER COUNT -->
-<div id="count-screen" class="screen">
-  <h2>何人でプレイする？</h2>
-  <div class="count-btns">
-    <button class="count-btn" onclick="selectCount(1)">1</button>
-    <button class="count-btn" onclick="selectCount(2)">2</button>
-    <button class="count-btn" onclick="selectCount(3)">3</button>
-    <button class="count-btn" onclick="selectCount(4)">4</button>
+<div id="ui-overlay">
+  <!-- TITLE -->
+  <div id="title-screen" class="screen active">
+    <div class="title-logo">人生ゲーム</div>
+    <div class="title-sub">AODAISHO.ver</div>
+    <div class="title-edition">— 3D EDITION —</div>
+    <button class="neon-btn" onclick="showScreen('count-screen')">🎮 GAME START</button>
   </div>
-  <button class="start-btn" id="count-next-btn" disabled onclick="showScreen('name-screen')">次へ →</button>
-</div>
 
-<!-- NAME INPUT -->
-<div id="name-screen" class="screen">
-  <h2>名前を入力しよう</h2>
-  <div class="name-inputs" id="name-inputs"></div>
-  <button class="start-btn" onclick="startGame()">ゲーム開始！</button>
-</div>
-
-<!-- GAME -->
-<div id="game-screen" class="screen">
-  <div class="player-status-bar" id="player-status-bar"></div>
-  <div class="board-container">
-    <div class="board" id="board"></div>
+  <!-- COUNT -->
+  <div id="count-screen" class="screen">
+    <h2>何人でプレイする？</h2>
+    <div class="count-btns">
+      <button class="count-btn" onclick="selectCount(1)">1</button>
+      <button class="count-btn" onclick="selectCount(2)">2</button>
+      <button class="count-btn" onclick="selectCount(3)">3</button>
+      <button class="count-btn" onclick="selectCount(4)">4</button>
+    </div>
+    <button class="neon-btn" id="count-next-btn" disabled onclick="showScreen('name-screen')">NEXT →</button>
   </div>
-  <div class="controls">
-    <div class="turn-info" id="turn-info"></div>
-    <div class="roulette-display" id="roulette-display">?</div>
-    <button class="roulette-btn" id="roulette-btn" onclick="spinRoulette()">🎲 ルーレット</button>
-    <button class="item-btn" id="item-btn" disabled onclick="useItem()">🎒 アイテム</button>
+
+  <!-- NAME -->
+  <div id="name-screen" class="screen">
+    <h2>名前を入力</h2>
+    <div class="name-inputs" id="name-inputs"></div>
+    <button class="neon-btn" onclick="startGame()">START!</button>
+  </div>
+
+  <!-- ENDING -->
+  <div id="ending-screen" class="screen">
+    <h1>🏆 RESULT 🏆</h1>
+    <ul class="ranking-list" id="ranking-list"></ul>
+    <button class="neon-btn restart-btn" onclick="location.reload()">PLAY AGAIN</button>
   </div>
 </div>
 
-<!-- ENDING -->
-<div id="ending-screen" class="screen">
-  <h1>🏆 結果発表 🏆</h1>
-  <ul class="ranking-list" id="ranking-list"></ul>
-  <button class="play-again-btn" onclick="location.reload()">もう一回遊ぶ！</button>
+<!-- GAME HUD (separate layer) -->
+<div id="game-hud">
+  <div class="hud-top" id="hud-top"></div>
+  <div class="hud-bottom">
+    <span class="hud-turn-label" id="hud-turn-label">Turn 1</span>
+    <span class="dice-display" id="dice-display">?</span>
+    <button class="roll-btn" id="roll-btn" onclick="rollDice()">🎲 ROLL</button>
+    <button class="item-btn" id="item-btn" disabled onclick="useItem()">🎒</button>
+  </div>
 </div>
 
 <!-- EVENT OVERLAY -->
 <div class="event-overlay" id="event-overlay">
   <div class="event-card" id="event-card">
-    <div class="event-emoji" id="event-emoji"></div>
-    <div class="event-title" id="event-title"></div>
-    <div class="event-desc" id="event-desc"></div>
-    <div class="event-effects" id="event-effects"></div>
-    <button class="event-close-btn" onclick="closeEvent()">OK</button>
+    <div class="ev-emoji" id="ev-emoji"></div>
+    <div class="ev-title" id="ev-title"></div>
+    <div class="ev-desc" id="ev-desc"></div>
+    <div class="ev-effects" id="ev-effects"></div>
+    <button class="ev-close-btn" onclick="closeEvent()">OK</button>
   </div>
 </div>
 
-<!-- MINIGAME OVERLAY -->
+<!-- MINIGAME -->
 <div class="minigame-overlay" id="minigame-overlay">
-  <div class="minigame-card" id="minigame-card"></div>
+  <div class="mg-card" id="mg-card"></div>
 </div>
 
 <!-- TURN TRANSITION -->
 <div class="turn-overlay" id="turn-overlay">
-  <h2 id="turn-overlay-text"></h2>
+  <h2 id="turn-text"></h2>
   <div class="countdown" id="turn-countdown"></div>
 </div>
 
 <script>
+// ===== THREE.JS SETUP =====
+let scene, camera, renderer, clock;
+let boardTiles = [];
+let playerMeshes = [];
+let diceMesh = null;
+let particleSystem = null;
+
+function initThree() {
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0a0a1a);
+  scene.fog = new THREE.FogExp2(0x0a0a1a, 0.012);
+
+  camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
+  camera.position.set(0, 28, 22);
+  camera.lookAt(0, 0, 0);
+
+  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2;
+
+  clock = new THREE.Clock();
+
+  setupLighting();
+  createEnvironment();
+  createBoard3D();
+  createFloatingParticles();
+
+  window.addEventListener('resize', onResize);
+  animate();
+}
+
+function setupLighting() {
+  const ambient = new THREE.AmbientLight(0x404060, 0.5);
+  scene.add(ambient);
+
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+  dirLight.position.set(15, 25, 15);
+  dirLight.castShadow = true;
+  dirLight.shadow.mapSize.width = 2048;
+  dirLight.shadow.mapSize.height = 2048;
+  dirLight.shadow.camera.near = 1;
+  dirLight.shadow.camera.far = 60;
+  dirLight.shadow.camera.left = -30;
+  dirLight.shadow.camera.right = 30;
+  dirLight.shadow.camera.top = 30;
+  dirLight.shadow.camera.bottom = -30;
+  scene.add(dirLight);
+
+  const neonLight1 = new THREE.PointLight(0x00f5ff, 0.8, 40);
+  neonLight1.position.set(-10, 8, -10);
+  scene.add(neonLight1);
+
+  const neonLight2 = new THREE.PointLight(0xb967db, 0.6, 40);
+  neonLight2.position.set(10, 8, 10);
+  scene.add(neonLight2);
+
+  const greenLight = new THREE.PointLight(0x39ff14, 0.4, 30);
+  greenLight.position.set(0, 5, 0);
+  scene.add(greenLight);
+}
+
+function createEnvironment() {
+  // Ground plane
+  const groundGeo = new THREE.PlaneGeometry(80, 80);
+  const groundMat = new THREE.MeshStandardMaterial({ color: 0x080818, roughness: 0.9, metalness: 0.1 });
+  const ground = new THREE.Mesh(groundGeo, groundMat);
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.y = -0.5;
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // Grid lines
+  const gridHelper = new THREE.GridHelper(60, 30, 0x1a1a3e, 0x1a1a3e);
+  gridHelper.position.y = -0.49;
+  scene.add(gridHelper);
+}
+
+// ===== BOARD 3D =====
+const TILE_SIZE = 2.2;
+const TILE_GAP = 0.3;
+const TOTAL_CELLS = 25;
+
+const boardLayout = [
+  {type:'start', icon:'🚀', label:'START', color:0x66bb6a},
+  {type:'bonus', icon:'🔵', label:'ボーナス', color:0x39ff14},
+  {type:'fate', icon:'🟡', label:'運命', color:0xffca28},
+  {type:'pinch', icon:'🔴', label:'ピンチ', color:0xff6b35},
+  {type:'history', icon:'⭐', label:'歴史', color:0xb967db},
+  {type:'battle', icon:'🆚', label:'対決', color:0xff7043},
+  {type:'bonus', icon:'🔵', label:'ボーナス', color:0x39ff14},
+  {type:'boss', icon:'🎭', label:'社長', color:0xffd700},
+  {type:'pinch', icon:'🔴', label:'ピンチ', color:0xff6b35},
+  {type:'fate', icon:'🟡', label:'運命', color:0xffca28},
+  {type:'hell', icon:'💀', label:'地獄', color:0x880e4f},
+  {type:'bonus', icon:'🔵', label:'ボーナス', color:0x39ff14},
+  {type:'history', icon:'⭐', label:'歴史', color:0xb967db},
+  {type:'battle', icon:'🆚', label:'対決', color:0xff7043},
+  {type:'pinch', icon:'🔴', label:'ピンチ', color:0xff6b35},
+  {type:'fate', icon:'🟡', label:'運命', color:0xffca28},
+  {type:'bonus', icon:'🔵', label:'ボーナス', color:0x39ff14},
+  {type:'hell', icon:'💀', label:'地獄', color:0x880e4f},
+  {type:'boss', icon:'🎭', label:'社長', color:0xffd700},
+  {type:'history', icon:'⭐', label:'歴史', color:0xb967db},
+  {type:'pinch', icon:'🔴', label:'ピンチ', color:0xff6b35},
+  {type:'bonus', icon:'🔵', label:'ボーナス', color:0x39ff14},
+  {type:'battle', icon:'🆚', label:'対決', color:0xff7043},
+  {type:'fate', icon:'🟡', label:'運命', color:0xffca28},
+  {type:'goal', icon:'🏁', label:'GOAL', color:0xffa726}
+];
+
+function getTilePosition(index) {
+  // Snake layout: 5 columns, alternating direction
+  const row = Math.floor(index / 5);
+  const colInRow = index % 5;
+  const col = (row % 2 === 0) ? colInRow : (4 - colInRow);
+  const x = (col - 2) * (TILE_SIZE + TILE_GAP);
+  const z = (row - 2) * (TILE_SIZE + TILE_GAP);
+  return new THREE.Vector3(x, 0, z);
+}
+
+function createBoard3D() {
+  for (let i = 0; i < TOTAL_CELLS; i++) {
+    const data = boardLayout[i];
+    const pos = getTilePosition(i);
+
+    // Tile mesh
+    const geo = new THREE.BoxGeometry(TILE_SIZE, 0.4, TILE_SIZE);
+    const mat = new THREE.MeshStandardMaterial({
+      color: data.color,
+      emissive: data.color,
+      emissiveIntensity: 0.15,
+      roughness: 0.4,
+      metalness: 0.2,
+      flatShading: true
+    });
+    const tile = new THREE.Mesh(geo, mat);
+    tile.position.copy(pos);
+    tile.castShadow = true;
+    tile.receiveShadow = true;
+    tile.userData = { index: i, type: data.type };
+    scene.add(tile);
+    boardTiles.push(tile);
+
+    // Edge glow
+    const edgeGeo = new THREE.BoxGeometry(TILE_SIZE + 0.1, 0.05, TILE_SIZE + 0.1);
+    const edgeMat = new THREE.MeshBasicMaterial({ color: data.color, transparent: true, opacity: 0.3 });
+    const edge = new THREE.Mesh(edgeGeo, edgeMat);
+    edge.position.copy(pos);
+    edge.position.y = -0.15;
+    scene.add(edge);
+
+    // Index number as small pillar
+    if (data.type === 'start' || data.type === 'goal' || data.type === 'boss') {
+      const pillarGeo = new THREE.CylinderGeometry(0.1, 0.15, 1.5, 6);
+      const pillarMat = new THREE.MeshStandardMaterial({ color: data.color, emissive: data.color, emissiveIntensity: 0.5 });
+      const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+      pillar.position.copy(pos);
+      pillar.position.y = 0.95;
+      scene.add(pillar);
+    }
+  }
+}
+
+function createFloatingParticles() {
+  const count = 200;
+  const geo = new THREE.BufferGeometry();
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+
+  for (let i = 0; i < count; i++) {
+    positions[i * 3] = (Math.random() - 0.5) * 60;
+    positions[i * 3 + 1] = Math.random() * 20 + 2;
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 60;
+
+    const color = new THREE.Color();
+    color.setHSL(Math.random() * 0.3 + 0.5, 0.8, 0.6);
+    colors[i * 3] = color.r;
+    colors[i * 3 + 1] = color.g;
+    colors[i * 3 + 2] = color.b;
+  }
+
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+  const mat = new THREE.PointsMaterial({ size: 0.15, vertexColors: true, transparent: true, opacity: 0.6 });
+  particleSystem = new THREE.Points(geo, mat);
+  scene.add(particleSystem);
+}
+
+// ===== PLAYER 3D TOKENS =====
+const PLAYER_COLORS_HEX = [0xff4757, 0x3742fa, 0x2ed573, 0xffa502];
+const PLAYER_COLORS_CSS = ['#ff4757', '#3742fa', '#2ed573', '#ffa502'];
+
+function createPlayerTokens() {
+  playerMeshes = [];
+  players.forEach((p, i) => {
+    const group = new THREE.Group();
+
+    // Body (low-poly cylinder)
+    const bodyGeo = new THREE.CylinderGeometry(0.3, 0.4, 0.9, 8);
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: PLAYER_COLORS_HEX[i],
+      flatShading: true,
+      roughness: 0.5,
+      metalness: 0.2,
+      emissive: PLAYER_COLORS_HEX[i],
+      emissiveIntensity: 0.1
+    });
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.position.y = 0.65;
+    body.castShadow = true;
+    group.add(body);
+
+    // Head (dodecahedron)
+    const headGeo = new THREE.DodecahedronGeometry(0.25, 0);
+    const headMat = new THREE.MeshStandardMaterial({ color: 0xffcc99, flatShading: true, roughness: 0.7 });
+    const head = new THREE.Mesh(headGeo, headMat);
+    head.position.y = 1.35;
+    head.castShadow = true;
+    group.add(head);
+
+    // Base glow ring
+    const ringGeo = new THREE.RingGeometry(0.35, 0.55, 16);
+    const ringMat = new THREE.MeshBasicMaterial({ color: PLAYER_COLORS_HEX[i], transparent: true, opacity: 0.6, side: THREE.DoubleSide });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = 0.21;
+    group.add(ring);
+
+    // Position at start
+    const startPos = getTilePosition(0);
+    group.position.set(startPos.x + (i - 1.5) * 0.4, 0, startPos.z + (i < 2 ? -0.3 : 0.3));
+
+    scene.add(group);
+    playerMeshes.push(group);
+
+    // Idle float animation
+    gsap.to(group.position, { y: '+=0.15', duration: 1.5 + i * 0.2, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+  });
+}
+
+function moveToken3D(playerIndex, targetTileIndex) {
+  return new Promise(resolve => {
+    const token = playerMeshes[playerIndex];
+    const targetPos = getTilePosition(targetTileIndex);
+    // Offset to avoid overlap
+    const offsetX = (playerIndex - 1.5) * 0.35;
+    const offsetZ = (playerIndex < 2 ? -0.25 : 0.25);
+
+    const tl = gsap.timeline({ onComplete: resolve });
+    tl.to(token.position, { y: 2.5, duration: 0.3, ease: 'power2.out' });
+    tl.to(token.position, { x: targetPos.x + offsetX, z: targetPos.z + offsetZ, duration: 0.5, ease: 'power2.inOut' }, '-=0.1');
+    tl.to(token.position, { y: 0, duration: 0.4, ease: 'bounce.out' });
+    tl.to(token.rotation, { y: '+=1', duration: 0.3, ease: 'power1.out' }, '-=0.4');
+
+    // Glow the target tile
+    const tile = boardTiles[targetTileIndex];
+    if (tile) {
+      gsap.to(tile.material, { emissiveIntensity: 0.8, duration: 0.3, yoyo: true, repeat: 1 });
+      gsap.to(tile.position, { y: 0.2, duration: 0.2, yoyo: true, repeat: 1 });
+    }
+  });
+}
+
+// ===== 3D DICE =====
+function createDice3D() {
+  const geo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+  const mats = [];
+  const faceColors = [0xffffff, 0xffffff, 0xffffff, 0xffffff, 0xffffff, 0xffffff];
+  faceColors.forEach(c => {
+    mats.push(new THREE.MeshStandardMaterial({ color: c, roughness: 0.3, metalness: 0.1 }));
+  });
+  diceMesh = new THREE.Mesh(geo, mats);
+  diceMesh.position.set(0, 15, 0);
+  diceMesh.castShadow = true;
+  diceMesh.visible = false;
+  scene.add(diceMesh);
+}
+
+function animateDiceRoll(result) {
+  return new Promise(resolve => {
+    diceMesh.visible = true;
+    diceMesh.position.set(0, 8, 0);
+
+    const tl = gsap.timeline({ onComplete: () => { diceMesh.visible = false; resolve(); } });
+    // Spin
+    tl.to(diceMesh.rotation, { x: Math.PI * 4 + Math.random() * 2, y: Math.PI * 3 + Math.random() * 2, z: Math.PI * 2, duration: 1.5, ease: 'power3.out' });
+    // Fall
+    tl.to(diceMesh.position, { y: 1, duration: 1.2, ease: 'bounce.out' }, '<0.3');
+    // Scale pop
+    tl.to(diceMesh.scale, { x: 1.3, y: 1.3, z: 1.3, duration: 0.15, yoyo: true, repeat: 1 }, '-=0.3');
+  });
+}
+
+// ===== ANIMATION LOOP =====
+function animate() {
+  requestAnimationFrame(animate);
+  const time = clock.getElapsedTime();
+
+  // Rotate particles slowly
+  if (particleSystem) {
+    particleSystem.rotation.y = time * 0.02;
+    const positions = particleSystem.geometry.attributes.position.array;
+    for (let i = 1; i < positions.length; i += 3) {
+      positions[i] += Math.sin(time + i) * 0.002;
+    }
+    particleSystem.geometry.attributes.position.needsUpdate = true;
+  }
+
+  // Subtle tile animations
+  boardTiles.forEach((tile, i) => {
+    tile.position.y = Math.sin(time * 0.5 + i * 0.3) * 0.03;
+  });
+
+  renderer.render(scene, camera);
+}
+
+function onResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
 // ===== GAME STATE =====
 let playerCount = 0;
 let players = [];
 let currentPlayerIndex = 0;
-let isSpinning = false;
+let isRolling = false;
 let turnNumber = 1;
 let gameEnded = false;
-const TOTAL_CELLS = 25;
-const PLAYER_COLORS = ['#e53935','#1e88e5','#43a047','#f9a825'];
-const PLAYER_LABELS = ['P1','P2','P3','P4'];
 
-// ===== BOARD LAYOUT =====
-const boardLayout = [
-  {type:'start', icon:'🚀', label:'START'},
-  {type:'bonus', icon:'🔵', label:'ボーナス'},
-  {type:'fate', icon:'🟡', label:'運命'},
-  {type:'pinch', icon:'🔴', label:'ピンチ'},
-  {type:'history', icon:'⭐', label:'歴史'},
-  {type:'battle', icon:'🆚', label:'対決'},
-  {type:'bonus', icon:'🔵', label:'ボーナス'},
-  {type:'boss', icon:'🎭', label:'社長'},
-  {type:'pinch', icon:'🔴', label:'ピンチ'},
-  {type:'fate', icon:'🟡', label:'運命'},
-  {type:'hell', icon:'💀', label:'地獄'},
-  {type:'bonus', icon:'🔵', label:'ボーナス'},
-  {type:'history', icon:'⭐', label:'歴史'},
-  {type:'battle', icon:'🆚', label:'対決'},
-  {type:'pinch', icon:'🔴', label:'ピンチ'},
-  {type:'fate', icon:'🟡', label:'運命'},
-  {type:'bonus', icon:'🔵', label:'ボーナス'},
-  {type:'hell', icon:'💀', label:'地獄'},
-  {type:'boss', icon:'🎭', label:'社長'},
-  {type:'history', icon:'⭐', label:'歴史'},
-  {type:'pinch', icon:'🔴', label:'ピンチ'},
-  {type:'bonus', icon:'🔵', label:'ボーナス'},
-  {type:'battle', icon:'🆚', label:'対決'},
-  {type:'fate', icon:'🟡', label:'運命'},
-  {type:'goal', icon:'🏁', label:'GOAL'}
+const ITEMS = [
+  {id:'drink', name:'社長の栄養ドリンク', emoji:'🥤', desc:'全パラメータ+30'},
+  {id:'blame', name:'他部署への責任転嫁', emoji:'📋', desc:'次マイナス無効'},
+  {id:'meeting', name:'緊急会議召集令', emoji:'📣', desc:'全員召集'}
 ];
 
-// ===== EVENTS =====
+// ===== EVENTS DATA =====
 const bonusEvents = [
   {emoji:'💰', title:'お給料日サバイバル', description:'今月も生き残った証として給料が振り込まれた。財布が一瞬だけ厚くなる季節。使う前に消えるのはなぜだろう？', effects:{money:80, motivation:15, contribution:5}},
   {emoji:'🍕', title:'社長の謎おごり宣言', description:'社長が突然「今日は俺のおごりだ！」と宣言。全員が一瞬固まった後、高級焼肉店へ直行。翌日の仕事効率が謎に向上した。', effects:{money:30, motivation:40, contribution:5}},
@@ -332,11 +890,11 @@ const fateResults = [
 ];
 
 const historyEvents = [
-  {emoji:'🏢', title:'AODAISHO創立 (2021.11.18)', description:'渋谷区神宮前。一人のオフィスから全ては始まった。「おもしろいをサイエンスしよう」——その言葉が未来を変える。', effects:{money:20, motivation:40, contribution:30}},
+  {emoji:'🏢', title:'AODAISHO創立 (2021.11.18)', description:'渋谷区神宮前。一人のオフィスから全ては始まった。おもしろいをサイエンスしよう——その言葉が未来を変える。', effects:{money:20, motivation:40, contribution:30}},
   {emoji:'📱', title:'TikTok 5000万再生突破', description:'バズの法則を科学的に解析。気づけば再生数は天文学的数字に。「再現性」という武器を手に入れた瞬間。', effects:{money:50, motivation:30, contribution:25}},
   {emoji:'🤝', title:'リクルートコンサル事業開始', description:'人材業界に切り込む。クライアントファーストを掲げ、本質課題に最短でたどり着く支援を開始。', effects:{money:40, motivation:25, contribution:20}},
   {emoji:'💡', title:'9つのクレド制定', description:'誠実である。責務を全うする。人の心を大切にする。——会社の魂が言語化された日。', effects:{money:10, motivation:45, contribution:35}},
-  {emoji:'🌐', title:'Web開発事業本格始動', description:'「場の発明」をデジタルで体現。コードの一行一行に哲学を込めて、クライアントの未来を構築する。', effects:{money:45, motivation:30, contribution:25}}
+  {emoji:'🌐', title:'Web開発事業本格始動', description:'場の発明をデジタルで体現。コードの一行一行に哲学を込めて、クライアントの未来を構築する。', effects:{money:45, motivation:30, contribution:25}}
 ];
 
 const bossEvents = [
@@ -353,25 +911,18 @@ const hellEvents = [
   {emoji:'👻', title:'深夜のサーバーダウン', description:'午前3時。スマホが鳴り止まない。サーバーが完全に死んだ。パジャマのまま出社。こういう日もある。', effects:{money:-30, motivation:-50, contribution:-25}}
 ];
 
-// ===== ITEMS =====
-const ITEMS = [
-  {id:'drink', name:'社長の栄養ドリンク', emoji:'🥤', desc:'全パラメータ+30回復'},
-  {id:'blame', name:'他部署への責任転嫁', emoji:'📋', desc:'次のマイナスイベントを無効化'},
-  {id:'meeting', name:'緊急会議召集令', emoji:'📣', desc:'全員を自分のマスに呼び戻す'}
-];
-
 // ===== SCREEN MANAGEMENT =====
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  if (id === 'game-screen' || id === 'ending-screen') {
+    document.getElementById('game-hud').classList.remove('active');
+  }
 }
 
-// ===== PLAYER COUNT =====
 function selectCount(n) {
   playerCount = n;
-  document.querySelectorAll('.count-btn').forEach((btn,i) => {
-    btn.classList.toggle('selected', i === n-1);
-  });
+  document.querySelectorAll('.count-btn').forEach((b, i) => b.classList.toggle('selected', i === n - 1));
   document.getElementById('count-next-btn').disabled = false;
   buildNameInputs();
 }
@@ -382,602 +933,468 @@ function buildNameInputs() {
   for (let i = 0; i < playerCount; i++) {
     const row = document.createElement('div');
     row.className = 'name-row';
-    row.innerHTML = `<div class="player-color" style="background:${PLAYER_COLORS[i]}"></div><input type="text" id="pname-${i}" placeholder="プレイヤー${i+1}の名前" maxlength="8">`;
+    row.innerHTML = `<div class="p-dot" style="background:${PLAYER_COLORS_CSS[i]};color:${PLAYER_COLORS_CSS[i]}"></div><input type="text" id="pname-${i}" placeholder="プレイヤー${i+1}" maxlength="8">`;
     container.appendChild(row);
   }
 }
 
-// ===== GAME INIT =====
+// ===== START GAME =====
 function startGame() {
   players = [];
   for (let i = 0; i < playerCount; i++) {
-    const nameInput = document.getElementById(`pname-${i}`);
-    const name = nameInput.value.trim() || `プレイヤー${i+1}`;
-    players.push({ name, color: PLAYER_COLORS[i], label: PLAYER_LABELS[i], position: 0, money: 100, motivation: 100, contribution: 0, item: null, shield: false, finished: false, finishOrder: 0 });
+    const name = document.getElementById(`pname-${i}`).value.trim() || `P${i+1}`;
+    players.push({ name, position: 0, money: 100, motivation: 100, contribution: 0, item: null, shield: false, finished: false, finishOrder: 0 });
   }
   currentPlayerIndex = 0;
   turnNumber = 1;
   gameEnded = false;
-  showScreen('game-screen');
-  buildBoard();
-  renderStatus();
-  renderPieces();
+
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('game-hud').classList.add('active');
+
+  createPlayerTokens();
+  createDice3D();
+  renderHUD();
   updateControls();
+
+  // Camera move to game view
+  gsap.to(camera.position, { x: 0, y: 22, z: 18, duration: 2, ease: 'power3.inOut' });
+  gsap.to(camera.rotation, { x: -0.9, duration: 2, ease: 'power3.inOut' });
 }
 
-// ===== BOARD =====
-function buildBoard() {
-  const board = document.getElementById('board');
-  board.innerHTML = '';
-  // Snake pattern: rows of 5, alternating direction
-  const order = [];
-  for (let row = 0; row < 5; row++) {
-    if (row % 2 === 0) {
-      for (let col = 0; col < 5; col++) order.push(row * 5 + col);
-    } else {
-      for (let col = 4; col >= 0; col--) order.push(row * 5 + col);
-    }
-  }
-  // Create cells in grid order, but assign board positions using snake
-  const cellElements = new Array(25);
-  for (let i = 0; i < 25; i++) {
-    const boardIndex = order[i];
-    const data = boardLayout[boardIndex];
-    const cell = document.createElement('div');
-    cell.className = `cell type-${data.type}`;
-    cell.id = `cell-${boardIndex}`;
-    cell.innerHTML = `<span class="cell-num">${boardIndex}</span><span class="cell-icon">${data.icon}</span><span class="cell-label">${data.label}</span>`;
-    cellElements[i] = cell;
-  }
-  cellElements.forEach(c => board.appendChild(c));
-}
-
-function getCellElement(position) {
-  return document.getElementById(`cell-${position}`);
-}
-
-// ===== RENDER =====
-function renderStatus() {
-  const bar = document.getElementById('player-status-bar');
-  bar.innerHTML = '';
+// ===== HUD =====
+function renderHUD() {
+  const top = document.getElementById('hud-top');
+  top.innerHTML = '';
   players.forEach((p, i) => {
-    const isActive = i === currentPlayerIndex && !p.finished;
     const card = document.createElement('div');
-    card.className = `player-card${isActive ? ' active-player' : ''}`;
-    card.style.borderTopColor = p.color;
-    const itemText = p.item ? `${ITEMS.find(it=>it.id===p.item).emoji} ${ITEMS.find(it=>it.id===p.item).name}` : 'なし';
-    card.innerHTML = `<div class="p-name" style="color:${p.color}">${p.label} ${p.name}</div><div class="p-stats">💰${p.money} ❤️${p.motivation} ⭐${p.contribution}</div><div class="p-item">🎒${itemText}</div>`;
-    bar.appendChild(card);
-  });
-}
-
-function renderPieces() {
-  document.querySelectorAll('.piece').forEach(p => p.remove());
-  // Group by position
-  const groups = {};
-  players.forEach((p, i) => {
-    const pos = p.finished ? TOTAL_CELLS - 1 : p.position;
-    if (!groups[pos]) groups[pos] = [];
-    groups[pos].push(i);
-  });
-  Object.entries(groups).forEach(([pos, indices]) => {
-    const cell = getCellElement(parseInt(pos));
-    if (!cell) return;
-    indices.forEach((pi, stackIndex) => {
-      const piece = document.createElement('div');
-      piece.className = 'piece';
-      piece.style.background = players[pi].color;
-      piece.style.bottom = `${4 + stackIndex * 14}px`;
-      piece.style.right = `${4 + stackIndex * 6}px`;
-      piece.textContent = players[pi].label.replace('P','');
-      cell.appendChild(piece);
-    });
+    card.className = `hud-card${i === currentPlayerIndex && !p.finished ? ' active-turn' : ''}`;
+    const itemText = p.item ? ITEMS.find(it => it.id === p.item).emoji + ' ' + ITEMS.find(it => it.id === p.item).name : 'なし';
+    card.innerHTML = `<div class="hc-name" style="color:${PLAYER_COLORS_CSS[i]}">${p.name}</div><div class="hc-stats">💰${p.money} ❤️${p.motivation} ⭐${p.contribution}</div><div class="hc-item">🎒 ${itemText}</div>`;
+    top.appendChild(card);
   });
 }
 
 function updateControls() {
   const p = players[currentPlayerIndex];
-  document.getElementById('turn-info').textContent = `Turn ${turnNumber} - ${p.name} のターン`;
-  document.getElementById('roulette-btn').disabled = isSpinning || p.finished;
-  document.getElementById('roulette-display').textContent = '?';
-  const itemBtn = document.getElementById('item-btn');
-  itemBtn.disabled = !p.item;
-  itemBtn.textContent = p.item ? `🎒 ${ITEMS.find(it=>it.id===p.item).emoji} 使う` : '🎒 アイテム';
+  document.getElementById('hud-turn-label').textContent = `Turn ${turnNumber} - ${p.name}`;
+  document.getElementById('roll-btn').disabled = isRolling || p.finished;
+  document.getElementById('dice-display').textContent = '?';
+  const ib = document.getElementById('item-btn');
+  ib.disabled = !p.item;
+  ib.textContent = p.item ? ITEMS.find(it => it.id === p.item).emoji + ' 使う' : '🎒';
 }
 
-// ===== ROULETTE =====
-function spinRoulette() {
-  if (isSpinning || gameEnded) return;
-  isSpinning = true;
-  const btn = document.getElementById('roulette-btn');
-  const display = document.getElementById('roulette-display');
-  btn.disabled = true;
+// ===== DICE ROLL =====
+async function rollDice() {
+  if (isRolling || gameEnded) return;
+  isRolling = true;
+  document.getElementById('roll-btn').disabled = true;
+  const display = document.getElementById('dice-display');
 
+  // Spinning numbers
   let count = 0;
-  const maxCount = 20;
-  const interval = setInterval(() => {
+  const spinInterval = setInterval(() => {
     display.textContent = Math.floor(Math.random() * 6) + 1;
     count++;
-    if (count >= maxCount) {
-      clearInterval(interval);
-      const result = Math.floor(Math.random() * 6) + 1;
-      display.textContent = result;
-      display.style.animation = 'numberPop .4s ease';
-      setTimeout(() => { display.style.animation = ''; }, 400);
-      movePlayer(result);
-    }
-  }, 80);
+  }, 60);
+
+  // 3D dice animation
+  await animateDiceRoll();
+
+  clearInterval(spinInterval);
+  const result = Math.floor(Math.random() * 6) + 1;
+  display.textContent = result;
+
+  // Flash effect on display
+  gsap.fromTo(display, { scale: 2, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(2)' });
+
+  await movePlayer(result);
 }
 
-function movePlayer(steps) {
+async function movePlayer(steps) {
   const p = players[currentPlayerIndex];
-  let target = Math.min(p.position + steps, TOTAL_CELLS - 1);
+  const target = Math.min(p.position + steps, TOTAL_CELLS - 1);
 
-  // Animate movement step by step
-  let current = p.position;
-  const moveInterval = setInterval(() => {
-    current++;
-    if (current > target) {
-      clearInterval(moveInterval);
-      p.position = target;
-      renderPieces();
-      // Check if reached goal
-      if (target >= TOTAL_CELLS - 1) {
-        p.finished = true;
-        p.finishOrder = players.filter(pp => pp.finished).length;
-        showGoalEvent(p);
-      } else {
-        triggerCellEvent(target);
-      }
-      return;
-    }
-    p.position = current;
-    renderPieces();
-  }, 300);
-}
+  // Animate step by step
+  for (let pos = p.position + 1; pos <= target; pos++) {
+    await moveToken3D(currentPlayerIndex, pos);
+    p.position = pos;
+    await sleep(150);
+  }
 
-function showGoalEvent(p) {
-  const bonuses = [60, 40, 20, 0];
-  const bonus = bonuses[p.finishOrder - 1] || 0;
-  p.contribution += bonus;
-  showEventCard('🏁', `${p.name} ゴール！`, `${p.finishOrder}位でゴール！ 貢献度ボーナス +${bonus}`, {contribution: bonus});
+  if (target >= TOTAL_CELLS - 1) {
+    p.finished = true;
+    p.finishOrder = players.filter(pp => pp.finished).length;
+    const bonuses = [60, 40, 20, 0];
+    const bonus = bonuses[p.finishOrder - 1] || 0;
+    p.contribution += bonus;
+    spawnConfetti();
+    showEventCard('🏁', `${p.name} ゴール！`, `${p.finishOrder}位でゴール！ 貢献度ボーナス +${bonus}`, { contribution: bonus });
+  } else {
+    triggerCellEvent(target);
+  }
 }
 
 // ===== CELL EVENTS =====
 function triggerCellEvent(position) {
   const cell = boardLayout[position];
-  switch(cell.type) {
-    case 'bonus': triggerBonusEvent(); break;
-    case 'pinch': triggerPinchEvent(); break;
-    case 'fate': triggerFateEvent(); break;
-    case 'history': triggerHistoryEvent(); break;
-    case 'battle': triggerBattleEvent(); break;
-    case 'hell': triggerHellEvent(); break;
-    case 'boss': triggerBossEvent(); break;
+  switch (cell.type) {
+    case 'bonus': spawnConfetti(); triggerRandom(bonusEvents); break;
+    case 'pinch': shakeScreen(); triggerPinch(); break;
+    case 'fate': showSlotMachine(); break;
+    case 'history': triggerRandom(historyEvents); break;
+    case 'battle': triggerBattle(); break;
+    case 'hell': flashRed(); triggerHell(); break;
+    case 'boss': triggerRandom(bossEvents); break;
     default: endTurn(); break;
   }
 }
 
-function triggerBonusEvent() {
-  spawnConfetti();
-  const event = bonusEvents[Math.floor(Math.random() * bonusEvents.length)];
-  applyEffects(event.effects);
-  showEventCard(event.emoji, event.title, event.description, event.effects);
+function triggerRandom(eventList) {
+  const ev = eventList[Math.floor(Math.random() * eventList.length)];
+  applyEffects(ev.effects);
+  showEventCard(ev.emoji, ev.title, ev.description, ev.effects);
 }
 
-function triggerPinchEvent() {
-  document.body.classList.add('shaking');
-  setTimeout(() => document.body.classList.remove('shaking'), 500);
+function triggerPinch() {
   const p = players[currentPlayerIndex];
   if (p.shield) {
     p.shield = false;
-    showEventCard('🛡️', '責任転嫁発動！', 'アイテム「他部署への責任転嫁」が発動！ マイナスイベントを完全回避した！', {});
+    showEventCard('🛡️', '責任転嫁発動！', 'マイナスイベント完全回避！他部署のみなさんすみません！', {});
     return;
   }
-  const event = pinchEvents[Math.floor(Math.random() * pinchEvents.length)];
-  applyEffects(event.effects);
-  showEventCard(event.emoji, event.title, event.description, event.effects);
+  triggerRandom(pinchEvents);
 }
 
-function triggerFateEvent() {
-  showSlotMachine();
-}
-
-function triggerHistoryEvent() {
-  const event = historyEvents[Math.floor(Math.random() * historyEvents.length)];
-  applyEffects(event.effects);
-  showEventCard(event.emoji, event.title, event.description, event.effects);
-}
-
-function triggerBattleEvent() {
-  if (playerCount <= 1) {
-    // Solo: tap challenge instead
-    showTapChallenge();
-  } else {
-    showJanken();
-  }
-}
-
-function triggerHellEvent() {
-  document.body.classList.add('flash-red');
-  setTimeout(() => document.body.classList.remove('flash-red'), 900);
+function triggerHell() {
   const p = players[currentPlayerIndex];
   if (p.shield) {
     p.shield = false;
-    showEventCard('🛡️', '責任転嫁発動！', '地獄マスのダメージを完全回避！ アイテムの力は偉大だ！', {});
+    showEventCard('🛡️', '責任転嫁発動！', '地獄のダメージを全回避！奇跡だ！', {});
     return;
   }
-  const event = hellEvents[Math.floor(Math.random() * hellEvents.length)];
-  applyEffects(event.effects);
-  showEventCard(event.emoji, event.title, event.description, event.effects);
+  triggerRandom(hellEvents);
 }
 
-function triggerBossEvent() {
-  const event = bossEvents[Math.floor(Math.random() * bossEvents.length)];
-  applyEffects(event.effects);
-  showEventCard(event.emoji, event.title, event.description, event.effects);
+function triggerBattle() {
+  if (playerCount <= 1) { showTapChallenge(); return; }
+  const opponents = players.filter((p, i) => i !== currentPlayerIndex && !p.finished);
+  if (opponents.length === 0) { showTapChallenge(); return; }
+  showJanken(opponents);
 }
 
 // ===== EFFECTS =====
 function applyEffects(effects) {
   const p = players[currentPlayerIndex];
-  if (effects.money) p.money += effects.money;
-  if (effects.motivation) p.motivation += effects.motivation;
-  if (effects.contribution) p.contribution += effects.contribution;
-  // Clamp values
-  p.money = Math.max(0, p.money);
-  p.motivation = Math.max(0, p.motivation);
-  p.contribution = Math.max(0, p.contribution);
+  if (effects.money) p.money = Math.max(0, p.money + effects.money);
+  if (effects.motivation) p.motivation = Math.max(0, p.motivation + effects.motivation);
+  if (effects.contribution) p.contribution = Math.max(0, p.contribution + effects.contribution);
 }
 
 // ===== EVENT CARD =====
-function showEventCard(emoji, title, description, effects) {
-  document.getElementById('event-emoji').textContent = emoji;
-  document.getElementById('event-title').textContent = title;
-  document.getElementById('event-desc').textContent = description;
-  const effectsDiv = document.getElementById('event-effects');
-  effectsDiv.innerHTML = '';
-  if (effects.money) {
-    const badge = document.createElement('span');
-    badge.className = `effect-badge ${effects.money > 0 ? 'positive' : 'negative'}`;
-    badge.textContent = `💰 ${effects.money > 0 ? '+' : ''}${effects.money}`;
-    effectsDiv.appendChild(badge);
-  }
-  if (effects.motivation) {
-    const badge = document.createElement('span');
-    badge.className = `effect-badge ${effects.motivation > 0 ? 'positive' : 'negative'}`;
-    badge.textContent = `❤️ ${effects.motivation > 0 ? '+' : ''}${effects.motivation}`;
-    effectsDiv.appendChild(badge);
-  }
-  if (effects.contribution) {
-    const badge = document.createElement('span');
-    badge.className = `effect-badge ${effects.contribution > 0 ? 'positive' : 'negative'}`;
-    badge.textContent = `⭐ ${effects.contribution > 0 ? '+' : ''}${effects.contribution}`;
-    effectsDiv.appendChild(badge);
-  }
+function showEventCard(emoji, title, desc, effects) {
+  document.getElementById('ev-emoji').textContent = emoji;
+  document.getElementById('ev-title').textContent = title;
+  document.getElementById('ev-desc').textContent = desc;
+  const efDiv = document.getElementById('ev-effects');
+  efDiv.innerHTML = '';
+  if (effects.money) { efDiv.innerHTML += `<span class="ev-badge ${effects.money > 0 ? 'pos' : 'neg'}">💰 ${effects.money > 0 ? '+' : ''}${effects.money}</span>`; }
+  if (effects.motivation) { efDiv.innerHTML += `<span class="ev-badge ${effects.motivation > 0 ? 'pos' : 'neg'}">❤️ ${effects.motivation > 0 ? '+' : ''}${effects.motivation}</span>`; }
+  if (effects.contribution) { efDiv.innerHTML += `<span class="ev-badge ${effects.contribution > 0 ? 'pos' : 'neg'}">⭐ ${effects.contribution > 0 ? '+' : ''}${effects.contribution}</span>`; }
   document.getElementById('event-overlay').classList.add('show');
-  renderStatus();
+  renderHUD();
 }
 
 function closeEvent() {
   document.getElementById('event-overlay').classList.remove('show');
-  checkGameEnd();
-}
-
-function checkGameEnd() {
-  if (players.every(p => p.finished)) {
-    showEnding();
-  } else {
-    endTurn();
-  }
+  if (players.every(p => p.finished)) { showEnding(); }
+  else { endTurn(); }
 }
 
 // ===== ITEMS =====
 function useItem() {
   const p = players[currentPlayerIndex];
   if (!p.item) return;
-  const item = ITEMS.find(it => it.id === p.item);
-  switch(p.item) {
+  switch (p.item) {
     case 'drink':
-      p.money += 30;
-      p.motivation += 30;
-      p.contribution += 30;
+      p.money += 30; p.motivation += 30; p.contribution += 30;
       p.item = null;
-      showEventCard(item.emoji, item.name + ' 使用！', '全パラメータが30回復！ 社長特製の味がする...！', {money:30, motivation:30, contribution:30});
-      return;
+      showEventCard('🥤', '社長の栄養ドリンク使用！', '全パラメータ+30！ 謎の味がするが効果は本物！', {money:30, motivation:30, contribution:30});
+      break;
     case 'blame':
-      p.shield = true;
-      p.item = null;
-      showEventCard(item.emoji, item.name + ' セット！', '次のマイナスイベントを自動で回避するぞ！ 他部署のみなさんごめんなさい！', {});
-      return;
+      p.shield = true; p.item = null;
+      showEventCard('📋', '責任転嫁セット！', '次のマイナスイベントを自動回避！ 他部署ごめんなさい！', {});
+      break;
     case 'meeting':
-      players.forEach((pp, i) => {
-        if (i !== currentPlayerIndex && !pp.finished) {
-          pp.position = p.position;
+      players.forEach((pp, i) => { if (i !== currentPlayerIndex && !pp.finished) pp.position = p.position; });
+      p.item = null;
+      playerMeshes.forEach((m, i) => {
+        if (i !== currentPlayerIndex && !players[i].finished) {
+          const pos = getTilePosition(p.position);
+          gsap.to(m.position, { x: pos.x + (i-1.5)*0.35, z: pos.z + (i<2?-0.25:0.25), y: 0, duration: 0.8, ease: 'power2.inOut' });
         }
       });
-      p.item = null;
-      renderPieces();
-      showEventCard(item.emoji, item.name + ' 発動！', '全員がこのマスに強制召集された！ 恐怖の「緊急会議」パワー！', {});
-      return;
+      showEventCard('📣', '緊急会議召集！', '全員がこのマスに強制召集！ 恐怖の会議パワー！', {});
+      break;
   }
 }
 
-// Give random item at random intervals
 function maybeGiveItem() {
   const p = players[currentPlayerIndex];
-  if (p.item) return;
-  if (Math.random() < 0.2) {
-    const item = ITEMS[Math.floor(Math.random() * ITEMS.length)];
-    p.item = item.id;
+  if (!p.item && Math.random() < 0.2) {
+    p.item = ITEMS[Math.floor(Math.random() * ITEMS.length)].id;
   }
 }
 
 // ===== MINIGAMES =====
 
-// --- SLOT MACHINE (FATE) ---
+// SLOT MACHINE
 function showSlotMachine() {
   const overlay = document.getElementById('minigame-overlay');
-  const card = document.getElementById('minigame-card');
-  const reels = ['🌟','😊','🙂','😐','😰','💀'];
-  let stopped = [false, false, false];
-  let reelValues = [0, 0, 0];
-  let intervals = [];
+  const card = document.getElementById('mg-card');
+  const symbols = ['🌟','😊','🙂','😐','😰','💀'];
 
   card.innerHTML = `
-    <h3>🎰 運命のスロット 🎰</h3>
-    <p>STOPボタンでリールを止めろ！<br>揃った絵柄で運命が決まる！</p>
+    <h3>🎰 運命のスロット</h3>
+    <p>STOPで止めろ！ 最高の目を狙え！</p>
     <div class="slot-machine">
-      <div class="slot-reel spinning" id="reel-0">${reels[0]}</div>
-      <div class="slot-reel spinning" id="reel-1">${reels[0]}</div>
-      <div class="slot-reel spinning" id="reel-2">${reels[0]}</div>
+      <div class="slot-reel" id="sr0">${symbols[0]}</div>
+      <div class="slot-reel" id="sr1">${symbols[0]}</div>
+      <div class="slot-reel" id="sr2">${symbols[0]}</div>
     </div>
-    <button class="slot-stop-btn" id="slot-stop-btn" onclick="stopNextReel()">STOP!</button>
-    <div id="slot-result" style="margin-top:12px;font-size:1.2rem;font-weight:700;"></div>
+    <button class="slot-stop-btn" id="slot-btn" onclick="stopSlotReel()">STOP!</button>
   `;
   overlay.classList.add('show');
 
-  // Spin reels
+  const state = { stopped: [false,false,false], values: [0,0,0], current: 0, intervals: [] };
   for (let i = 0; i < 3; i++) {
-    intervals.push(setInterval(() => {
-      if (stopped[i]) return;
-      reelValues[i] = Math.floor(Math.random() * reels.length);
-      document.getElementById(`reel-${i}`).textContent = reels[reelValues[i]];
-    }, 100 + i * 30));
+    state.intervals[i] = setInterval(() => {
+      if (state.stopped[i]) return;
+      state.values[i] = Math.floor(Math.random() * symbols.length);
+      document.getElementById(`sr${i}`).textContent = symbols[state.values[i]];
+    }, 80 + i * 20);
   }
-
-  window._slotState = { stopped, reelValues, intervals, reels, currentReel: 0 };
+  window._slotState = { ...state, symbols };
 }
 
-function stopNextReel() {
-  const state = window._slotState;
-  if (!state) return;
-  const idx = state.currentReel;
-  if (idx >= 3) return;
-  state.stopped[idx] = true;
-  clearInterval(state.intervals[idx]);
-  const reel = document.getElementById(`reel-${idx}`);
-  reel.classList.remove('spinning');
-  reel.style.animation = 'numberPop .3s ease';
-  state.currentReel++;
-
-  if (state.currentReel >= 3) {
-    document.getElementById('slot-stop-btn').disabled = true;
-    setTimeout(() => resolveSlot(), 500);
+function stopSlotReel() {
+  const s = window._slotState;
+  if (!s || s.current >= 3) return;
+  s.stopped[s.current] = true;
+  clearInterval(s.intervals[s.current]);
+  document.getElementById(`sr${s.current}`).classList.add('stopped');
+  s.current++;
+  if (s.current >= 3) {
+    document.getElementById('slot-btn').disabled = true;
+    setTimeout(resolveSlot, 600);
   }
 }
 
 function resolveSlot() {
-  const state = window._slotState;
-  // Determine result based on best reel value (lower index = better)
-  const bestVal = Math.min(...state.reelValues);
-  const result = fateResults[bestVal];
-  document.getElementById('slot-result').textContent = `${result.emoji} ${result.title}`;
+  const s = window._slotState;
+  const best = Math.min(...s.values);
+  const result = fateResults[best];
   applyEffects(result.effects);
-
-  setTimeout(() => {
-    document.getElementById('minigame-overlay').classList.remove('show');
-    showEventCard(result.emoji, result.title, result.description, result.effects);
-  }, 1200);
+  document.getElementById('minigame-overlay').classList.remove('show');
+  if (best <= 1) spawnConfetti();
+  showEventCard(result.emoji, result.title, result.description, result.effects);
 }
 
-// --- TAP CHALLENGE ---
+// TAP CHALLENGE
 function showTapChallenge() {
   const overlay = document.getElementById('minigame-overlay');
-  const card = document.getElementById('minigame-card');
-  const target = 15 + Math.floor(Math.random() * 10); // 15-24 taps needed
+  const card = document.getElementById('mg-card');
+  const target = 15 + Math.floor(Math.random() * 10);
 
   card.innerHTML = `
     <h3>👊 連打チャレンジ！</h3>
-    <p>${target}回タップで成功！<br>3秒以内にクリックしまくれ！</p>
-    <div class="tap-area" id="tap-area" onclick="registerTap()">👊</div>
-    <div class="tap-counter" id="tap-counter">0 / ${target}</div>
-    <div class="tap-timer" id="tap-timer">準備中...</div>
+    <p>${target}回タップで成功！ 3秒以内！</p>
+    <div class="tap-area" id="tap-area" onclick="doTap()">👊</div>
+    <div class="tap-counter" id="tap-cnt">0 / ${target}</div>
+    <div class="tap-timer" id="tap-tmr">準備中...</div>
   `;
   overlay.classList.add('show');
 
   window._tapState = { count: 0, target, started: false, ended: false };
-
   setTimeout(() => {
     if (window._tapState.ended) return;
     window._tapState.started = true;
-    document.getElementById('tap-timer').textContent = '3.0秒';
-    let timeLeft = 3000;
+    document.getElementById('tap-tmr').textContent = '3.0秒';
+    let t = 3000;
     const timer = setInterval(() => {
-      timeLeft -= 100;
-      if (timeLeft <= 0 || window._tapState.ended) {
-        clearInterval(timer);
-        endTapChallenge();
-        return;
-      }
-      document.getElementById('tap-timer').textContent = `${(timeLeft/1000).toFixed(1)}秒`;
+      t -= 100;
+      if (t <= 0 || window._tapState.ended) { clearInterval(timer); finishTap(); return; }
+      document.getElementById('tap-tmr').textContent = (t/1000).toFixed(1) + '秒';
     }, 100);
-  }, 1000);
-}
-
-function registerTap() {
-  const state = window._tapState;
-  if (!state || !state.started || state.ended) return;
-  state.count++;
-  const counter = document.getElementById('tap-counter');
-  counter.textContent = `${state.count} / ${state.target}`;
-  const area = document.getElementById('tap-area');
-  area.style.transform = 'scale(0.9)';
-  setTimeout(() => { area.style.transform = ''; }, 50);
-
-  if (state.count >= state.target) {
-    state.ended = true;
-    endTapChallenge();
-  }
-}
-
-function endTapChallenge() {
-  const state = window._tapState;
-  if (!state) return;
-  state.ended = true;
-  const success = state.count >= state.target;
-
-  setTimeout(() => {
-    document.getElementById('minigame-overlay').classList.remove('show');
-    if (success) {
-      spawnConfetti();
-      applyEffects({money:40, motivation:20, contribution:15});
-      showEventCard('🎊', '連打チャレンジ成功！', `見事${state.count}回の連打を達成！ 指が光速を超えた！`, {money:40, motivation:20, contribution:15});
-    } else {
-      applyEffects({money:-20, motivation:-15, contribution:0});
-      showEventCard('😵', '連打チャレンジ失敗...', `${state.count}/${state.target}回... あと少しだったのに！ 次こそは！`, {money:-20, motivation:-15, contribution:0});
-    }
   }, 800);
 }
 
-// --- JANKEN ---
-function showJanken() {
-  const overlay = document.getElementById('minigame-overlay');
-  const card = document.getElementById('minigame-card');
-  // Pick opponent (random other player)
-  const opponents = players.filter((p, i) => i !== currentPlayerIndex && !p.finished);
-  if (opponents.length === 0) {
-    showTapChallenge();
-    return;
-  }
-  const opponent = opponents[Math.floor(Math.random() * opponents.length)];
-  window._jankenOpponent = opponent;
+function doTap() {
+  const s = window._tapState;
+  if (!s || !s.started || s.ended) return;
+  s.count++;
+  document.getElementById('tap-cnt').textContent = `${s.count} / ${s.target}`;
+  if (s.count >= s.target) { s.ended = true; finishTap(); }
+}
 
+function finishTap() {
+  const s = window._tapState;
+  if (!s) return;
+  s.ended = true;
+  const ok = s.count >= s.target;
+  setTimeout(() => {
+    document.getElementById('minigame-overlay').classList.remove('show');
+    if (ok) {
+      spawnConfetti();
+      applyEffects({money:40, motivation:20, contribution:15});
+      showEventCard('🎊', '連打成功！', `${s.count}回達成！ 指が光速を超えた！`, {money:40, motivation:20, contribution:15});
+    } else {
+      applyEffects({money:-20, motivation:-15, contribution:0});
+      showEventCard('😵', '連打失敗...', `${s.count}/${s.target}回... 次こそは！`, {money:-20, motivation:-15, contribution:0});
+    }
+  }, 500);
+}
+
+// JANKEN
+function showJanken(opponents) {
+  const opp = opponents[Math.floor(Math.random() * opponents.length)];
+  window._jankenOpp = opp;
+  const overlay = document.getElementById('minigame-overlay');
+  const card = document.getElementById('mg-card');
   card.innerHTML = `
     <h3>🆚 じゃんけん対決！</h3>
-    <p><strong>${players[currentPlayerIndex].name}</strong> vs <strong>${opponent.name}</strong></p>
-    <p>あなたの手を選べ！</p>
+    <p><strong>${players[currentPlayerIndex].name}</strong> vs <strong>${opp.name}</strong></p>
     <div class="janken-choices">
-      <button class="janken-btn" onclick="playJanken('rock')">✊</button>
-      <button class="janken-btn" onclick="playJanken('scissors')">✌️</button>
-      <button class="janken-btn" onclick="playJanken('paper')">🖐️</button>
+      <button class="janken-btn" onclick="doJanken('rock')">✊</button>
+      <button class="janken-btn" onclick="doJanken('scissors')">✌️</button>
+      <button class="janken-btn" onclick="doJanken('paper')">🖐️</button>
     </div>
-    <div class="janken-result" id="janken-result"></div>
   `;
   overlay.classList.add('show');
 }
 
-function playJanken(choice) {
+function doJanken(choice) {
   const choices = ['rock','scissors','paper'];
   const emojis = {rock:'✊', scissors:'✌️', paper:'🖐️'};
-  const opChoice = choices[Math.floor(Math.random() * 3)];
-  const result = document.getElementById('janken-result');
-
+  const oChoice = choices[Math.floor(Math.random() * 3)];
   let outcome;
-  if (choice === opChoice) outcome = 'draw';
-  else if ((choice === 'rock' && opChoice === 'scissors') || (choice === 'scissors' && opChoice === 'paper') || (choice === 'paper' && opChoice === 'rock')) outcome = 'win';
+  if (choice === oChoice) outcome = 'draw';
+  else if ((choice==='rock'&&oChoice==='scissors')||(choice==='scissors'&&oChoice==='paper')||(choice==='paper'&&oChoice==='rock')) outcome = 'win';
   else outcome = 'lose';
 
-  result.textContent = `${emojis[choice]} vs ${emojis[opChoice]}`;
   document.querySelectorAll('.janken-btn').forEach(b => b.disabled = true);
-
   setTimeout(() => {
     document.getElementById('minigame-overlay').classList.remove('show');
     if (outcome === 'win') {
       spawnConfetti();
       applyEffects({money:50, motivation:20, contribution:15});
-      showEventCard('🎉', 'じゃんけん勝利！', `${window._jankenOpponent.name}に完全勝利！ 勝者には栄光を！`, {money:50, motivation:20, contribution:15});
+      showEventCard('🎉', 'じゃんけん勝利！', `${window._jankenOpp.name}に完勝！`, {money:50, motivation:20, contribution:15});
     } else if (outcome === 'lose') {
       applyEffects({money:-30, motivation:-15, contribution:-5});
-      showEventCard('😭', 'じゃんけん敗北...', `${window._jankenOpponent.name}に負けた... 次は負けない！`, {money:-30, motivation:-15, contribution:-5});
+      showEventCard('😭', 'じゃんけん敗北...', `${window._jankenOpp.name}に負けた...`, {money:-30, motivation:-15, contribution:-5});
     } else {
       applyEffects({money:10, motivation:10, contribution:5});
-      showEventCard('🤝', 'あいこ！', `${window._jankenOpponent.name}と引き分け。仲良しの証！`, {money:10, motivation:10, contribution:5});
+      showEventCard('🤝', 'あいこ！', '引き分け！仲良しの証！', {money:10, motivation:10, contribution:5});
     }
-  }, 1500);
+  }, 1200);
 }
 
-// ===== CONFETTI =====
+// ===== VFX =====
 function spawnConfetti() {
-  const colors = ['#e53935','#1e88e5','#43a047','#f9a825','#ab47bc','#ff7043','#26c6da'];
-  for (let i = 0; i < 40; i++) {
-    const piece = document.createElement('div');
-    piece.className = 'confetti-piece';
-    piece.style.left = Math.random() * 100 + '%';
-    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-    piece.style.width = (Math.random() * 8 + 6) + 'px';
-    piece.style.height = (Math.random() * 8 + 6) + 'px';
-    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-    piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
-    piece.style.animationDelay = (Math.random() * 0.5) + 's';
-    document.body.appendChild(piece);
-    setTimeout(() => piece.remove(), 4000);
+  const colors = ['#ff4757','#3742fa','#2ed573','#ffa502','#b967db','#00f5ff','#39ff14'];
+  for (let i = 0; i < 50; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.width = (Math.random() * 8 + 5) + 'px';
+    p.style.height = (Math.random() * 8 + 5) + 'px';
+    p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    p.style.animationDuration = (Math.random() * 2 + 2) + 's';
+    p.style.animationDelay = Math.random() * 0.5 + 's';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 4500);
   }
+
+  // 3D confetti burst in scene
+  burstParticles3D();
+}
+
+function burstParticles3D() {
+  const count = 30;
+  const geo = new THREE.BufferGeometry();
+  const positions = new Float32Array(count * 3);
+  const p = players[currentPlayerIndex];
+  const tilePos = getTilePosition(p.position);
+
+  for (let i = 0; i < count; i++) {
+    positions[i*3] = tilePos.x + (Math.random() - 0.5) * 2;
+    positions[i*3+1] = 2 + Math.random() * 3;
+    positions[i*3+2] = tilePos.z + (Math.random() - 0.5) * 2;
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const mat = new THREE.PointsMaterial({ color: 0xffd700, size: 0.3, transparent: true });
+  const pts = new THREE.Points(geo, mat);
+  scene.add(pts);
+
+  gsap.to(mat, { opacity: 0, size: 0, duration: 2, ease: 'power2.out', onComplete: () => scene.remove(pts) });
+}
+
+function shakeScreen() {
+  document.body.classList.add('shaking');
+  setTimeout(() => document.body.classList.remove('shaking'), 500);
+  // Camera shake
+  const orig = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+  gsap.to(camera.position, { x: '+=0.5', duration: 0.05, yoyo: true, repeat: 5, onComplete: () => { camera.position.set(orig.x, orig.y, orig.z); } });
+}
+
+function flashRed() {
+  const flash = new THREE.PointLight(0xff0000, 3, 50);
+  flash.position.set(0, 10, 0);
+  scene.add(flash);
+  gsap.to(flash, { intensity: 0, duration: 1, ease: 'power2.out', onComplete: () => scene.remove(flash) });
 }
 
 // ===== TURN MANAGEMENT =====
 function endTurn() {
   maybeGiveItem();
-  renderStatus();
-  renderPieces();
-  isSpinning = false;
+  renderHUD();
+  isRolling = false;
 
-  // Find next active player
   let next = (currentPlayerIndex + 1) % playerCount;
-  let loopCount = 0;
-  while (players[next].finished && loopCount < playerCount) {
-    next = (next + 1) % playerCount;
-    loopCount++;
-  }
-
-  if (players.every(p => p.finished)) {
-    showEnding();
-    return;
-  }
-
-  if (next <= currentPlayerIndex || next === 0) {
-    turnNumber++;
-  }
+  let loop = 0;
+  while (players[next].finished && loop < playerCount) { next = (next + 1) % playerCount; loop++; }
+  if (players.every(p => p.finished)) { showEnding(); return; }
+  if (next <= currentPlayerIndex) turnNumber++;
   currentPlayerIndex = next;
 
-  // Turn transition
-  if (playerCount > 1) {
-    showTurnTransition();
-  } else {
-    updateControls();
-    renderStatus();
-  }
+  if (playerCount > 1) { showTurnTransition(); }
+  else { updateControls(); renderHUD(); }
 }
 
 function showTurnTransition() {
   const overlay = document.getElementById('turn-overlay');
-  const text = document.getElementById('turn-overlay-text');
-  const countdown = document.getElementById('turn-countdown');
   const p = players[currentPlayerIndex];
-  text.innerHTML = `<span style="color:${p.color}">● </span>${p.name} のターン！`;
+  document.getElementById('turn-text').innerHTML = `<span style="color:${PLAYER_COLORS_CSS[currentPlayerIndex]}">${p.name}</span> のターン！`;
   overlay.classList.add('show');
 
-  let count = 3;
-  countdown.textContent = count;
+  // Focus camera on next player
+  const pos = getTilePosition(p.position);
+  gsap.to(camera.position, { x: pos.x + 5, y: 15, z: pos.z + 12, duration: 1.5, ease: 'power2.inOut' });
+
+  let c = 3;
+  document.getElementById('turn-countdown').textContent = c;
   const timer = setInterval(() => {
-    count--;
-    if (count <= 0) {
+    c--;
+    if (c <= 0) {
       clearInterval(timer);
       overlay.classList.remove('show');
+      gsap.to(camera.position, { x: 0, y: 22, z: 18, duration: 1, ease: 'power2.inOut' });
       updateControls();
-      renderStatus();
+      renderHUD();
     } else {
-      countdown.textContent = count;
+      document.getElementById('turn-countdown').textContent = c;
     }
   }, 1000);
 }
@@ -985,28 +1402,34 @@ function showTurnTransition() {
 // ===== ENDING =====
 function showEnding() {
   gameEnded = true;
-  // Calculate total score
-  const sorted = [...players].sort((a, b) => {
-    const sa = a.money + a.motivation + a.contribution;
-    const sb = b.money + b.motivation + b.contribution;
-    return sb - sa;
-  });
-
+  document.getElementById('game-hud').classList.remove('active');
   showScreen('ending-screen');
   spawnConfetti();
 
+  const sorted = [...players].sort((a,b) => (b.money+b.motivation+b.contribution) - (a.money+a.motivation+a.contribution));
+  const medals = ['🥇','🥈','🥉','4️⃣'];
   const list = document.getElementById('ranking-list');
   list.innerHTML = '';
-  const medals = ['🥇','🥈','🥉','4️⃣'];
   sorted.forEach((p, i) => {
     const total = p.money + p.motivation + p.contribution;
     const item = document.createElement('li');
     item.className = 'ranking-item';
     item.style.animationDelay = `${i * 0.2}s`;
-    item.innerHTML = `<span class="rank">${medals[i]}</span><span class="rank-name" style="color:${p.color}">${p.name}</span><span class="rank-score">💰${p.money} ❤️${p.motivation} ⭐${p.contribution} = ${total}pt</span>`;
+    const ci = players.indexOf(p);
+    item.innerHTML = `<span class="rank">${medals[i]}</span><span class="r-name" style="color:${PLAYER_COLORS_CSS[ci]}">${p.name}</span><span class="r-score">💰${p.money} ❤️${p.motivation} ⭐${p.contribution} = ${total}pt</span>`;
     list.appendChild(item);
   });
+
+  // Celebration camera
+  gsap.to(camera.position, { x: 0, y: 30, z: 5, duration: 2, ease: 'power2.inOut' });
+  gsap.to(camera.rotation, { x: -1.2, y: Math.PI * 2, duration: 4, ease: 'power1.inOut' });
 }
+
+// ===== UTILITIES =====
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ===== INIT =====
+initThree();
 </script>
 </body>
 </html>
