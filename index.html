@@ -161,6 +161,7 @@ body{font-family:var(--font-body);background:transparent;color:#fff;overflow:hid
     <div class="char-header"><h2>キャラクター選択</h2><div class="char-player-label" id="char-plabel">P1</div><div class="char-selected-list" id="char-slist"></div></div>
     <button class="char-nav left" onclick="rotateChars(-1)">&larr;</button>
     <button class="char-nav right" onclick="rotateChars(1)">&rarr;</button>
+    <div id="char-carousel" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);display:flex;align-items:center;gap:12px;z-index:6;"></div>
     <div class="char-info-panel" id="char-panel">
       <div class="ci-name" id="ci-name"></div>
       <div class="ci-role" id="ci-role"></div>
@@ -233,78 +234,29 @@ function buildCharStage(){
   // Remove old
   if(charStageGroup){scene.remove(charStageGroup);}
   charBillboards=[];
-  charStageGroup=new THREE.Group();
-  scene.add(charStageGroup);
+  charStageGroup=new THREE.Group();scene.add(charStageGroup);
+  // 3D stage background
+  const sg=new THREE.Mesh(new THREE.CylinderGeometry(6,6.5,0.4,48),new THREE.MeshStandardMaterial({color:0x1a3a6b,emissive:0x00f5ff,emissiveIntensity:0.2,metalness:0.9,roughness:0.1}));
+  sg.position.y=-0.8;sg.receiveShadow=true;charStageGroup.add(sg);
+  const rg=new THREE.Mesh(new THREE.TorusGeometry(6.3,0.06,8,64),new THREE.MeshBasicMaterial({color:0x00f5ff,transparent:true,opacity:0.7}));
+  rg.rotation.x=Math.PI/2;rg.position.y=-0.55;charStageGroup.add(rg);
+  gsap.to(camera.position,{x:0,y:4,z:10,duration:1.2,ease:'power3.inOut'});
 
-  // Circular glowing stage
-  const stageGeo=new THREE.CylinderGeometry(6,6.5,0.4,48);
-  const stageMat=new THREE.MeshStandardMaterial({color:0x1a3a6b,emissive:0x00f5ff,emissiveIntensity:0.2,metalness:0.9,roughness:0.1});
-  const stageMesh=new THREE.Mesh(stageGeo,stageMat);
-  stageMesh.position.y=-0.8;
-  stageMesh.receiveShadow=true;
-  charStageGroup.add(stageMesh);
-
-  // Outer glow ring
-  const ringGeo=new THREE.TorusGeometry(6.3,0.06,8,64);
-  const ringMat=new THREE.MeshBasicMaterial({color:0x00f5ff,transparent:true,opacity:0.7});
-  const ringMesh=new THREE.Mesh(ringGeo,ringMat);
-  ringMesh.rotation.x=Math.PI/2;
-  ringMesh.position.y=-0.55;
-  charStageGroup.add(ringMesh);
-
-  // Inner ring pulse
-  const ring2Geo=new THREE.TorusGeometry(4,0.04,8,48);
-  const ring2Mat=new THREE.MeshBasicMaterial({color:0xb967db,transparent:true,opacity:0.4});
-  const ring2=new THREE.Mesh(ring2Geo,ring2Mat);
-  ring2.rotation.x=Math.PI/2;
-  ring2.position.y=-0.54;
-  charStageGroup.add(ring2);
-
-  // Spotlight on center
-  if(charSpotlight) scene.remove(charSpotlight);
-  charSpotlight=new THREE.SpotLight(0xffffff,2,30,Math.PI/6,0.5,1);
-  charSpotlight.position.set(0,12,0);
-  charSpotlight.target.position.set(0,0,0);
-  scene.add(charSpotlight);
-  scene.add(charSpotlight.target);
-
-  // Create character billboards
+  // Build HTML carousel (DOM-based for guaranteed visibility)
+  const container=document.getElementById('char-carousel');
+  container.innerHTML='';
   const avail=getAvailChars();
   avail.forEach((ch,i)=>{
-    const angle=(i/avail.length)*Math.PI*2 - Math.PI/2;
-    const radius=4.5;
-    const x=Math.cos(angle)*radius;
-    const z=Math.sin(angle)*radius;
-
     const canvas=document.createElement('canvas');
-    canvas.width=300;canvas.height=400;
-    const ctx=canvas.getContext('2d');
-    drawChar(ctx,ch,300,400);
-
-    const tex=new THREE.CanvasTexture(canvas);
-    tex.magFilter=THREE.LinearFilter;
-    const mat=new THREE.SpriteMaterial({map:tex,transparent:true,fog:false});
-    const sprite=new THREE.Sprite(mat);
-    sprite.position.set(x,1.5,z);
-    sprite.scale.set(2.8,3.7,1);
-    sprite.userData={charIdx:i,charData:ch};
-    scene.add(sprite);
-    charBillboards.push(sprite);
-
-    // Idle float
-    gsap.to(sprite.position,{y:1.7,duration:1.8+i*0.15,ease:'sine.inOut',yoyo:true,repeat:-1});
+    canvas.width=200;canvas.height=280;
+    drawChar(canvas.getContext('2d'),ch,200,280);
+    const img=document.createElement('img');
+    img.src=canvas.toDataURL();
+    img.style.cssText='width:130px;height:182px;object-fit:contain;transition:all .4s cubic-bezier(.34,1.56,.64,1);border-radius:12px;cursor:pointer;opacity:0.35;transform:scale(0.65);filter:brightness(0.5);';
+    img.dataset.idx=i;
+    img.onclick=()=>{charCurrentIdx=i;highlightCurrent();updateCharPanel();};
+    container.appendChild(img);
   });
-
-  // Camera move - position to see characters clearly
-  gsap.to(camera.position,{x:0,y:3.5,z:8,duration:1.2,ease:'power3.inOut',onUpdate:()=>{camera.lookAt(0,1.5,0);}});
-  // Add strong front light for character visibility
-  const charLight=new THREE.PointLight(0xffffff,1.5,20);
-  charLight.position.set(0,4,6);
-  charStageGroup.add(charLight);
-  const charLight2=new THREE.PointLight(0xffffff,1.0,15);
-  charLight2.position.set(0,3,-3);
-  charStageGroup.add(charLight2);
-
   highlightCurrent();
 }
 
@@ -346,25 +298,15 @@ function drawChar(ctx,ch,w,h){
 }
 
 function highlightCurrent(){
-  const avail=getAvailChars();
-  charBillboards.forEach((bb,i)=>{
-    const isFront=i===(charCurrentIdx%avail.length);
-    gsap.to(bb.scale,{x:isFront?1.3:0.7,y:isFront?1.3:0.7,duration:0.4,ease:'power2.out'});
-    bb.material.opacity=isFront?1:0.35;
-    // Arrange in arc in front of camera
-    const offset=i-charCurrentIdx;
-    const normalizedOffset=((offset%avail.length)+avail.length)%avail.length;
-    const angle=(normalizedOffset/avail.length)*Math.PI*2 - Math.PI/2;
-    const radius=isFront?1.5:3.8;
-    const tx=Math.cos(angle)*radius;
-    const tz=Math.sin(angle)*radius - 1;
-    const ty=isFront?1.8:1.5;
-    gsap.to(bb.position,{x:tx,y:ty,z:tz,duration:0.5,ease:'back.out(1.4)'});
+  const container=document.getElementById('char-carousel');
+  if(!container)return;
+  const imgs=container.querySelectorAll('img');
+  imgs.forEach((img,i)=>{
+    const isFront=i===charCurrentIdx;
+    img.style.opacity=isFront?'1':'0.35';
+    img.style.transform=isFront?'scale(1.1)':'scale(0.65)';
+    img.style.filter=isFront?'brightness(1) drop-shadow(0 0 20px rgba(0,245,255,0.5))':'brightness(0.5)';
   });
-  if(charSpotlight&&charBillboards.length>0){
-    const front=charBillboards[charCurrentIdx%avail.length];
-    if(front)gsap.to(charSpotlight.target.position,{x:front.position.x,z:front.position.z,duration:0.4});
-  }
 }
 
 function rotateChars(dir){
@@ -458,9 +400,9 @@ function spawnTextParticles(texts,color){
 
 function cleanupCharStage(){
   if(charStageGroup){scene.remove(charStageGroup);charStageGroup=null;}
-  charBillboards.forEach(s=>scene.remove(s));
-  charBillboards=[];
+  charBillboards.forEach(s=>scene.remove(s));charBillboards=[];
   if(charSpotlight){scene.remove(charSpotlight);scene.remove(charSpotlight.target);charSpotlight=null;}
+  document.getElementById('char-carousel').innerHTML='';
 }
 
 function lighten(hex,amt){const n=parseInt(hex.replace('#',''),16);return '#'+[16,8,0].map(s=>Math.min(255,(n>>s&0xFF)+amt).toString(16).padStart(2,'0')).join('');}
@@ -502,8 +444,6 @@ function animate(){
   const t=clock.getElapsedTime();
   if(particleSystem){particleSystem.rotation.y=t*0.015;const p=particleSystem.geometry.attributes.position.array;for(let i=1;i<p.length;i+=3)p[i]+=Math.sin(t+i)*.001;particleSystem.geometry.attributes.position.needsUpdate=true;}
   boardTiles.forEach((tile,i)=>{tile.position.y=Math.sin(t*.5+i*.3)*.03;});
-  // Keep camera looking at stage center during char select
-  if(document.getElementById('char-screen').classList.contains('active')){camera.lookAt(0,1.5,0);}
   renderer.render(scene,camera);
 }
 
