@@ -292,7 +292,7 @@ function buildCharStage(){
     charBillboards.push(sprite);
 
     // Idle float
-    gsap.to(mesh.position,{y:1.7,duration:1.8+i*0.15,ease:'sine.inOut',yoyo:true,repeat:-1});
+    gsap.to(sprite.position,{y:1.7,duration:1.8+i*0.15,ease:'sine.inOut',yoyo:true,repeat:-1});
   });
 
   // Camera move - position to see characters clearly
