@@ -206,13 +206,39 @@ const ITEMS=[{id:'drink',name:'栄養ドリンク',emoji:'🥤'},{id:'blame',nam
 const TOTAL_CELLS=25,TILE_SZ=2.2,TILE_GAP=0.3;
 
 // EVENTS
-const bonusEv=[{emoji:'💰',title:'お給料日サバイバル',desc:'今月も生き残った証として給料が振り込まれた。財布が一瞬だけ厚くなる季節。',fx:{money:80,motivation:15,contribution:5}},{emoji:'🍕',title:'社長の謎おごり宣言',desc:'社長が突然「今日は俺のおごりだ！」と宣言。高級焼肉店へ直行。',fx:{money:30,motivation:40,contribution:5}},{emoji:'🏆',title:'MVP受賞の奇跡',desc:'「今月のMVPはあなたです！」社内全員から拍手喝采。',fx:{money:50,motivation:35,contribution:30}},{emoji:'📈',title:'残業代正確支払い伝説',desc:'経理担当が全部正確に計算した奇跡。語り継がれる。',fx:{money:70,motivation:25,contribution:10}},{emoji:'🎉',title:'謎の有給消化指令',desc:'上司「明日休んでいいぞ」理由は不明。温泉に直行。',fx:{money:10,motivation:50,contribution:0}}];
-const pinchEv=[{emoji:'😱',title:'会議室への恐怖の召喚',desc:'「ちょっといいですか」この7文字で人は3kg痩せる。',fx:{money:0,motivation:-35,contribution:10}},{emoji:'💻',title:'本番環境破壊事件',desc:'全社員に影響するシステムに謎データを投入。Slackが地獄絵図に。',fx:{money:-60,motivation:-25,contribution:-15}},{emoji:'📊',title:'定時後爆弾投下事件',desc:'退社5分前に「明日の朝イチで資料お願い」送信者は帰宅済み。',fx:{money:0,motivation:-45,contribution:20}},{emoji:'🤒',title:'月曜朝の体調正直症候群',desc:'なぜ月曜の朝だけ体が正直なのか。38.5度。',fx:{money:0,motivation:-40,contribution:-5}},{emoji:'🖨️',title:'プリンター反乱事件',desc:'プレゼン当日、プリンターがエラーE-NEMESISを表示。',fx:{money:-25,motivation:-25,contribution:-5}}];
+const bonusEv=[
+  {emoji:'📺',title:'研修チャンネル始動！',desc:'新しいYouTubeチャンネル「研修チャンネル」が始動！会社の知名度がアップ！',fx:{money:40,motivation:35,contribution:25}},
+  {emoji:'🎭',title:'ほんねふぁくとりー始動！',desc:'本音で語るコンテンツが大バズり。再生数うなぎ登り！',fx:{money:50,motivation:40,contribution:30}},
+  {emoji:'💑',title:'カップルチャンネルを始めた！',desc:'社長のカップルチャンネルが話題に。会社のブランド力が爆上がり！',fx:{money:60,motivation:30,contribution:20}},
+  {emoji:'📔',title:'いたずらダイアリー始動！',desc:'いたずら企画が次々とバズる！登録者が急増！',fx:{money:45,motivation:45,contribution:20}},
+  {emoji:'🦸‍♀️',title:'石井が痴漢を撃退！',desc:'通勤電車で正義の一撃！社内でヒーロー扱い。チーム士気爆上がり！',fx:{money:10,motivation:50,contribution:30}},
+  {emoji:'😄',title:'佐藤が上機嫌！',desc:'佐藤さんが珍しく超ご機嫌。社内の空気が一気に和む。全員の生産性UP！',fx:{money:20,motivation:60,contribution:15}}
+];
+const pinchEv=[
+  {emoji:'😤',title:'服部さんに叱られた',desc:'「これ何回言ったら分かるの？」胃が痛い。明日から気をつけます…',fx:{money:0,motivation:-30,contribution:10}},
+  {emoji:'🍺',title:'出口さんが悪酔い',desc:'出口さんが暴走モード突入。3次会に強制連行された。朝がツライ…',fx:{money:-25,motivation:-20,contribution:5}},
+  {emoji:'💢',title:'佐藤と出口が喧嘩！',desc:'二人の喧嘩に巻き込まれた。仲裁したら両方から怒られた。理不尽。',fx:{money:0,motivation:-35,contribution:-10}},
+  {emoji:'💸',title:'残業代カット',desc:'「今月から制度変更です」経理からの冷酷メール。財布が薄くなる…',fx:{money:-50,motivation:-25,contribution:0}},
+  {emoji:'😠',title:'佐藤の機嫌が悪い',desc:'佐藤さんがピリピリ。社内が緊張感に包まれる。全員小声で会話。',fx:{money:0,motivation:-40,contribution:-5}},
+  {emoji:'📛',title:'名札を会社に置いてきた！',desc:'新卒入社式で使う名札を事務所に忘れた。式まであと30分。全力ダッシュ！',fx:{money:-10,motivation:-30,contribution:-15}},
+  {emoji:'💰',title:'小口のお金が合わない…',desc:'経理作業で100円合わない。たかが100円、されど100円。終電まで探す羽目に。',fx:{money:-15,motivation:-35,contribution:5}},
+  {emoji:'🤢',title:'豪の息がくさい',desc:'隣の席の豪くん…今日もにんにくマシマシ。マスク3枚重ね。集中力ゼロ。',fx:{money:0,motivation:-25,contribution:-5}},
+  {emoji:'😷',title:'佐藤の息が臭い',desc:'打ち合わせ中、佐藤さんの口臭がキツすぎて内容が頭に入らない。議事録ゼロ。',fx:{money:0,motivation:-30,contribution:-10}}
+];
+const hellEv=[
+  {emoji:'💀',title:'小野が突然退社した',desc:'朝来たら机が空。Slackの最終ログインは昨夜。引き継ぎゼロ。業務崩壊。',fx:{money:-40,motivation:-50,contribution:-30}},
+  {emoji:'👻',title:'小川が突然退社した',desc:'「一身上の都合により」のメール一通。残されたプロジェクトの山。途方に暮れる。',fx:{money:-35,motivation:-50,contribution:-25}},
+  {emoji:'⚔️',title:'加々美が謀反を起こした！',desc:'内部クーデター未遂。社内政治が一気に不安定化。信頼崩壊。',fx:{money:-50,motivation:-60,contribution:-40}},
+  {emoji:'🚫',title:'境田の奥さんに嫌われた',desc:'飲み会で遅くまで付き合わせた結果、境田の奥さんからLINEブロック。家庭崩壊の序章。',fx:{money:-20,motivation:-45,contribution:-20}},
+  {emoji:'⚖️',title:'前職からSNS利権で訴えられた！',desc:'顧問弁護士から緊急連絡。訴状が届いた。法務対応で全リソース停止。',fx:{money:-60,motivation:-50,contribution:-35}},
+  {emoji:'🍸',title:'ガールズバーで30万ぼったくり！',desc:'接待のつもりが罠だった。会計見て目が飛び出る。経費では落ちない…',fx:{money:-80,motivation:-40,contribution:-20}},
+  {emoji:'📋',title:'労基問題発生！対応丸投げ！',desc:'労働基準監督署から通知。上司「よろしく」の一言で全責任があなたに。地獄。',fx:{money:-30,motivation:-60,contribution:-30}},
+  {emoji:'📱',title:'カップルチャンネルを親に見られた！',desc:'実家から「あんた何やってんの！？」の着信13件。正月に帰れない…',fx:{money:-20,motivation:-55,contribution:-25}}
+];
 const fateRes=[{emoji:'🌟',title:'大吉！',desc:'天が味方！全パラメータ爆上がり！',fx:{money:60,motivation:30,contribution:20}},{emoji:'😊',title:'中吉',desc:'そこそこラッキー。',fx:{money:30,motivation:20,contribution:10}},{emoji:'🙂',title:'小吉',desc:'微妙に良い。',fx:{money:15,motivation:10,contribution:5}},{emoji:'😐',title:'末吉',desc:'まあ生きてるだけで丸儲け。',fx:{money:0,motivation:5,contribution:0}},{emoji:'😰',title:'凶',desc:'今日は大人しく...',fx:{money:-30,motivation:-20,contribution:-10}},{emoji:'💀',title:'大凶！！',desc:'人生で一番いらないガチャを引いた。',fx:{money:-60,motivation:-40,contribution:-20}}];
-const historyEv=[{emoji:'🏢',title:'AODAISHO創立',desc:'渋谷区神宮前。おもしろいをサイエンスしよう——その言葉が未来を変える。',fx:{money:20,motivation:40,contribution:30}},{emoji:'📱',title:'TikTok 5000万再生',desc:'バズの法則を科学的に解析。再現性という武器を獲得。',fx:{money:50,motivation:30,contribution:25}},{emoji:'🤝',title:'リクルートコンサル開始',desc:'クライアントファーストで本質課題に最短到達。',fx:{money:40,motivation:25,contribution:20}},{emoji:'💡',title:'9つのクレド制定',desc:'誠実。責務。人の心を大切に。会社の魂が言語化された日。',fx:{money:10,motivation:45,contribution:35}},{emoji:'🌐',title:'Web開発事業始動',desc:'場の発明をデジタルで体現。',fx:{money:45,motivation:30,contribution:25}}];
-const bossEv=[{emoji:'👔',title:'社長の気まぐれ昇給',desc:'社長「頑張ってるね」→謎の臨時ボーナス。',fx:{money:100,motivation:30,contribution:10}},{emoji:'🍣',title:'社長の寿司ミーティング',desc:'重要な話=大トロ+来期戦略。情報量多い。',fx:{money:50,motivation:50,contribution:20}},{emoji:'📢',title:'社長の無茶振り',desc:'「来週までに新規事業3つ」→後に柱になる。',fx:{money:-20,motivation:-15,contribution:40}},{emoji:'🎪',title:'社員旅行',desc:'行き先当日発表→グランピング。最高かよ。',fx:{money:-30,motivation:60,contribution:25}}];
-const hellEv=[{emoji:'💀',title:'全パラメータ崩壊',desc:'何が起きたか分からない。全てが減った。',fx:{money:-50,motivation:-50,contribution:-30}},{emoji:'🔥',title:'炎上案件直撃',desc:'火消し担当に。三日三晩の対応。',fx:{money:-40,motivation:-60,contribution:-20}},{emoji:'👻',title:'深夜サーバーダウン',desc:'午前3時。パジャマのまま出社。',fx:{money:-30,motivation:-50,contribution:-25}}];
-const boardLayout=[{t:'start',c:0x66bb6a},{t:'bonus',c:0x39ff14},{t:'fate',c:0xffca28},{t:'pinch',c:0xff6b35},{t:'history',c:0xb967db},{t:'battle',c:0xff7043},{t:'bonus',c:0x39ff14},{t:'boss',c:0xffd700},{t:'pinch',c:0xff6b35},{t:'fate',c:0xffca28},{t:'hell',c:0x880e4f},{t:'bonus',c:0x39ff14},{t:'history',c:0xb967db},{t:'battle',c:0xff7043},{t:'pinch',c:0xff6b35},{t:'fate',c:0xffca28},{t:'bonus',c:0x39ff14},{t:'hell',c:0x880e4f},{t:'boss',c:0xffd700},{t:'history',c:0xb967db},{t:'pinch',c:0xff6b35},{t:'bonus',c:0x39ff14},{t:'battle',c:0xff7043},{t:'fate',c:0xffca28},{t:'goal',c:0xffa726}];
+const historyEv=[{emoji:'🏢',title:'AODAISHO創立',desc:'2021年11月18日、渋谷区神宮前。「おもしろい」をサイエンスしよう——伝説の始まり。',fx:{money:20,motivation:40,contribution:30}},{emoji:'📱',title:'TikTok 5000万再生達成！',desc:'バズの法則を科学的に解析。再現性という武器を獲得した瞬間。',fx:{money:50,motivation:30,contribution:25}},{emoji:'🤝',title:'リクルートコンサル開始',desc:'クライアントファーストで本質課題に最短到達。信頼の積み重ね。',fx:{money:40,motivation:25,contribution:20}},{emoji:'💡',title:'9つのクレド制定',desc:'誠実。責務。人の心を大切に。会社の魂が言語化された日。',fx:{money:10,motivation:45,contribution:35}},{emoji:'🌐',title:'Web開発事業始動',desc:'場の発明をデジタルで体現。新たな収益の柱が生まれた。',fx:{money:45,motivation:30,contribution:25}}];
+const bossEv=[{emoji:'👔',title:'社長の気まぐれ昇給',desc:'土屋社長「頑張ってるね」→謎の臨時ボーナス支給。理由は聞くな。',fx:{money:100,motivation:30,contribution:10}},{emoji:'🍣',title:'社長の寿司ミーティング',desc:'重要な話がある＝大トロ+来期戦略。情報量と脂質量が多すぎる。',fx:{money:50,motivation:50,contribution:20}},{emoji:'📢',title:'社長の無茶振り',desc:'「来週までに新規事業3つ」後に柱になるやつ。やるしかない。',fx:{money:-20,motivation:-15,contribution:40}},{emoji:'🎪',title:'社員旅行！',desc:'行き先当日発表→グランピング。最高かよ。仕事忘れる。',fx:{money:-30,motivation:60,contribution:25}}];
+const boardLayout=[{t:'start',c:0x66bb6a},{t:'bonus',c:0x39ff14},{t:'pinch',c:0xff6b35},{t:'fate',c:0xffca28},{t:'history',c:0xb967db},{t:'battle',c:0xff7043},{t:'bonus',c:0x39ff14},{t:'hell',c:0x880e4f},{t:'pinch',c:0xff6b35},{t:'fate',c:0xffca28},{t:'boss',c:0xffd700},{t:'bonus',c:0x39ff14},{t:'pinch',c:0xff6b35},{t:'history',c:0xb967db},{t:'hell',c:0x880e4f},{t:'bonus',c:0x39ff14},{t:'fate',c:0xffca28},{t:'pinch',c:0xff6b35},{t:'battle',c:0xff7043},{t:'hell',c:0x880e4f},{t:'bonus',c:0x39ff14},{t:'pinch',c:0xff6b35},{t:'history',c:0xb967db},{t:'boss',c:0xffd700},{t:'goal',c:0xffa726}];
 
 function getTilePos(i){const r=Math.floor(i/5),ci=i%5,col=r%2===0?ci:4-ci;return new THREE.Vector3((col-2)*(TILE_SZ+TILE_GAP),0,(r-2)*(TILE_SZ+TILE_GAP));}
 
