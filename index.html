@@ -269,6 +269,12 @@ const P_COLORS=['#ff4757','#3742fa','#2ed573','#ffa502'];
 const ITEMS=[{id:'drink',name:'栄養ドリンク',emoji:'🥤'},{id:'blame',name:'責任転嫁',emoji:'📋'},{id:'meeting',name:'緊急会議',emoji:'📣'}];
 const TOTAL_CELLS=25;
 
+// Event decks (shuffled copies, refilled when empty to avoid repeats)
+let deckBonus=[],deckPinch=[],deckHell=[],deckHistory=[],deckBoss=[];
+function shuffleDeck(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function drawFromDeck(deck,source){if(deck.length===0){deck.push(...shuffleDeck(source));}return deck.pop();}
+function initDecks(){deckBonus=shuffleDeck(bonusEv);deckPinch=shuffleDeck(pinchEv);deckHell=shuffleDeck(hellEv);deckHistory=shuffleDeck(historyEv);deckBoss=shuffleDeck(bossEv);}
+
 // BOARD LAYOUT: +マス=bonus(青), -マス=pinch(赤), 重-マス=hell(黒赤悪魔)
 const TILE_ICONS={start:'image/icon-start.png',bonus:'image/icon-bonus.png',pinch:'image/icon-pinch.png',fate:'image/icon-fate.png',history:'image/icon-history.png',battle:'image/icon-battle.png',hell:'image/icon-hell.png',boss:'image/icon-boss.png',goal:'image/icon-goal.png'};
 const boardLayout=[
@@ -428,6 +434,7 @@ function lighten(hex,amt){const n=parseInt(hex.replace('#',''),16);return '#'+[1
 // ===== GAME BOARD (DOM) =====
 function startGame(){
   currentPlayerIndex=0;turnNumber=1;gameEnded=false;
+  initDecks();
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('game-screen').classList.add('active');
   buildBoard();renderHUD();updateCtrl();
@@ -571,11 +578,13 @@ async function doMove(steps){
 }
 
 // EVENTS
-function triggerCell(pos){const t=boardLayout[pos].t;switch(t){case'bonus':spawnConfetti();doBonus();break;case'pinch':shakeScr();doPinch();break;case'fate':showSlot();break;case'history':doRandom(historyEv);break;case'battle':doBattle();break;case'hell':flashHell();doHell();break;case'boss':doRandom(bossEv);break;default:endTurn();}}
-function doBonus(){const p=players[currentPlayerIndex],ev=bonusEv[Math.floor(Math.random()*bonusEv.length)];let fx={...ev.fx};if(p.char&&p.char.id==='S'){fx.money=Math.round((fx.money||0)*1.5);fx.motivation=Math.round((fx.motivation||0)*1.5);fx.contribution=Math.round((fx.contribution||0)*1.5);}applyFx(fx);if(p.char&&p.char.id==='A'){players.forEach((pp,i)=>{if(i!==currentPlayerIndex&&!pp.finished){pp.money=Math.max(0,pp.money+Math.round((fx.money||0)*.5));pp.motivation=Math.max(0,pp.motivation+Math.round((fx.motivation||0)*.5));pp.contribution=Math.max(0,pp.contribution+Math.round((fx.contribution||0)*.5));}});}showEvent(ev.emoji,ev.title,ev.desc,fx);}
-function doPinch(){const p=players[currentPlayerIndex];if(p.shield){p.shield=false;showEvent('🛡️','責任転嫁発動！','マイナス回避！',{});return;}doRandom(pinchEv);}
-function doHell(){const p=players[currentPlayerIndex];if(p.char&&p.char.id==='H'){showEvent('👊','物理的解決！','パンチで解決。ダメージ無効化！',{});return;}if(p.shield){p.shield=false;showEvent('🛡️','責任転嫁発動！','回避！',{});return;}doRandom(hellEv);}
+function triggerCell(pos){const t=boardLayout[pos].t;switch(t){case'bonus':spawnConfetti();doBonus();break;case'pinch':shakeScr();doPinch();break;case'fate':showSlot();break;case'history':doHistory();break;case'battle':doBattle();break;case'hell':flashHell();doHell();break;case'boss':doBoss();break;default:endTurn();}}
+function doBonus(){const p=players[currentPlayerIndex],ev=drawFromDeck(deckBonus,bonusEv);let fx={...ev.fx};if(p.char&&p.char.id==='S'){fx.money=Math.round((fx.money||0)*1.5);fx.motivation=Math.round((fx.motivation||0)*1.5);fx.contribution=Math.round((fx.contribution||0)*1.5);}applyFx(fx);if(p.char&&p.char.id==='A'){players.forEach((pp,i)=>{if(i!==currentPlayerIndex&&!pp.finished){pp.money=Math.max(0,pp.money+Math.round((fx.money||0)*.5));pp.motivation=Math.max(0,pp.motivation+Math.round((fx.motivation||0)*.5));pp.contribution=Math.max(0,pp.contribution+Math.round((fx.contribution||0)*.5));}});}showEvent(ev.emoji,ev.title,ev.desc,fx);}
+function doPinch(){const p=players[currentPlayerIndex];if(p.shield){p.shield=false;showEvent('🛡️','責任転嫁発動！','マイナス回避！',{});return;}const ev=drawFromDeck(deckPinch,pinchEv);applyFx(ev.fx);showEvent(ev.emoji,ev.title,ev.desc,ev.fx);}
+function doHell(){const p=players[currentPlayerIndex];if(p.char&&p.char.id==='H'){showEvent('👊','物理的解決！','パンチで解決。ダメージ無効化！',{});return;}if(p.shield){p.shield=false;showEvent('🛡️','責任転嫁発動！','回避！',{});return;}const ev=drawFromDeck(deckHell,hellEv);applyFx(ev.fx);showEvent(ev.emoji,ev.title,ev.desc,ev.fx);}
 function doBattle(){const p=players[currentPlayerIndex];if(p.char&&p.char.id==='K'){spawnConfetti();applyFx({money:50,motivation:20,contribution:15});showEvent('🔥','教育的指導！','怒りモード発動！自動勝利！',{money:50,motivation:20,contribution:15});return;}if(playerCount<=1||players.filter((x,i)=>i!==currentPlayerIndex&&!x.finished).length===0){showTap();return;}showJanken();}
+function doHistory(){const ev=drawFromDeck(deckHistory,historyEv);applyFx(ev.fx);showEvent(ev.emoji,ev.title,ev.desc,ev.fx);}
+function doBoss(){const ev=drawFromDeck(deckBoss,bossEv);applyFx(ev.fx);showEvent(ev.emoji,ev.title,ev.desc,ev.fx);}
 function doRandom(list){const ev=list[Math.floor(Math.random()*list.length)];applyFx(ev.fx);showEvent(ev.emoji,ev.title,ev.desc,ev.fx);}
 function applyFx(fx){const p=players[currentPlayerIndex];if(fx.money)p.money=Math.max(0,p.money+fx.money);if(fx.motivation)p.motivation=Math.max(0,p.motivation+fx.motivation);if(fx.contribution)p.contribution=Math.max(0,p.contribution+fx.contribution);}
 
