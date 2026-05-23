@@ -84,10 +84,10 @@ body{font-family:var(--font-body);background:var(--dark-bg);color:#fff;overflow:
 .prop-boxes::before{content:'';position:absolute;bottom:0;left:0;width:30px;height:25px;background:#d2b48c;border:1px solid #a08060;border-radius:2px}
 .prop-boxes::after{content:'';position:absolute;bottom:15px;left:12px;width:25px;height:20px;background:#c4a67a;border:1px solid #a08060;border-radius:2px;transform:rotate(-5deg)}
 
-#board-container{position:absolute;top:60px;left:50%;transform:translateX(-50%);display:grid;grid-template-columns:repeat(5,1fr);gap:6px;width:min(90vw,500px);padding:10px;z-index:5}
-.tile{position:relative;aspect-ratio:1;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--font-game);font-size:.6rem;font-weight:700;transition:all .3s;cursor:default;border:2px solid rgba(139,105,20,.4);box-shadow:0 2px 8px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.08)}
-.tile .tile-icon{width:36px;height:36px;border-radius:4px;object-fit:cover;margin-bottom:2px}
-.tile .tile-label{font-size:.8rem;opacity:.9;letter-spacing:1px;font-family:var(--font-game);color:#ffe4b5;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+#board-container{position:absolute;top:55px;left:50%;transform:translateX(-50%);width:min(95vw,520px);height:calc(100vh - 130px);z-index:5}
+.tile{position:absolute;width:60px;height:60px;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--font-game);font-size:.6rem;font-weight:700;transition:all .3s;cursor:default;border:2px solid rgba(139,105,20,.4);box-shadow:0 2px 8px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.08)}
+.tile .tile-icon{width:28px;height:28px;border-radius:4px;object-fit:cover;margin-bottom:1px}
+.tile .tile-label{font-size:.65rem;opacity:.9;letter-spacing:1px;font-family:var(--font-game);color:#ffe4b5;text-shadow:0 1px 2px rgba(0,0,0,.5)}
 .tile-bonus{background:linear-gradient(135deg,#1a3a5c,#2a5080);border-color:rgba(100,160,220,.4);box-shadow:0 0 8px rgba(100,160,220,.2),inset 0 1px 0 rgba(255,255,255,.08)}
 .tile-pinch{background:linear-gradient(135deg,#5c1a1a,#802a2a);border-color:rgba(200,80,80,.4);box-shadow:0 0 8px rgba(200,80,80,.2),inset 0 1px 0 rgba(255,255,255,.08)}
 .tile-hell{background:linear-gradient(135deg,#0a0a0a,#1a0000);border-color:rgba(180,0,0,.6);animation:hellPulse 2s ease infinite}
@@ -410,13 +410,47 @@ function startGame(){
 }
 function buildBoard(){
   const container=document.getElementById('board-container');container.innerHTML='';
+  const cw=container.offsetWidth||500;
+  const ch=container.offsetHeight||600;
+  // S-curve layout: 5 rows, alternating direction
+  const cols=5,rows=5;
+  const tileW=60,tileH=60;
+  const gapX=(cw-cols*tileW)/(cols-1+2);// extra margin
+  const gapY=(ch-rows*tileH)/(rows-1+2);
+  const marginX=gapX;
+  const marginY=gapY;
   for(let i=0;i<TOTAL_CELLS;i++){
     const d=boardLayout[i];
+    const row=Math.floor(i/cols);
+    const colInRow=i%cols;
+    // S-curve: even rows go left→right, odd rows go right→left
+    const col=(row%2===0)?colInRow:(cols-1-colInRow);
+    const x=marginX+col*(tileW+gapX);
+    const y=marginY+row*(tileH+gapY);
     const tile=document.createElement('div');
     tile.className=`tile tile-${d.t}`;
     tile.id=`tile-${i}`;
+    tile.style.left=x+'px';
+    tile.style.top=y+'px';
     tile.innerHTML=`<img class="tile-icon" src="${TILE_ICONS[d.t]}" alt="${d.t}"><div class="tile-label">${d.label}</div>`;
     container.appendChild(tile);
+    // Draw path connector
+    if(i>0){
+      const prevRow=Math.floor((i-1)/cols);
+      const prevColInRow=(i-1)%cols;
+      const prevCol=(prevRow%2===0)?prevColInRow:(cols-1-prevColInRow);
+      const px=marginX+prevCol*(tileW+gapX)+tileW/2;
+      const py=marginY+prevRow*(tileH+gapY)+tileH/2;
+      const cx2=x+tileW/2;
+      const cy2=y+tileH/2;
+      const line=document.createElement('div');
+      line.className='path-line';
+      const dx=cx2-px,dy=cy2-py;
+      const len=Math.sqrt(dx*dx+dy*dy);
+      const ang=Math.atan2(dy,dx)*180/Math.PI;
+      line.style.cssText=`position:absolute;left:${px}px;top:${py}px;width:${len}px;height:2px;background:rgba(212,168,83,.35);transform-origin:0 50%;transform:rotate(${ang}deg);z-index:1;border-radius:1px;`;
+      container.appendChild(line);
+    }
   }
   players.forEach((p,i)=>{
     const tk=document.createElement('div');
