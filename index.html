@@ -435,7 +435,7 @@ function lighten(hex,amt){const n=parseInt(hex.replace('#',''),16);return '#'+[1
 
 // ===== THREE.JS INIT =====
 function initThree(){
-  scene=new THREE.Scene();scene.background=new THREE.Color(0x0a0a1a);scene.fog=new THREE.FogExp2(0x0a0a1a,0.01);
+  scene=new THREE.Scene();scene.background=new THREE.Color(0x0a0a1a);
   camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,0.1,200);camera.position.set(0,28,22);camera.lookAt(0,0,0);
   renderer=new THREE.WebGLRenderer({canvas:document.getElementById('three-canvas'),antialias:true,preserveDrawingBuffer:true});
   renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
@@ -479,8 +479,7 @@ function startGame(){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('game-hud').classList.add('active');
   buildBoard();createTokens();createDice();renderHUD();updateCtrl();
-  gsap.to(camera.position,{x:0,y:22,z:18,duration:2,ease:'power3.inOut'});
-  gsap.to(camera.rotation,{x:-0.9,y:0,z:0,duration:2,ease:'power3.inOut'});
+  gsap.to(camera.position,{x:0,y:18,z:14,duration:2,ease:'power3.inOut',onUpdate:()=>{camera.lookAt(0,0,0);}});
 }
 function buildBoard(){boardTiles.forEach(t=>scene.remove(t));boardTiles=[];for(let i=0;i<TOTAL_CELLS;i++){const d=boardLayout[i],p=getTilePos(i);const m=new THREE.Mesh(new THREE.BoxGeometry(TILE_SZ,.4,TILE_SZ),new THREE.MeshStandardMaterial({color:d.c,emissive:d.c,emissiveIntensity:.15,roughness:.4,metalness:.2,flatShading:true}));m.position.copy(p);m.castShadow=true;m.receiveShadow=true;scene.add(m);boardTiles.push(m);}}
 function createTokens(){playerMeshes.forEach(m=>scene.remove(m));playerMeshes=[];players.forEach((p,i)=>{const g=new THREE.Group();const cc=p.char?p.char.hex:P_HEX[i];const b=new THREE.Mesh(new THREE.CylinderGeometry(.3,.4,.9,8),new THREE.MeshStandardMaterial({color:cc,flatShading:true,emissive:cc,emissiveIntensity:.1}));b.position.y=.65;b.castShadow=true;g.add(b);const h=new THREE.Mesh(new THREE.DodecahedronGeometry(.25,0),new THREE.MeshStandardMaterial({color:0xffcc99,flatShading:true}));h.position.y=1.35;h.castShadow=true;g.add(h);const rg=new THREE.Mesh(new THREE.RingGeometry(.35,.55,16),new THREE.MeshBasicMaterial({color:cc,transparent:true,opacity:.6,side:THREE.DoubleSide}));rg.rotation.x=-Math.PI/2;rg.position.y=.21;g.add(rg);const sp=getTilePos(0);g.position.set(sp.x+(i-1.5)*.4,0,sp.z+(i<2?-.3:.3));scene.add(g);playerMeshes.push(g);gsap.to(g.position,{y:'+=.12',duration:1.5+i*.2,ease:'sine.inOut',yoyo:true,repeat:-1});});}
@@ -527,7 +526,7 @@ function flashR(){const f=new THREE.PointLight(0xff0000,3,50);f.position.set(0,1
 
 // TURNS
 function endTurn(){maybeItem();renderHUD();isRolling=false;let next=(currentPlayerIndex+1)%playerCount;let lp=0;while(players[next].finished&&lp<playerCount){next=(next+1)%playerCount;lp++;}if(players.every(p=>p.finished)){showEnding();return;}if(next<=currentPlayerIndex)turnNumber++;currentPlayerIndex=next;if(playerCount>1)showTurnTrans();else{updateCtrl();renderHUD();}}
-function showTurnTrans(){const ov=document.getElementById('turn-overlay'),p=players[currentPlayerIndex],cc=p.char?p.char.color:P_COLORS[currentPlayerIndex];document.getElementById('turn-text').innerHTML=`<span style="color:${cc}">${p.name}</span> のターン！`;ov.classList.add('show');const tp=getTilePos(p.pos);gsap.to(camera.position,{x:tp.x+4,y:14,z:tp.z+10,duration:1.2,ease:'power2.inOut'});let c=3;document.getElementById('turn-cd').textContent=c;const tm=setInterval(()=>{c--;if(c<=0){clearInterval(tm);ov.classList.remove('show');gsap.to(camera.position,{x:0,y:22,z:18,duration:1,ease:'power2.inOut'});updateCtrl();renderHUD();}else document.getElementById('turn-cd').textContent=c;},1000);}
+function showTurnTrans(){const ov=document.getElementById('turn-overlay'),p=players[currentPlayerIndex],cc=p.char?p.char.color:P_COLORS[currentPlayerIndex];document.getElementById('turn-text').innerHTML=`<span style="color:${cc}">${p.name}</span> のターン！`;ov.classList.add('show');const tp=getTilePos(p.pos);gsap.to(camera.position,{x:tp.x+4,y:14,z:tp.z+10,duration:1.2,ease:'power2.inOut',onUpdate:()=>{camera.lookAt(tp.x,0,tp.z);}});let c=3;document.getElementById('turn-cd').textContent=c;const tm=setInterval(()=>{c--;if(c<=0){clearInterval(tm);ov.classList.remove('show');gsap.to(camera.position,{x:0,y:18,z:14,duration:1,ease:'power2.inOut',onUpdate:()=>{camera.lookAt(0,0,0);}});updateCtrl();renderHUD();}else document.getElementById('turn-cd').textContent=c;},1000);}
 
 // ENDING
 function showEnding(){gameEnded=true;document.getElementById('game-hud').classList.remove('active');showScreen('ending-screen');spawnConfetti();const sorted=[...players].sort((a,b)=>(b.money+b.motivation+b.contribution)-(a.money+a.motivation+a.contribution));const medals=['🥇','🥈','🥉','4️⃣'];const list=document.getElementById('ranking-list');list.innerHTML='';sorted.forEach((p,i)=>{const total=p.money+p.motivation+p.contribution;const li=document.createElement('li');li.className='ranking-item';li.style.animationDelay=`${i*.2}s`;const cc=p.char?p.char.color:'#fff';li.innerHTML=`<span class="rank">${medals[i]}</span><span class="r-name" style="color:${cc}">${p.char?p.char.id+' ':''}${p.name}</span><span class="r-score">💰${p.money} ❤️${p.motivation} ⭐${p.contribution}=${total}pt</span>`;list.appendChild(li);});}
