@@ -34,7 +34,7 @@ body{font-family:var(--font-body);background:#0a0a1a;color:#fff;overflow:hidden;
 .neon-btn{background:transparent;border:2px solid var(--neon-blue);color:var(--neon-blue);font-size:1.3rem;font-weight:700;padding:16px 50px;border-radius:50px;cursor:pointer;font-family:var(--font-body);transition:all .3s;text-shadow:0 0 10px var(--neon-blue);box-shadow:0 0 15px rgba(0,245,255,.3),inset 0 0 15px rgba(0,245,255,.1)}
 .neon-btn:hover{background:rgba(0,245,255,.15);box-shadow:0 0 30px rgba(0,245,255,.5);transform:scale(1.05)}
 .neon-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
-#count-screen,#name-screen{background:radial-gradient(ellipse at center,rgba(26,26,62,1) 0%,rgba(10,10,26,1) 100%)}
+#count-screen{background:radial-gradient(ellipse at center,rgba(26,26,62,1) 0%,rgba(10,10,26,1) 100%)}
 .screen h2{font-family:var(--font-title);font-size:2rem;color:var(--neon-blue);margin-bottom:30px;text-shadow:0 0 20px rgba(0,245,255,.5)}
 .count-btns{display:flex;gap:16px;margin-bottom:30px}
 .count-btn{width:72px;height:72px;border-radius:50%;border:2px solid var(--cyber-purple);background:rgba(185,103,219,.1);color:var(--cyber-purple);font-size:1.8rem;font-weight:900;cursor:pointer;transition:all .3s}
@@ -150,12 +150,7 @@ body{font-family:var(--font-body);background:#0a0a1a;color:#fff;overflow:hidden;
   <div id="count-screen" class="screen">
     <h2>何人でプレイする？</h2>
     <div class="count-btns"><button class="count-btn" onclick="selectCount(1)">1</button><button class="count-btn" onclick="selectCount(2)">2</button><button class="count-btn" onclick="selectCount(3)">3</button><button class="count-btn" onclick="selectCount(4)">4</button></div>
-    <button class="neon-btn" id="count-next-btn" disabled onclick="showScreen('name-screen')">NEXT</button>
-  </div>
-  <div id="name-screen" class="screen">
-    <h2>名前を入力</h2>
-    <div class="name-inputs" id="name-inputs"></div>
-    <button class="neon-btn" onclick="goToCharSelect()">キャラ選択へ</button>
+    <button class="neon-btn" id="count-next-btn" disabled onclick="goToCharSelect()">NEXT</button>
   </div>
   <div id="char-screen" class="screen">
     <div class="char-header"><h2>キャラクター選択</h2><div class="char-player-label" id="char-plabel">P1</div><div class="char-selected-list" id="char-slist"></div></div>
@@ -238,18 +233,18 @@ const hellEv=[
 const fateRes=[{emoji:'🌟',title:'大吉！',desc:'天が味方！全パラメータ爆上がり！',fx:{money:60,motivation:30,contribution:20}},{emoji:'😊',title:'中吉',desc:'そこそこラッキー。',fx:{money:30,motivation:20,contribution:10}},{emoji:'🙂',title:'小吉',desc:'微妙に良い。',fx:{money:15,motivation:10,contribution:5}},{emoji:'😐',title:'末吉',desc:'まあ生きてるだけで丸儲け。',fx:{money:0,motivation:5,contribution:0}},{emoji:'😰',title:'凶',desc:'今日は大人しく...',fx:{money:-30,motivation:-20,contribution:-10}},{emoji:'💀',title:'大凶！！',desc:'人生で一番いらないガチャを引いた。',fx:{money:-60,motivation:-40,contribution:-20}}];
 const historyEv=[{emoji:'🏢',title:'AODAISHO創立',desc:'2021年11月18日、渋谷区神宮前。「おもしろい」をサイエンスしよう——伝説の始まり。',fx:{money:20,motivation:40,contribution:30}},{emoji:'📱',title:'TikTok 5000万再生達成！',desc:'バズの法則を科学的に解析。再現性という武器を獲得した瞬間。',fx:{money:50,motivation:30,contribution:25}},{emoji:'🤝',title:'リクルートコンサル開始',desc:'クライアントファーストで本質課題に最短到達。信頼の積み重ね。',fx:{money:40,motivation:25,contribution:20}},{emoji:'💡',title:'9つのクレド制定',desc:'誠実。責務。人の心を大切に。会社の魂が言語化された日。',fx:{money:10,motivation:45,contribution:35}},{emoji:'🌐',title:'Web開発事業始動',desc:'場の発明をデジタルで体現。新たな収益の柱が生まれた。',fx:{money:45,motivation:30,contribution:25}}];
 const bossEv=[{emoji:'👔',title:'社長の気まぐれ昇給',desc:'土屋社長「頑張ってるね」→謎の臨時ボーナス支給。理由は聞くな。',fx:{money:100,motivation:30,contribution:10}},{emoji:'🍣',title:'社長の寿司ミーティング',desc:'重要な話がある＝大トロ+来期戦略。情報量と脂質量が多すぎる。',fx:{money:50,motivation:50,contribution:20}},{emoji:'📢',title:'社長の無茶振り',desc:'「来週までに新規事業3つ」後に柱になるやつ。やるしかない。',fx:{money:-20,motivation:-15,contribution:40}},{emoji:'🎪',title:'社員旅行！',desc:'行き先当日発表→グランピング。最高かよ。仕事忘れる。',fx:{money:-30,motivation:60,contribution:25}}];
-const boardLayout=[{t:'start',c:0x66bb6a},{t:'bonus',c:0x39ff14},{t:'pinch',c:0xff6b35},{t:'fate',c:0xffca28},{t:'history',c:0xb967db},{t:'battle',c:0xff7043},{t:'bonus',c:0x39ff14},{t:'hell',c:0x880e4f},{t:'pinch',c:0xff6b35},{t:'fate',c:0xffca28},{t:'boss',c:0xffd700},{t:'bonus',c:0x39ff14},{t:'pinch',c:0xff6b35},{t:'history',c:0xb967db},{t:'hell',c:0x880e4f},{t:'bonus',c:0x39ff14},{t:'fate',c:0xffca28},{t:'pinch',c:0xff6b35},{t:'battle',c:0xff7043},{t:'hell',c:0x880e4f},{t:'bonus',c:0x39ff14},{t:'pinch',c:0xff6b35},{t:'history',c:0xb967db},{t:'boss',c:0xffd700},{t:'goal',c:0xffa726}];
+const boardLayout=[{t:'start',c:0x66bb6a,em:0x66bb6a},{t:'bonus',c:0x1565c0,em:0x42a5f5},{t:'pinch',c:0xc62828,em:0xef5350},{t:'fate',c:0xf9a825,em:0xffca28},{t:'history',c:0x6a1b9a,em:0xb967db},{t:'battle',c:0xff6d00,em:0xffab40},{t:'bonus',c:0x1565c0,em:0x42a5f5},{t:'hell',c:0x1a1a1a,em:0xb71c1c},{t:'pinch',c:0xc62828,em:0xef5350},{t:'fate',c:0xf9a825,em:0xffca28},{t:'boss',c:0xf57f17,em:0xffd700},{t:'bonus',c:0x1565c0,em:0x42a5f5},{t:'pinch',c:0xc62828,em:0xef5350},{t:'history',c:0x6a1b9a,em:0xb967db},{t:'hell',c:0x1a1a1a,em:0xb71c1c},{t:'bonus',c:0x1565c0,em:0x42a5f5},{t:'fate',c:0xf9a825,em:0xffca28},{t:'pinch',c:0xc62828,em:0xef5350},{t:'battle',c:0xff6d00,em:0xffab40},{t:'hell',c:0x1a1a1a,em:0xb71c1c},{t:'bonus',c:0x1565c0,em:0x42a5f5},{t:'pinch',c:0xc62828,em:0xef5350},{t:'history',c:0x6a1b9a,em:0xb967db},{t:'boss',c:0xf57f17,em:0xffd700},{t:'goal',c:0xffa726,em:0xffd54f}];
 
 function getTilePos(i){const r=Math.floor(i/5),ci=i%5,col=r%2===0?ci:4-ci;return new THREE.Vector3((col-2)*(TILE_SZ+TILE_GAP),0,(r-2)*(TILE_SZ+TILE_GAP));}
 
 // ===== SCREEN =====
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
-function selectCount(n){playerCount=n;document.querySelectorAll('.count-btn').forEach((b,i)=>b.classList.toggle('selected',i===n-1));document.getElementById('count-next-btn').disabled=false;const c=document.getElementById('name-inputs');c.innerHTML='';for(let i=0;i<n;i++){const r=document.createElement('div');r.className='name-row';r.innerHTML=`<div class="p-dot" style="background:${P_COLORS[i]}"></div><input type="text" id="pn-${i}" placeholder="プレイヤー${i+1}" maxlength="8">`;c.appendChild(r);}}
+function selectCount(n){playerCount=n;document.querySelectorAll('.count-btn').forEach((b,i)=>b.classList.toggle('selected',i===n-1));document.getElementById('count-next-btn').disabled=false;}
 
 // ===== CHARACTER SELECT 3D =====
 function goToCharSelect(){
   players=[];
-  for(let i=0;i<playerCount;i++){const nm=document.getElementById(`pn-${i}`).value.trim()||`P${i+1}`;players.push({name:nm,pos:0,money:100,motivation:100,contribution:0,item:null,shield:false,finished:false,order:0,char:null});}
+  for(let i=0;i<playerCount;i++){players.push({name:`P${i+1}`,pos:0,money:100,motivation:100,contribution:0,item:null,shield:false,finished:false,order:0,char:null});}
   charSelectingP=0;charCurrentIdx=0;
   showScreen('char-screen');
   buildCharStage();
@@ -469,7 +464,7 @@ function animate(){
   requestAnimationFrame(animate);
   const t=clock.getElapsedTime();
   if(particleSystem){particleSystem.rotation.y=t*0.015;const p=particleSystem.geometry.attributes.position.array;for(let i=1;i<p.length;i+=3)p[i]+=Math.sin(t+i)*.001;particleSystem.geometry.attributes.position.needsUpdate=true;}
-  boardTiles.forEach((tile,i)=>{tile.position.y=Math.sin(t*.5+i*.3)*.03;});
+  boardTiles.forEach((g,i)=>{g.position.y=Math.sin(t*.5+i*.3)*.05;});
   renderer.render(scene,camera);
 }
 
@@ -481,10 +476,46 @@ function startGame(){
   buildBoard();createTokens();createDice();renderHUD();updateCtrl();
   gsap.to(camera.position,{x:0,y:18,z:14,duration:2,ease:'power3.inOut',onUpdate:()=>{camera.lookAt(0,0,0);}});
 }
-function buildBoard(){boardTiles.forEach(t=>scene.remove(t));boardTiles=[];for(let i=0;i<TOTAL_CELLS;i++){const d=boardLayout[i],p=getTilePos(i);const m=new THREE.Mesh(new THREE.BoxGeometry(TILE_SZ,.4,TILE_SZ),new THREE.MeshStandardMaterial({color:d.c,emissive:d.c,emissiveIntensity:.15,roughness:.4,metalness:.2,flatShading:true}));m.position.copy(p);m.castShadow=true;m.receiveShadow=true;scene.add(m);boardTiles.push(m);}}
+function buildBoard(){boardTiles.forEach(t=>scene.remove(t));boardTiles=[];
+  const icons={start:'🚀',bonus:'✦',pinch:'⚡',fate:'🎲',history:'⭐',battle:'⚔',hell:'👿',boss:'👑',goal:'🏁'};
+  for(let i=0;i<TOTAL_CELLS;i++){
+    const d=boardLayout[i],p=getTilePos(i);
+    const g=new THREE.Group();
+    // Main tile
+    const mat=new THREE.MeshStandardMaterial({color:d.c,emissive:d.em||d.c,emissiveIntensity:d.t==='hell'?0.6:0.25,roughness:0.3,metalness:0.4,flatShading:true});
+    const tile=new THREE.Mesh(new THREE.BoxGeometry(TILE_SZ,0.35,TILE_SZ),mat);
+    tile.castShadow=true;tile.receiveShadow=true;
+    g.add(tile);
+    // Glow ring under tile
+    const ringMat=new THREE.MeshBasicMaterial({color:d.em||d.c,transparent:true,opacity:0.4});
+    const ring=new THREE.Mesh(new THREE.RingGeometry(TILE_SZ*0.4,TILE_SZ*0.52,24),ringMat);
+    ring.rotation.x=-Math.PI/2;ring.position.y=-0.16;
+    g.add(ring);
+    // Icon sprite on top
+    const ic=document.createElement('canvas');ic.width=64;ic.height=64;
+    const ctx=ic.getContext('2d');
+    ctx.font='40px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(icons[d.t]||'?',32,32);
+    const tex=new THREE.CanvasTexture(ic);
+    const spMat=new THREE.SpriteMaterial({map:tex,transparent:true});
+    const sp=new THREE.Sprite(spMat);
+    sp.position.y=0.5;sp.scale.set(1,1,1);
+    g.add(sp);
+    // Hell tiles: extra devil horns glow
+    if(d.t==='hell'){
+      const hellGlow=new THREE.PointLight(0xff0000,0.8,3);
+      hellGlow.position.y=0.5;g.add(hellGlow);
+      // Dark pillar effect
+      const pillar=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,1.2,6),new THREE.MeshBasicMaterial({color:0xff0000,transparent:true,opacity:0.3}));
+      pillar.position.y=0.6;g.add(pillar);
+    }
+    g.position.copy(p);
+    scene.add(g);boardTiles.push(g);
+  }
+}
 function createTokens(){playerMeshes.forEach(m=>scene.remove(m));playerMeshes=[];players.forEach((p,i)=>{const g=new THREE.Group();const cc=p.char?p.char.hex:P_HEX[i];const b=new THREE.Mesh(new THREE.CylinderGeometry(.3,.4,.9,8),new THREE.MeshStandardMaterial({color:cc,flatShading:true,emissive:cc,emissiveIntensity:.1}));b.position.y=.65;b.castShadow=true;g.add(b);const h=new THREE.Mesh(new THREE.DodecahedronGeometry(.25,0),new THREE.MeshStandardMaterial({color:0xffcc99,flatShading:true}));h.position.y=1.35;h.castShadow=true;g.add(h);const rg=new THREE.Mesh(new THREE.RingGeometry(.35,.55,16),new THREE.MeshBasicMaterial({color:cc,transparent:true,opacity:.6,side:THREE.DoubleSide}));rg.rotation.x=-Math.PI/2;rg.position.y=.21;g.add(rg);const sp=getTilePos(0);g.position.set(sp.x+(i-1.5)*.4,0,sp.z+(i<2?-.3:.3));scene.add(g);playerMeshes.push(g);gsap.to(g.position,{y:'+=.12',duration:1.5+i*.2,ease:'sine.inOut',yoyo:true,repeat:-1});});}
 function createDice(){diceMesh=new THREE.Mesh(new THREE.BoxGeometry(1.2,1.2,1.2),new THREE.MeshStandardMaterial({color:0xffffff,roughness:.3}));diceMesh.position.set(0,15,0);diceMesh.castShadow=true;diceMesh.visible=false;scene.add(diceMesh);}
-function moveToken(pi,ti){return new Promise(res=>{const tk=playerMeshes[pi],tp=getTilePos(ti),ox=(pi-1.5)*.35,oz=pi<2?-.25:.25;const tl=gsap.timeline({onComplete:res});tl.to(tk.position,{y:2.5,duration:.3,ease:'power2.out'});tl.to(tk.position,{x:tp.x+ox,z:tp.z+oz,duration:.5,ease:'power2.inOut'},'-=.1');tl.to(tk.position,{y:0,duration:.4,ease:'bounce.out'});const tile=boardTiles[ti];if(tile)gsap.to(tile.material,{emissiveIntensity:.8,duration:.3,yoyo:true,repeat:1});});}
+function moveToken(pi,ti){return new Promise(res=>{const tk=playerMeshes[pi],tp=getTilePos(ti),ox=(pi-1.5)*.35,oz=pi<2?-.25:.25;const tl=gsap.timeline({onComplete:res});tl.to(tk.position,{y:2.5,duration:.3,ease:'power2.out'});tl.to(tk.position,{x:tp.x+ox,z:tp.z+oz,duration:.5,ease:'power2.inOut'},'-=.1');tl.to(tk.position,{y:0,duration:.4,ease:'bounce.out'});const tileG=boardTiles[ti];if(tileG&&tileG.children[0])gsap.to(tileG.children[0].material,{emissiveIntensity:.9,duration:.3,yoyo:true,repeat:1});});}
 
 // HUD
 function renderHUD(){const top=document.getElementById('hud-top');top.innerHTML='';players.forEach((p,i)=>{const c=document.createElement('div');c.className=`hud-card${i===currentPlayerIndex&&!p.finished?' active-turn':''}`;const cc=p.char?p.char.color:P_COLORS[i];const it=p.item?ITEMS.find(x=>x.id===p.item).emoji:'-';c.innerHTML=`<div class="hc-name" style="color:${cc}">${p.char?p.char.id+' ':''}${p.name}</div><div class="hc-stats">💰${p.money} ❤️${p.motivation} ⭐${p.contribution}</div><div class="hc-item">🎒${it}</div>`;top.appendChild(c);});}
