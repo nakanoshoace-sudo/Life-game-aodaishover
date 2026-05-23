@@ -250,6 +250,38 @@ const fateRes=[{emoji:'🌟',title:'大吉！',desc:'天が味方！全パラメ
 const historyEv=[{emoji:'🏢',title:'AODAISHO創立',desc:'2021年11月18日、渋谷区神宮前。「おもしろい」をサイエンスしよう——伝説の始まり。',fx:{money:20,motivation:40,contribution:30}},{emoji:'📱',title:'TikTok 5000万再生達成！',desc:'バズの法則を科学的に解析。再現性という武器を獲得した瞬間。',fx:{money:50,motivation:30,contribution:25}},{emoji:'🤝',title:'リクルートコンサル開始',desc:'クライアントファーストで本質課題に最短到達。信頼の積み重ね。',fx:{money:40,motivation:25,contribution:20}},{emoji:'💡',title:'9つのクレド制定',desc:'誠実。責務。人の心を大切に。会社の魂が言語化された日。',fx:{money:10,motivation:45,contribution:35}},{emoji:'🌐',title:'Web開発事業始動',desc:'場の発明をデジタルで体現。新たな収益の柱が生まれた。',fx:{money:45,motivation:30,contribution:25}}];
 const bossEv=[{emoji:'👔',title:'社長の気まぐれ昇給',desc:'土屋社長「頑張ってるね」→謎の臨時ボーナス支給。理由は聞くな。',fx:{money:100,motivation:30,contribution:10}},{emoji:'🍣',title:'社長の寿司ミーティング',desc:'重要な話がある＝大トロ+来期戦略。情報量と脂質量が多すぎる。',fx:{money:50,motivation:50,contribution:20}},{emoji:'📢',title:'社長の無茶振り',desc:'「来週までに新規事業3つ」後に柱になるやつ。やるしかない。',fx:{money:-20,motivation:-15,contribution:40}},{emoji:'🎪',title:'社員旅行！',desc:'行き先当日発表→グランピング。最高かよ。仕事忘れる。',fx:{money:-30,motivation:60,contribution:25}}];
 
+// IMAGE MAPPING (event title -> filename in image/)
+const EVT_IMG={
+  '研修チャンネル始動！':'研修チャンネル始動！.png',
+  'ほんねふぁくとりー始動！':'ほんねふぁくとりー始動！.png',
+  'カップルチャンネルを始めた！':'カップルチャンネルを始めた！.png',
+  'いたずらダイアリー始動！':'いたずらダイアリー始動！.png',
+  '石井が痴漢を撃退！':'石井が痴漢を撃退！.png',
+  '佐藤が上機嫌！':'佐藤が上機嫌！.png',
+  '服部さんに叱られた':'服部さんに叱られた.png',
+  '出口さんが悪酔い':'出口さんが悪酔い.png',
+  '佐藤と出口が喧嘩！':'佐藤と出口が喧嘩！.png',
+  '残業代カット':'残業代カット.png',
+  '佐藤の機嫌が悪い':'佐藤の機嫌が悪い.png',
+  '名札を会社に置いてきた！':'名札を会社に置いてきた！.png',
+  '小口のお金が合わない…':'小口のお金が合わない….png',
+  '豪の息がくさい':'豪の息がくさい.png',
+  '佐藤の息が臭い':'佐藤の息が臭い.png',
+  '小野が突然退社した':'小野が突然退社した.png',
+  '小川が突然退社した':'小川が突然退社した.png',
+  '加々美が謀反を起こした！':'加々美が謀反を起こした！.png',
+  '境田の奥さんに嫌われた':'境田の奥さんに嫌われた.png',
+  '前職からSNS利権で訴えられた！':'前職からSNS利権で訴えられた！.png',
+  'ガールズバーで30万ぼったくり！':'ガールズバーで30万ぼったくり！.png',
+  '労基問題発生！対応丸投げ！':'労基問題発生！対応丸投げ！.png',
+  'カップルチャンネルを親に見られた！':'カップルチャンネルを親に見られた！.png',
+  'AODAISHO創立':'AODAISHO創立.png',
+  'TikTok 5000万再生達成！':'TikTok 5000万再生達成！.png',
+  'リクルートコンサル開始':'リクルートコンサル開始.png',
+  '9つのクレド制定':'9つのクレド制定.jpg',
+  'Web開発事業始動':'Web開発事業始動.png'
+};
+
 // ===== SCREENS =====
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.getElementById('game-screen').classList.remove('active');}
 function selectCount(n){playerCount=n;document.querySelectorAll('.count-btn').forEach((b,i)=>b.classList.toggle('selected',i===n-1));document.getElementById('count-next-btn').disabled=false;}
@@ -439,7 +471,18 @@ function doBattle(){const p=players[currentPlayerIndex];if(p.char&&p.char.id==='
 function doRandom(list){const ev=list[Math.floor(Math.random()*list.length)];applyFx(ev.fx);showEvent(ev.emoji,ev.title,ev.desc,ev.fx);}
 function applyFx(fx){const p=players[currentPlayerIndex];if(fx.money)p.money=Math.max(0,p.money+fx.money);if(fx.motivation)p.motivation=Math.max(0,p.motivation+fx.motivation);if(fx.contribution)p.contribution=Math.max(0,p.contribution+fx.contribution);}
 
-function showEvent(emoji,title,desc,fx){document.getElementById('ev-emoji').textContent=emoji;document.getElementById('ev-title').textContent=title;document.getElementById('ev-desc').textContent=desc;const ef=document.getElementById('ev-effects');ef.innerHTML='';if(fx.money)ef.innerHTML+=`<span class="ev-badge ${fx.money>0?'pos':'neg'}">💰${fx.money>0?'+':''}${fx.money}</span>`;if(fx.motivation)ef.innerHTML+=`<span class="ev-badge ${fx.motivation>0?'pos':'neg'}">❤️${fx.motivation>0?'+':''}${fx.motivation}</span>`;if(fx.contribution)ef.innerHTML+=`<span class="ev-badge ${fx.contribution>0?'pos':'neg'}">⭐${fx.contribution>0?'+':''}${fx.contribution}</span>`;document.getElementById('event-overlay').classList.add('show');renderHUD();}
+function showEvent(emoji,title,desc,fx){
+  const imgFile=EVT_IMG[title];
+  const imgHtml=imgFile?`<img src="image/${encodeURIComponent(imgFile)}" style="width:100%;max-height:180px;object-fit:cover;border-radius:12px;margin-bottom:12px;" onerror="this.style.display='none'">`:'';
+  document.getElementById('ev-emoji').textContent=emoji;
+  document.getElementById('ev-title').textContent=title;
+  document.getElementById('ev-desc').innerHTML=imgHtml+desc;
+  const ef=document.getElementById('ev-effects');ef.innerHTML='';
+  if(fx.money)ef.innerHTML+=`<span class="ev-badge ${fx.money>0?'pos':'neg'}">💰${fx.money>0?'+':''}${fx.money}</span>`;
+  if(fx.motivation)ef.innerHTML+=`<span class="ev-badge ${fx.motivation>0?'pos':'neg'}">❤️${fx.motivation>0?'+':''}${fx.motivation}</span>`;
+  if(fx.contribution)ef.innerHTML+=`<span class="ev-badge ${fx.contribution>0?'pos':'neg'}">⭐${fx.contribution>0?'+':''}${fx.contribution}</span>`;
+  document.getElementById('event-overlay').classList.add('show');renderHUD();
+}
 function closeEvent(){document.getElementById('event-overlay').classList.remove('show');if(players.every(p=>p.finished))showEnding();else endTurn();}
 
 // ITEMS
