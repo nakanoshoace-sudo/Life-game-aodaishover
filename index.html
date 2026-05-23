@@ -65,7 +65,7 @@ body{font-family:var(--font-body);background:var(--dark-bg);color:#fff;overflow:
 #game-screen.active{display:block}
 #board-container{position:absolute;top:60px;left:50%;transform:translateX(-50%);display:grid;grid-template-columns:repeat(5,1fr);gap:6px;width:min(90vw,500px);padding:10px}
 .tile{position:relative;aspect-ratio:1;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--font-game);font-size:.6rem;font-weight:700;transition:all .3s;cursor:default;border:2px solid rgba(255,255,255,.1)}
-.tile .tile-icon{font-size:1.4rem;margin-bottom:2px}
+.tile .tile-icon{width:36px;height:36px;border-radius:6px;object-fit:cover;margin-bottom:2px}
 .tile .tile-label{font-size:.85rem;opacity:.9;letter-spacing:2px;font-family:var(--font-game)}
 .tile-bonus{background:linear-gradient(135deg,#0d47a1,#1565c0);border-color:rgba(33,150,243,.4);box-shadow:0 0 12px rgba(33,150,243,.3)}
 .tile-pinch{background:linear-gradient(135deg,#b71c1c,#c62828);border-color:rgba(244,67,54,.4);box-shadow:0 0 12px rgba(244,67,54,.3)}
@@ -100,7 +100,7 @@ body{font-family:var(--font-body);background:var(--dark-bg);color:#fff;overflow:
 .event-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:100;align-items:center;justify-content:center;padding:16px}
 .event-overlay.show{display:flex}
 .event-card{background:#fff;border:none;border-radius:20px;padding:30px 24px;max-width:440px;width:100%;text-align:center;animation:popIn .5s cubic-bezier(.34,1.56,.64,1);box-shadow:0 16px 50px rgba(0,0,0,.3)}
-.ev-emoji{font-size:60px;margin-bottom:12px;animation:float 2s ease infinite}
+.ev-emoji{display:none}
 .ev-title{font-family:var(--font-title);font-size:1.3rem;font-weight:900;margin-bottom:8px;color:#1a1a1a}
 .ev-desc{font-size:.85rem;line-height:1.6;color:#333;margin-bottom:14px}
 .ev-effects{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:16px}
@@ -208,12 +208,13 @@ const ITEMS=[{id:'drink',name:'栄養ドリンク',emoji:'🥤'},{id:'blame',nam
 const TOTAL_CELLS=25;
 
 // BOARD LAYOUT: +マス=bonus(青), -マス=pinch(赤), 重-マス=hell(黒赤悪魔)
+const TILE_ICONS={start:'image/icon-start.png',bonus:'image/icon-bonus.png',pinch:'image/icon-pinch.png',fate:'image/icon-fate.png',history:'image/icon-history.png',battle:'image/icon-battle.png',hell:'image/icon-hell.png',boss:'image/icon-boss.png',goal:'image/icon-goal.png'};
 const boardLayout=[
-  {t:'start',icon:'🚀',label:'START'},{t:'bonus',icon:'✦',label:'BONUS'},{t:'pinch',icon:'⚡',label:'PINCH'},{t:'fate',icon:'🎲',label:'FATE'},{t:'history',icon:'⭐',label:'HISTORY'},
-  {t:'battle',icon:'⚔️',label:'BATTLE'},{t:'bonus',icon:'✦',label:'BONUS'},{t:'hell',icon:'👿',label:'HELL'},{t:'pinch',icon:'⚡',label:'PINCH'},{t:'fate',icon:'🎲',label:'FATE'},
-  {t:'boss',icon:'👑',label:'BOSS'},{t:'bonus',icon:'✦',label:'BONUS'},{t:'pinch',icon:'⚡',label:'PINCH'},{t:'history',icon:'⭐',label:'HISTORY'},{t:'hell',icon:'👿',label:'HELL'},
-  {t:'bonus',icon:'✦',label:'BONUS'},{t:'fate',icon:'🎲',label:'FATE'},{t:'pinch',icon:'⚡',label:'PINCH'},{t:'battle',icon:'⚔️',label:'BATTLE'},{t:'hell',icon:'👿',label:'HELL'},
-  {t:'bonus',icon:'✦',label:'BONUS'},{t:'pinch',icon:'⚡',label:'PINCH'},{t:'history',icon:'⭐',label:'HISTORY'},{t:'boss',icon:'👑',label:'BOSS'},{t:'goal',icon:'🏁',label:'GOAL'}
+  {t:'start',label:'START'},{t:'bonus',label:'BONUS'},{t:'pinch',label:'PINCH'},{t:'fate',label:'FATE'},{t:'history',label:'HISTORY'},
+  {t:'battle',label:'BATTLE'},{t:'bonus',label:'BONUS'},{t:'hell',label:'HELL'},{t:'pinch',label:'PINCH'},{t:'fate',label:'FATE'},
+  {t:'boss',label:'BOSS'},{t:'bonus',label:'BONUS'},{t:'pinch',label:'PINCH'},{t:'history',label:'HISTORY'},{t:'hell',label:'HELL'},
+  {t:'bonus',label:'BONUS'},{t:'fate',label:'FATE'},{t:'pinch',label:'PINCH'},{t:'battle',label:'BATTLE'},{t:'hell',label:'HELL'},
+  {t:'bonus',label:'BONUS'},{t:'pinch',label:'PINCH'},{t:'history',label:'HISTORY'},{t:'boss',label:'BOSS'},{t:'goal',label:'GOAL'}
 ];
 
 // EVENTS
@@ -376,10 +377,9 @@ function buildBoard(){
     const tile=document.createElement('div');
     tile.className=`tile tile-${d.t}`;
     tile.id=`tile-${i}`;
-    tile.innerHTML=`<div class="tile-icon">${d.icon}</div><div class="tile-label">${d.label}</div>`;
+    tile.innerHTML=`<img class="tile-icon" src="${TILE_ICONS[d.t]}" alt="${d.t}"><div class="tile-label">${d.label}</div>`;
     container.appendChild(tile);
   }
-  // Place tokens
   players.forEach((p,i)=>{
     const tk=document.createElement('div');
     tk.className='token';tk.id=`token-${i}`;
@@ -387,7 +387,6 @@ function buildBoard(){
     tk.textContent=p.char?p.char.id[0]:(i+1);
     document.getElementById('tile-0').appendChild(tk);
   });
-  // Position tokens within start tile
   positionTokensOnTile(0);
 }
 function positionTokensOnTile(tileIdx){
