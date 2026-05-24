@@ -372,12 +372,11 @@ function buildCharCarousel(){
     if(ch.img){
       img.src=ch.img;
     }else{
-      // Fallback: draw with canvas for chars without photos
       const c=document.createElement('canvas');c.width=160;c.height=220;
       drawChar(c.getContext('2d'),ch,160,220);
       img.src=c.toDataURL();
     }
-    img.style.cssText='width:100px;height:138px;object-fit:contain;transition:all .4s cubic-bezier(.34,1.56,.64,1);border-radius:10px;cursor:pointer;opacity:0.3;transform:scale(0.6);filter:brightness(0.5);';
+    img.style.cssText='width:120px;height:150px;object-fit:cover;object-position:top center;transition:all .4s cubic-bezier(.34,1.56,.64,1);border-radius:12px;cursor:pointer;opacity:0.3;transform:scale(0.6);filter:brightness(0.5);';
     img.dataset.idx=i;
     img.onclick=()=>{charCurrentIdx=i;highlightCurrent();updateCharPanel();};
     box.appendChild(img);
