@@ -376,7 +376,7 @@ function buildCharCarousel(){
       drawChar(c.getContext('2d'),ch,160,220);
       img.src=c.toDataURL();
     }
-    img.style.cssText='width:120px;height:150px;object-fit:cover;object-position:top center;transition:all .4s cubic-bezier(.34,1.56,.64,1);border-radius:12px;cursor:pointer;opacity:0.3;transform:scale(0.6);filter:brightness(0.5);';
+    img.style.cssText='width:120px;height:150px;object-fit:contain;transition:all .4s cubic-bezier(.34,1.56,.64,1);border-radius:12px;cursor:pointer;opacity:0.3;transform:scale(0.6);filter:brightness(0.5);';
     img.dataset.idx=i;
     img.onclick=()=>{charCurrentIdx=i;highlightCurrent();updateCharPanel();};
     box.appendChild(img);
